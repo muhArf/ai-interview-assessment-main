@@ -12,15 +12,12 @@ sys.path.append(os.path.dirname(__file__))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'models'))
 
 # Import logic dari folder models
-# PASTIKAN FILE-FILE INI ADA DI FOLDER 'models'
-# Jika ada error, pastikan semua file dan fungsi di bawah ini ada dan dapat diakses
 try:
     from models.stt_processor import load_stt_model, load_text_models, video_to_wav, noise_reduction, transcribe_and_clean
     from models.scoring_logic import load_embedder_model, compute_confidence_score, score_with_rubric
     from models.nonverbal_analysis import analyze_non_verbal
 except ImportError as e:
     st.error(f"Gagal memuat modul dari folder 'models'. Pastikan struktur folder dan file sudah benar. Error: {e}")
-    # Anda mungkin perlu menghentikan aplikasi jika model gagal dimuat
     # sys.exit(1)
 
 # Konfigurasi Halaman & Load Data
@@ -41,7 +38,7 @@ if 'results' not in st.session_state:
     st.session_state.results = None
 
 # Konstanta
-TOTAL_QUESTIONS = 5 # Jumlah Pertanyaan
+TOTAL_QUESTIONS = 5
 VIDEO_MAX_SIZE_MB = 50
 
 # --- Fungsi Utility ---
@@ -56,7 +53,6 @@ def get_models():
         stt_model = load_stt_model()
         embedder_model = load_embedder_model()
         
-        # Load model text
         try:
             spell, _, english_words = load_text_models()
         except Exception:
@@ -128,6 +124,12 @@ def inject_custom_css():
         top: 0;
         z-index: 1000;
     }
+    
+    /* Memaksa elemen di kolom nav Streamlit untuk rata kanan */
+    .stHorizontalBlock > div:nth-child(2) > div:nth-child(2) {
+        justify-content: flex-end; /* Rata kanan di kolom tengah (untuk tombol info) */
+    }
+
     .hero-section {
         background-color: white;
         padding: 100px 50px;
@@ -145,7 +147,7 @@ def inject_custom_css():
         margin: 0 auto 40px auto;
     }
 
-    /* Styling How To Use Steps */
+    /* Styling How To Use Steps (Diperkuat) */
     .steps-container {
         display: flex;
         flex-wrap: wrap;
@@ -157,7 +159,6 @@ def inject_custom_css():
         background-color: #f9f9ff; /* Warna accent */
         border-radius: 6px;
         padding: 40px 20px 20px 20px;
-        width: 200px; /* Ukuran card */
         text-align: center;
         position: relative;
         flex-grow: 1;
@@ -203,7 +204,7 @@ def inject_custom_css():
         font-size: 13px;
     }
 
-    /* Penyesuaian Tombol Streamlit untuk Hero Section */
+    /* Penyesuaian Tombol Streamlit */
     .stButton>button {
         border-radius: 40px !important;
         padding: 15px 40px !important;
@@ -221,6 +222,21 @@ def inject_custom_css():
         transform: translateY(-2px);
     }
     
+    /* Untuk tombol di Header */
+    /* Tombol Info */
+    div[data-testid="stHorizontalBlock"] > div:nth-child(2) button {
+        padding: 8px 15px !important;
+        font-size: 14px !important;
+        border-radius: 6px !important;
+        margin-top: 5px; /* Sedikit geser ke bawah agar sejajar dengan home */
+    }
+    /* Tombol Start */
+    div[data-testid="stHorizontalBlock"] > div:nth-child(4) button {
+        padding: 8px 15px !important;
+        font-size: 14px !important;
+        border-radius: 6px !important;
+    }
+
     </style>
     """, unsafe_allow_html=True)
 
@@ -233,28 +249,31 @@ def render_home_page():
     with st.container():
         st.markdown('<div class="custom-header">', unsafe_allow_html=True)
         
+        # Revisi pembagian kolom: Logo, Navigasi
         col_logo, col_nav = st.columns([1, 4])
         
         with col_logo:
-            # PENTING: Jika Anda punya file logo, pastikan path-nya benar
+            # Gunakan Markdown untuk memastikan elemen logo/teks tetap rapi
             try:
-                # ASUMSI: Logo ada di folder 'assets'
                 st.image('assets/logo dicoding.png', width=80, output_format='PNG') 
             except FileNotFoundError:
-                st.markdown('<p style="font-weight: bold; font-size: 20px;">SEI-AI</p>', unsafe_allow_html=True) # Fallback
+                st.markdown('<p style="font-weight: bold; font-size: 20px; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True) 
 
         with col_nav:
-            # Mengatur kolom navigasi
+            # Mengatur kolom navigasi di dalam col_nav: Home, Info, Spasi, Start Button
+            # Rasio kolom di dalam nav disesuaikan agar tombol Start rata kanan
             col_home, col_info, col_start_space, col_start_btn = st.columns([0.5, 1, 1.5, 1])
             
             with col_home:
-                st.markdown('<p style="font-size: 14px; font-weight: 500; margin-top: 10px;">Home</p>', unsafe_allow_html=True)
+                st.markdown('<p style="font-size: 14px; font-weight: 500; margin-top: 25px;">Home</p>', unsafe_allow_html=True)
             
             with col_info:
+                # Tombol Info Aplikasi
                 if st.button("Info Aplikasi", key="nav_info", type="secondary"):
                     next_page('info')
             
             with col_start_btn:
+                # Tombol Mulai Wawancara di Navbar
                 if st.button("Mulai Wawancara", key="nav_start", type="primary"):
                     st.session_state.answers = {}
                     st.session_state.results = None
@@ -270,6 +289,7 @@ def render_home_page():
     st.markdown('<h1 class="hero-title">Selamat Datang di SEI-AI Interviewer</h1>', unsafe_allow_html=True)
     st.markdown('<p class="hero-subtitle">Asah keterampilan wawancara Anda dengan umpan balik bertenaga AI dan bersiaplah untuk pekerjaan impian Anda.</p>', unsafe_allow_html=True)
     
+    # Tombol Aksi Hero Section
     st.markdown('<div class="primary-btn-container" style="display: flex; justify-content: center;">', unsafe_allow_html=True)
     if st.button("▶️ Mulai Wawancara", key="hero_start"):
         st.session_state.answers = {}
@@ -287,6 +307,7 @@ def render_home_page():
     
     st.markdown('<div class="steps-container">', unsafe_allow_html=True)
     
+    # Grid Langkah-Langkah: Menggunakan kolom Streamlit untuk responsivitas dasar
     cols = st.columns(5)
     
     steps_data = [
@@ -299,6 +320,7 @@ def render_home_page():
     
     for i, (num, title, desc) in enumerate(steps_data):
         with cols[i]:
+            # Struktur Card Kustom
             st.markdown(f"""
             <div class="step-card">
                 <div class="step-number">{num}</div>
