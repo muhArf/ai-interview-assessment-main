@@ -3,7 +3,7 @@ import librosa
 import numpy as np
 import os
 import soundfile as sf
-import noisereduce as nr # Pastikan ini diimpor
+import noisereduce as nr 
 import torch
 from faster_whisper import WhisperModel
 from spellchecker import SpellChecker
@@ -12,7 +12,7 @@ from rapidfuzz.distance import Levenshtein
 from pydub import AudioSegment
 from sentence_transformers import util, SentenceTransformer
 import pandas as pd
-import re # Tambahkan impor 're' jika belum ada
+import re 
 
 # --- KONSTANTA (Sesuaikan jika perlu) ---
 WHISPER_MODEL_NAME = "small" 
@@ -61,25 +61,19 @@ def video_to_wav(input_video_path, output_wav_path, sr=SR_RATE):
 def noise_reduction(in_wav, out_wav, prop_decrease=0.6):
     """
     Menerapkan Noise Reduction menggunakan noisereduce.
-    PERBAIKAN: Menghapus argumen 'noise_clip' yang menyebabkan error.
     """
     try:
         y, sr = librosa.load(in_wav, sr=SR_RATE)
-        
-        # Versi terbaru noisereduce tidak menggunakan noise_clip secara langsung.
-        # Kita menggunakan parameter default untuk identifikasi noise di awal, 
-        # atau bisa menggunakan `y_clean = nr.reduce_noise(y=y, sr=sr, prop_decrease=prop_decrease, n_grad_mult=1.5)`
-        # Namun, untuk mengatasi error, kita hilangkan 'noise_clip'.
         
         y_clean = nr.reduce_noise(
             y=y, 
             sr=sr, 
             prop_decrease=prop_decrease,
-            # Argumen 'noise_clip' dihilangkan di sini.
         )
         sf.write(out_wav, y_clean, sr)
         return True
     except Exception as e:
+        # Menambahkan pesan error asli untuk debugging
         raise RuntimeError(f"Noise reduction failed: {e}")
 
 # --- TEXT CLEANING LOGIC ---
@@ -97,7 +91,6 @@ def correct_ml_terms(word, spell, english_words):
 
 def fix_context_outliers(text, model_embedder):
     """Koreksi kata yang tidak sesuai konteks menggunakan embedding (Experimental)."""
-    # Import Lokal (SentenceTransformer)
     try:
         from sentence_transformers import util
     except ImportError:
@@ -167,7 +160,8 @@ def clean_text(text, spell, model_embedder, english_words, use_embedding_fix=Tru
 # --- FUNGSI UTAMA TRANSKRIPSI ---
 def transcribe_and_clean(audio_path, whisper_model, spell_checker, embedder, english_words):
     """
-    Melakukan transkripsi, membersihkan teks, dan mengembalikan confidence score (avg_logprob).
+    Melakukan transkripsi, membersihkan teks, dan mengembalikan confidence score (avg_log_prob).
+    Perbaikan: Menggunakan info.avg_log_prob (dengan underscore)
     """
     try:
         segments, info = whisper_model.transcribe(
@@ -175,7 +169,8 @@ def transcribe_and_clean(audio_path, whisper_model, spell_checker, embedder, eng
         )
         raw_text = " ".join([seg.text for seg in segments])
         
-        confidence_log_prob = info.avg_logprob
+        # PERBAIKAN DI SINI: menggunakan avg_log_prob
+        confidence_log_prob = info.avg_log_prob 
 
         cleaned_text = clean_text(raw_text, spell_checker, embedder, english_words, use_embedding_fix=True)
         
