@@ -1,8 +1,7 @@
-import os
-import re
-import itertools
+# nonverbal_analysis.py
 import librosa
 import numpy as np
+import os
 import soundfile as sf
 import noisereduce as nr
 import torch
@@ -11,6 +10,8 @@ from spellchecker import SpellChecker
 from rapidfuzz import process, fuzz
 from rapidfuzz.distance import Levenshtein
 from pydub import AudioSegment
+from sentence_transformers import util, SentenceTransformer
+import pandas as pd
 
 
 WHISPER_MODEL_NAME = "small" 
@@ -61,7 +62,9 @@ def noise_reduction(in_wav, out_wav, prop_decrease=0.6):
     """Menerapkan Noise Reduction menggunakan noisereduce."""
     try:
         y, sr = librosa.load(in_wav, sr=SR_RATE)
-        y_clean = nr.reduce_noise(y=y, sr=sr, prop_decrease=prop_decrease)
+        # Ambil noise sample dari awal (misal 0.5 detik pertama)
+        noise_clip = y[:int(0.5 * sr)]
+        y_clean = nr.reduce_noise(y=y, sr=sr, prop_decrease=prop_decrease, noise_clip=noise_clip)
         sf.write(out_wav, y_clean, sr)
         return True
     except Exception as e:
@@ -151,14 +154,23 @@ def clean_text(text, spell, model_embedder, english_words, use_embedding_fix=Tru
 
 # --- FUNGSI UTAMA TRANSKRIPSI ---
 def transcribe_and_clean(audio_path, whisper_model, spell_checker, embedder, english_words):
-    """Melakukan transkripsi, lalu membersihkan teks."""
+    """
+    Melakukan transkripsi, membersihkan teks, dan mengembalikan confidence score (avg_logprob).
+    Perbaikan: Mengembalikan 2 nilai.
+    """
     try:
-        segments, _ = whisper_model.transcribe(
+        # Menangkap 'segments' dan 'info'
+        segments, info = whisper_model.transcribe(
             audio_path, language="en", task="transcribe", beam_size=4, vad_filter=True
         )
         raw_text = " ".join([seg.text for seg in segments])
         
+        # Ekstrak confidence log probability mentah dari info
+        confidence_log_prob = info.avg_logprob
+
         cleaned_text = clean_text(raw_text, spell_checker, embedder, english_words, use_embedding_fix=True)
-        return cleaned_text
+        
+        # MENGEMBALIKAN DUA NILAI
+        return cleaned_text, confidence_log_prob
     except Exception as e:
         raise RuntimeError(f"Transcription/Cleaning error: {e}")

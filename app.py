@@ -259,16 +259,19 @@ def render_processing_page():
                         progress_bar.progress((i-1)*10 + 3, text=f"Q{i}: Ekstraksi audio dan Noise Reduction...")
                         temp_audio_path = os.path.join(temp_dir, f'audio_{q_key_rubric}.wav')
                         video_to_wav(temp_video_path, temp_audio_path)
-                        # TIDAK PERLU DIHAPUS, CUKUP DIGANTI
-                        # noise_reduction(temp_audio_path) 
-                        # PERBAIKAN: Berikan dua argumen yang sama (input dan output)
-                        noise_reduction(temp_audio_path, temp_audio_path) # <--- PERBAIKAN DI SINI
+                        
+                        # PERBAIKAN 1: Panggil noise_reduction dengan 2 argumen (in_wav dan out_wav)
+                        noise_reduction(temp_audio_path, temp_audio_path) 
                         
                         # --- 3. Speech-to-Text (STT) & Cleaning
                         progress_bar.progress((i-1)*10 + 5, text=f"Q{i}: Transkripsi dan Pembersihan Teks...")
-                        transcript, confidence_score = transcribe_and_clean(
+                        # PERBAIKAN 2: Tangkap 2 nilai: transcript (clean) dan log_prob_raw (mentah dari Whisper)
+                        transcript, log_prob_raw = transcribe_and_clean(
                             temp_audio_path, STT_MODEL, SPELL_CHECKER, EMBEDDER_MODEL, ENGLISH_WORDS
                         )
+                        
+                        # Hitung confidence score akhir (0.0 - 1.0) menggunakan log_prob_raw
+                        final_confidence_score_0_1 = compute_confidence_score(transcript, log_prob_raw)
                         
                         # --- 4. Analisis Non-Verbal
                         progress_bar.progress((i-1)*10 + 7, text=f"Q{i}: Analisis Non-Verbal...")
@@ -288,7 +291,8 @@ def render_processing_page():
                             "transcript": transcript,
                             "final_score": score,
                             "rubric_reason": reason,
-                            "confidence_score": f"{confidence_score*100:.2f}",
+                            # Gunakan confidence score yang sudah diolah
+                            "confidence_score": f"{final_confidence_score_0_1*100:.2f}",
                             "non_verbal": non_verbal_res
                         }
 
