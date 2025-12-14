@@ -331,7 +331,6 @@ def render_results_page():
     processed_q = len(st.session_state.results)
     if processed_q > 0:
         # Konversi ke int() untuk memastikan penjumlahan berjalan lancar.
-        # Karena skor divalidasi sebagai int saat processing, ini seharusnya aman.
         total_score = sum(int(res['final_score']) for res in st.session_state.results.values())
         max_score = processed_q * 4 
     else:
@@ -350,9 +349,9 @@ def render_results_page():
         
         col_res1, col_res2, col_res3 = st.columns(3)
         with col_res1:
-            # PERBAIKAN: Konversi skor ke string secara eksplisit sebelum dimasukkan ke f-string st.metric
+            # PERBAIKAN: Konversi skor ke string secara eksplisit dan HAPUS unsafe_allow_html
             score_str = str(res['final_score'])
-            st.metric("Skor Final (Semantik)", f"**{score_str} / 4**", unsafe_allow_html=True)
+            st.metric("Skor Final (Semantik)", f"**{score_str} / 4**")
         with col_res2:
             # Pastikan nilai adalah float sebelum format
             confidence_val = float(res['confidence_score'].replace('%', ''))
