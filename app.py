@@ -260,12 +260,10 @@ def render_processing_page():
                         temp_audio_path = os.path.join(temp_dir, f'audio_{q_key_rubric}.wav')
                         video_to_wav(temp_video_path, temp_audio_path)
                         
-                        # Panggilan noise_reduction sudah benar
                         noise_reduction(temp_audio_path, temp_audio_path) 
                         
                         # --- 3. Speech-to-Text (STT) & Cleaning
                         progress_bar.progress((i-1)*10 + 5, text=f"Q{i}: Transkripsi dan Pembersihan Teks...")
-                        # Tangkap 2 nilai: transcript (clean) dan log_prob_raw (mentah dari Whisper)
                         transcript, log_prob_raw = transcribe_and_clean(
                             temp_audio_path, STT_MODEL, SPELL_CHECKER, EMBEDDER_MODEL, ENGLISH_WORDS
                         )
@@ -279,19 +277,23 @@ def render_processing_page():
 
                         # --- 5. Penilaian Jawaban (Semantik)
                         progress_bar.progress((i-1)*10 + 9, text=f"Q{i}: Penilaian Semantik...")
-                        # FIX 3: Kirim q_key_rubric (e.g., 'q1') sebagai question_id ke score_with_rubric
                         score, reason = score_with_rubric(
                             q_key_rubric, q_text, transcript, RUBRIC_DATA, EMBEDDER_MODEL
                         )
                         
+                        # PERBAIKAN: Pastikan 'score' adalah integer yang valid.
+                        try:
+                            final_score_value = int(score) if score is not None else 0
+                        except (ValueError, TypeError):
+                            final_score_value = 0
+                            reason = f"[ERROR: Skor gagal dihitung. Skor default 0 digunakan.] {reason}"
+                        
                         # --- 6. Simpan Hasil
-                        # FIX 4: Simpan hasil ke dictionary results dengan key q_key_rubric
                         results[q_key_rubric] = {
                             "question": q_text,
                             "transcript": transcript,
-                            "final_score": score,
+                            "final_score": final_score_value, # Menggunakan nilai yang sudah divalidasi
                             "rubric_reason": reason,
-                            # Gunakan confidence score yang sudah diolah
                             "confidence_score": f"{final_confidence_score_0_1*100:.2f}",
                             "non_verbal": non_verbal_res
                         }
@@ -328,7 +330,8 @@ def render_results_page():
     # Hitung Skor Total
     processed_q = len(st.session_state.results)
     if processed_q > 0:
-        total_score = sum(res['final_score'] for res in st.session_state.results.values())
+        # PERBAIKAN: Konversi ke int() untuk memastikan penjumlahan berjalan lancar.
+        total_score = sum(int(res['final_score']) for res in st.session_state.results.values())
         max_score = processed_q * 4 
     else:
         total_score = 0
