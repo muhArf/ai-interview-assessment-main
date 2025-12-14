@@ -17,8 +17,10 @@ try:
     from models.scoring_logic import load_embedder_model, compute_confidence_score, score_with_rubric
     from models.nonverbal_analysis import analyze_non_verbal
 except ImportError as e:
+    # Handle the error gracefully if modules fail to load
     st.error(f"Gagal memuat modul dari folder 'models'. Pastikan struktur folder dan file sudah benar. Error: {e}")
-    # sys.exit(1)
+    # Jika Anda ingin aplikasi berhenti total di sini, gunakan:
+    # st.stop()
 
 # Konfigurasi Halaman & Load Data
 st.set_page_config(
@@ -126,8 +128,28 @@ def inject_custom_css():
     }
     
     /* Memaksa elemen di kolom nav Streamlit untuk rata kanan */
-    .stHorizontalBlock > div:nth-child(2) > div:nth-child(2) {
-        justify-content: flex-end; /* Rata kanan di kolom tengah (untuk tombol info) */
+    /* Ini adalah perbaikan utama untuk memastikan tombol-tombol sejajar horizontal */
+    .header-nav > div[data-testid="stHorizontalBlock"] {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        width: 100%;
+    }
+    .header-nav > div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
+        /* Kolom Home */
+        margin-right: 20px;
+    }
+    .header-nav > div[data-testid="stHorizontalBlock"] > div:nth-child(2) {
+        /* Kolom Info Aplikasi */
+        margin-right: 10px;
+    }
+    .header-nav button {
+        /* Menyeimbangkan posisi tombol agar sejajar dengan teks Home */
+        margin-top: 0px !important;
+        padding: 8px 15px !important;
+        font-size: 14px !important;
+        border-radius: 6px !important;
+        height: 40px; 
     }
 
     .hero-section {
@@ -156,14 +178,14 @@ def inject_custom_css():
         padding: 50px 0;
     }
     .step-card {
-        background-color: #f9f9ff; /* Warna accent */
+        background-color: #f9f9ff; 
         border-radius: 6px;
         padding: 40px 20px 20px 20px;
         text-align: center;
         position: relative;
         flex-grow: 1;
         max-width: 300px;
-        min-height: 250px; 
+        min-height: 250px; /* Menjaga tinggi tetap untuk kerapian */
     }
     .step-number {
         position: absolute;
@@ -196,7 +218,7 @@ def inject_custom_css():
     /* Styling Footer */
     .custom-footer {
         background-color: black;
-        color: #9795b4; /* text-light */
+        color: #9795b4; 
         padding: 20px 50px;
         display: flex;
         justify-content: space-between;
@@ -204,7 +226,7 @@ def inject_custom_css():
         font-size: 13px;
     }
 
-    /* Penyesuaian Tombol Streamlit */
+    /* Penyesuaian Tombol Hero Streamlit */
     .stButton>button {
         border-radius: 40px !important;
         padding: 15px 40px !important;
@@ -222,21 +244,6 @@ def inject_custom_css():
         transform: translateY(-2px);
     }
     
-    /* Untuk tombol di Header */
-    /* Tombol Info */
-    div[data-testid="stHorizontalBlock"] > div:nth-child(2) button {
-        padding: 8px 15px !important;
-        font-size: 14px !important;
-        border-radius: 6px !important;
-        margin-top: 5px; /* Sedikit geser ke bawah agar sejajar dengan home */
-    }
-    /* Tombol Start */
-    div[data-testid="stHorizontalBlock"] > div:nth-child(4) button {
-        padding: 8px 15px !important;
-        font-size: 14px !important;
-        border-radius: 6px !important;
-    }
-
     </style>
     """, unsafe_allow_html=True)
 
@@ -249,36 +256,41 @@ def render_home_page():
     with st.container():
         st.markdown('<div class="custom-header">', unsafe_allow_html=True)
         
-        # Revisi pembagian kolom: Logo, Navigasi
+        # Menggunakan dua kolom utama: Logo dan Navigasi
         col_logo, col_nav = st.columns([1, 4])
         
         with col_logo:
-            # Gunakan Markdown untuk memastikan elemen logo/teks tetap rapi
+            # Logo/Nama Aplikasi
             try:
                 st.image('assets/logo dicoding.png', width=80, output_format='PNG') 
             except FileNotFoundError:
                 st.markdown('<p style="font-weight: bold; font-size: 20px; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True) 
 
         with col_nav:
-            # Mengatur kolom navigasi di dalam col_nav: Home, Info, Spasi, Start Button
-            # Rasio kolom di dalam nav disesuaikan agar tombol Start rata kanan
-            col_home, col_info, col_start_space, col_start_btn = st.columns([0.5, 1, 1.5, 1])
+            # Kontainer Navigasi dengan class 'header-nav' untuk styling khusus
+            st.markdown('<div class="header-nav">', unsafe_allow_html=True)
+            
+            # Menggunakan 3 kolom di dalam col_nav: Home, Info, Start
+            col_home, col_info, col_start = st.columns([0.5, 1, 1])
             
             with col_home:
-                st.markdown('<p style="font-size: 14px; font-weight: 500; margin-top: 25px;">Home</p>', unsafe_allow_html=True)
+                # Teks Home yang sejajar dengan tombol
+                st.markdown('<p style="font-size: 14px; font-weight: 500; margin-top: 10px;">Home</p>', unsafe_allow_html=True)
             
             with col_info:
                 # Tombol Info Aplikasi
                 if st.button("Info Aplikasi", key="nav_info", type="secondary"):
                     next_page('info')
             
-            with col_start_btn:
+            with col_start:
                 # Tombol Mulai Wawancara di Navbar
                 if st.button("Mulai Wawancara", key="nav_start", type="primary"):
                     st.session_state.answers = {}
                     st.session_state.results = None
                     st.session_state.current_q = 1
                     next_page('interview')
+            
+            st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -307,7 +319,7 @@ def render_home_page():
     
     st.markdown('<div class="steps-container">', unsafe_allow_html=True)
     
-    # Grid Langkah-Langkah: Menggunakan kolom Streamlit untuk responsivitas dasar
+    # Grid Langkah-Langkah: Menggunakan kolom Streamlit untuk 5 card
     cols = st.columns(5)
     
     steps_data = [
