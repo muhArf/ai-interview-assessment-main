@@ -1,9 +1,9 @@
-# nonverbal_analysis.py
+# stt_processor.py
 import librosa
 import numpy as np
 import os
 import soundfile as sf
-import noisereduce as nr
+import noisereduce as nr # Pastikan ini diimpor
 import torch
 from faster_whisper import WhisperModel
 from spellchecker import SpellChecker
@@ -12,8 +12,9 @@ from rapidfuzz.distance import Levenshtein
 from pydub import AudioSegment
 from sentence_transformers import util, SentenceTransformer
 import pandas as pd
+import re # Tambahkan impor 're' jika belum ada
 
-
+# --- KONSTANTA (Sesuaikan jika perlu) ---
 WHISPER_MODEL_NAME = "small" 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 COMPUTE_TYPE = "float16" if DEVICE == "cuda" else "int8"
@@ -38,7 +39,6 @@ FILLERS = ["umm", "uh", "uhh", "erm", "hmm", "eee", "emmm", "yeah", "ah", "okay"
 def load_stt_model():
     """Memuat Faster Whisper model."""
     print(f"Loading WhisperModel ({WHISPER_MODEL_NAME}) on {DEVICE.upper()}")
-    # Model diinisialisasi dengan WHISPER_MODEL_NAME yang kini bernilai "small"
     return WhisperModel(WHISPER_MODEL_NAME, device=DEVICE, compute_type=COMPUTE_TYPE) 
 
 def load_text_models():
@@ -59,12 +59,24 @@ def video_to_wav(input_video_path, output_wav_path, sr=SR_RATE):
         raise RuntimeError(f"Video to WAV conversion failed. Pastikan 'ffmpeg' terinstal via packages.txt. Error: {e}")
 
 def noise_reduction(in_wav, out_wav, prop_decrease=0.6):
-    """Menerapkan Noise Reduction menggunakan noisereduce."""
+    """
+    Menerapkan Noise Reduction menggunakan noisereduce.
+    PERBAIKAN: Menghapus argumen 'noise_clip' yang menyebabkan error.
+    """
     try:
         y, sr = librosa.load(in_wav, sr=SR_RATE)
-        # Ambil noise sample dari awal (misal 0.5 detik pertama)
-        noise_clip = y[:int(0.5 * sr)]
-        y_clean = nr.reduce_noise(y=y, sr=sr, prop_decrease=prop_decrease, noise_clip=noise_clip)
+        
+        # Versi terbaru noisereduce tidak menggunakan noise_clip secara langsung.
+        # Kita menggunakan parameter default untuk identifikasi noise di awal, 
+        # atau bisa menggunakan `y_clean = nr.reduce_noise(y=y, sr=sr, prop_decrease=prop_decrease, n_grad_mult=1.5)`
+        # Namun, untuk mengatasi error, kita hilangkan 'noise_clip'.
+        
+        y_clean = nr.reduce_noise(
+            y=y, 
+            sr=sr, 
+            prop_decrease=prop_decrease,
+            # Argumen 'noise_clip' dihilangkan di sini.
+        )
         sf.write(out_wav, y_clean, sr)
         return True
     except Exception as e:
@@ -156,21 +168,17 @@ def clean_text(text, spell, model_embedder, english_words, use_embedding_fix=Tru
 def transcribe_and_clean(audio_path, whisper_model, spell_checker, embedder, english_words):
     """
     Melakukan transkripsi, membersihkan teks, dan mengembalikan confidence score (avg_logprob).
-    Perbaikan: Mengembalikan 2 nilai.
     """
     try:
-        # Menangkap 'segments' dan 'info'
         segments, info = whisper_model.transcribe(
             audio_path, language="en", task="transcribe", beam_size=4, vad_filter=True
         )
         raw_text = " ".join([seg.text for seg in segments])
         
-        # Ekstrak confidence log probability mentah dari info
         confidence_log_prob = info.avg_logprob
 
         cleaned_text = clean_text(raw_text, spell_checker, embedder, english_words, use_embedding_fix=True)
         
-        # MENGEMBALIKAN DUA NILAI
         return cleaned_text, confidence_log_prob
     except Exception as e:
         raise RuntimeError(f"Transcription/Cleaning error: {e}")

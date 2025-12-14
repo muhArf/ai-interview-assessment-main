@@ -260,12 +260,12 @@ def render_processing_page():
                         temp_audio_path = os.path.join(temp_dir, f'audio_{q_key_rubric}.wav')
                         video_to_wav(temp_video_path, temp_audio_path)
                         
-                        # PERBAIKAN 1: Panggil noise_reduction dengan 2 argumen (in_wav dan out_wav)
+                        # Panggilan noise_reduction sudah benar
                         noise_reduction(temp_audio_path, temp_audio_path) 
                         
                         # --- 3. Speech-to-Text (STT) & Cleaning
                         progress_bar.progress((i-1)*10 + 5, text=f"Q{i}: Transkripsi dan Pembersihan Teks...")
-                        # PERBAIKAN 2: Tangkap 2 nilai: transcript (clean) dan log_prob_raw (mentah dari Whisper)
+                        # Tangkap 2 nilai: transcript (clean) dan log_prob_raw (mentah dari Whisper)
                         transcript, log_prob_raw = transcribe_and_clean(
                             temp_audio_path, STT_MODEL, SPELL_CHECKER, EMBEDDER_MODEL, ENGLISH_WORDS
                         )
