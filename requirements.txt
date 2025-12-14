@@ -1,0 +1,16 @@
+streamlit
+pandas
+numpy
+pillow
+pydub
+librosa
+soundfile
+noisereduce
+sentence-transformers
+scikit-learn
+nltk
+rapidfuzz
+pyspellchecker
+openai-whisper
+torch
+tf-keras
