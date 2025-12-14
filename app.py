@@ -281,18 +281,18 @@ def render_processing_page():
                             q_key_rubric, q_text, transcript, RUBRIC_DATA, EMBEDDER_MODEL
                         )
                         
-                        # PERBAIKAN: Pastikan 'score' adalah integer yang valid.
+                        # VALIDASI SKOR (PENTING untuk mencegah TypeError di results page)
                         try:
                             final_score_value = int(score) if score is not None else 0
                         except (ValueError, TypeError):
                             final_score_value = 0
-                            reason = f"[ERROR: Skor gagal dihitung. Skor default 0 digunakan.] {reason}"
+                            reason = f"[ERROR: Skor gagal dihitung/Tipe data salah. Skor default 0 digunakan.] {reason}"
                         
                         # --- 6. Simpan Hasil
                         results[q_key_rubric] = {
                             "question": q_text,
                             "transcript": transcript,
-                            "final_score": final_score_value, # Menggunakan nilai yang sudah divalidasi
+                            "final_score": final_score_value, # Disimpan sebagai INTEGER yang valid
                             "rubric_reason": reason,
                             "confidence_score": f"{final_confidence_score_0_1*100:.2f}",
                             "non_verbal": non_verbal_res
@@ -330,7 +330,8 @@ def render_results_page():
     # Hitung Skor Total
     processed_q = len(st.session_state.results)
     if processed_q > 0:
-        # PERBAIKAN: Konversi ke int() untuk memastikan penjumlahan berjalan lancar.
+        # Konversi ke int() untuk memastikan penjumlahan berjalan lancar.
+        # Karena skor divalidasi sebagai int saat processing, ini seharusnya aman.
         total_score = sum(int(res['final_score']) for res in st.session_state.results.values())
         max_score = processed_q * 4 
     else:
@@ -349,7 +350,9 @@ def render_results_page():
         
         col_res1, col_res2, col_res3 = st.columns(3)
         with col_res1:
-            st.metric("Skor Final (Semantik)", f"**{res['final_score']} / 4**", unsafe_allow_html=True)
+            # PERBAIKAN: Konversi skor ke string secara eksplisit sebelum dimasukkan ke f-string st.metric
+            score_str = str(res['final_score'])
+            st.metric("Skor Final (Semantik)", f"**{score_str} / 4**", unsafe_allow_html=True)
         with col_res2:
             # Pastikan nilai adalah float sebelum format
             confidence_val = float(res['confidence_score'].replace('%', ''))
