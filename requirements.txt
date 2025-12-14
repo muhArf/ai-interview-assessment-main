@@ -12,5 +12,6 @@ nltk
 rapidfuzz
 pyspellchecker
 openai-whisper
+faster-whisper
 torch
 tf-keras
