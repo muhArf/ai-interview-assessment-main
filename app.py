@@ -1,3 +1,4 @@
+# app.py
 import streamlit as st
 import pandas as pd
 import json
@@ -258,8 +259,10 @@ def render_processing_page():
                         progress_bar.progress((i-1)*10 + 3, text=f"Q{i}: Ekstraksi audio dan Noise Reduction...")
                         temp_audio_path = os.path.join(temp_dir, f'audio_{q_key_rubric}.wav')
                         video_to_wav(temp_video_path, temp_audio_path)
-                        # Tidak perlu menyimpan hasil noise reduction, karena pydub akan menimpa file
-                        noise_reduction(temp_audio_path) 
+                        # TIDAK PERLU DIHAPUS, CUKUP DIGANTI
+                        # noise_reduction(temp_audio_path) 
+                        # PERBAIKAN: Berikan dua argumen yang sama (input dan output)
+                        noise_reduction(temp_audio_path, temp_audio_path) # <--- PERBAIKAN DI SINI
                         
                         # --- 3. Speech-to-Text (STT) & Cleaning
                         progress_bar.progress((i-1)*10 + 5, text=f"Q{i}: Transkripsi dan Pembersihan Teks...")
