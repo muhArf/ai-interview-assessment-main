@@ -13,6 +13,7 @@ from pydub import AudioSegment
 from sentence_transformers import util, SentenceTransformer
 import pandas as pd
 import re 
+import itertools # Tambahkan impor itertools
 
 # --- KONSTANTA (Sesuaikan jika perlu) ---
 WHISPER_MODEL_NAME = "small" 
@@ -73,7 +74,6 @@ def noise_reduction(in_wav, out_wav, prop_decrease=0.6):
         sf.write(out_wav, y_clean, sr)
         return True
     except Exception as e:
-        # Menambahkan pesan error asli untuk debugging
         raise RuntimeError(f"Noise reduction failed: {e}")
 
 # --- TEXT CLEANING LOGIC ---
@@ -161,7 +161,7 @@ def clean_text(text, spell, model_embedder, english_words, use_embedding_fix=Tru
 def transcribe_and_clean(audio_path, whisper_model, spell_checker, embedder, english_words):
     """
     Melakukan transkripsi, membersihkan teks, dan mengembalikan confidence score (avg_log_prob).
-    Perbaikan: Menggunakan info.avg_log_prob (dengan underscore)
+    Menggunakan try-except untuk menangani perubahan nama atribut avg_log_prob/avg_logprob.
     """
     try:
         segments, info = whisper_model.transcribe(
@@ -169,8 +169,19 @@ def transcribe_and_clean(audio_path, whisper_model, spell_checker, embedder, eng
         )
         raw_text = " ".join([seg.text for seg in segments])
         
-        # PERBAIKAN DI SINI: menggunakan avg_log_prob
-        confidence_log_prob = info.avg_log_prob 
+        # --- PERBAIKAN UNIVERSAL: Ambil Log Probability ---
+        try:
+            # Coba versi terbaru (dengan underscore)
+            confidence_log_prob = info.avg_log_prob
+        except AttributeError:
+            try:
+                # Coba versi lama (tanpa underscore)
+                confidence_log_prob = info.avg_logprob 
+            except AttributeError:
+                # Jika keduanya gagal, tetapkan nilai default (untuk mencegah crash)
+                confidence_log_prob = -1.0
+                print("Warning: Failed to retrieve avg_log_prob from TranscriptionInfo object.")
+        # --------------------------------------------------
 
         cleaned_text = clean_text(raw_text, spell_checker, embedder, english_words, use_embedding_fix=True)
         
