@@ -352,7 +352,7 @@ def render_home_page():
         with col_logo:
             # Logo/Nama Aplikasi
             try:
-                st.image('assets/logo dicoding.png', width=80, output_format='PNG') 
+                st.image('assets/seiai.png', width=80, output_format='PNG') 
             except FileNotFoundError:
                 st.markdown('<p style="font-weight: bold; font-size: 20px; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True) 
 
