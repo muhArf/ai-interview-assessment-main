@@ -342,34 +342,36 @@ def render_home_page():
     # Suntikkan CSS kustom
     inject_custom_css()
 
-    # --- Header / Navbar Kustom ---
+    # --- Navbar Kustom ---
     with st.container():
-        st.markdown('<div class="custom-header">', unsafe_allow_html=True)
-        
-        # Dua kolom utama: Logo dan Navigasi
-        col_logo, col_nav = st.columns([1, 4])
-        
-        with col_logo:
-            # Logo
-            try:
-                st.image('assets/seiai.png', width=80, output_format='PNG')
-            except FileNotFoundError:
-                st.markdown('<p style="font-weight: bold; font-size: 20px; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True)
+        st.markdown("""
+        <div style="
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            background-color: #1f2937;  /* Warna navbar */
+            padding: 10px 50px;
+            height: 80px;
+        ">
+            <!-- Logo + Nama -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img src='assets/seiai.png' width='60' style='display: block;'/>
+                <p style="color: white; font-weight: bold; font-size: 20px; margin: 0;">SEI-AI</p>
+            </div>
 
-        with col_nav:
-            # Kontainer navigasi
-            st.markdown('<div class="header-nav" style="display: flex; justify-content: flex-end; gap: 15px;">', unsafe_allow_html=True)
-            
-            # Teks Home (bukan tombol)
-            st.markdown('<p style="margin: 0; font-size: 14px; font-weight: 500; line-height: 40px;">Home</p>', unsafe_allow_html=True)
-            
-            # Tombol App Info
-            if st.button("App Info", key="nav_info", type="secondary"):
-                next_page('info')
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+            <!-- Navigasi -->
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <p style="color: white; font-size: 16px; margin: 0; cursor: pointer;">Home</p>
+        """, unsafe_allow_html=True)
 
-        st.markdown('</div>', unsafe_allow_html=True)
+        # Tombol App Info
+        if st.button("App Info", key="nav_info", type="secondary"):
+            next_page('info')
+
+        st.markdown("""
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
     # --- 2. Hero Section ---
     st.markdown('<section class="hero-section">', unsafe_allow_html=True)
