@@ -13,6 +13,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'models'))
 
 # Import logic dari folder models
 try:
+    # PENTING: Pastikan file di folder models/ sudah terimplementasi dengan benar.
     # Dummy imports jika modul di folder models/ belum terimplementasi sepenuhnya
     def load_stt_model(): return "STT_Model_Loaded"
     def load_text_models(): return None, None, None
@@ -20,12 +21,7 @@ try:
     def video_to_wav(video_path, audio_path): pass
     def noise_reduction(audio_path_in, audio_path_out): pass
     def transcribe_and_clean(audio_path, stt_model, spell_checker, embedder_model, english_words): return "This is a dummy transcript for testing.", 0.95
-    def compute_confidence_score(transcript, log_prob_raw): 
-        # Mengembalikan nilai desimal 0.0 - 1.0 (Contoh: 0.9520)
-        # Dummy dynamic score untuk simulasi
-        if 'current_q' in st.session_state:
-             return 0.9520 + (st.session_state.current_q * 0.005) 
-        return 0.9520
+    def compute_confidence_score(transcript, log_prob_raw): return 0.95
     def analyze_non_verbal(audio_path): return {'tempo_bpm': '135 BPM', 'total_pause_seconds': '5.2', 'qualitative_summary': 'Normal pace'}
     def score_with_rubric(q_key_rubric, q_text, transcript, RUBRIC_DATA, embedder_model): return 4, "Excellent relevance and structural clarity."
     
@@ -286,7 +282,7 @@ def inject_custom_css():
         transform: translateY(-2px);
     }
     
-    /* === CARD METRIK HORIZONTAL (TELAH DIUBAH MENJADI LEBIH RINGKAS) === */
+    /* === CARD METRIK HORIZONTAL (PERBAIKAN FONT DAN SPACING) === */
     .metric-grid-container {
         display: grid;
         grid-template-columns: repeat(4, 1fr) !important; 
@@ -298,7 +294,7 @@ def inject_custom_css():
     .modern-metric-card {
         background-color: white;
         border-radius: 12px;
-        padding: 10px !important; /* Dikecilkan */ 
+        padding: 15px !important; 
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         text-align: left;
         transition: transform 0.2s;
@@ -315,12 +311,12 @@ def inject_custom_css():
     }
     
     .card-value {
-        font-size: 22px !important; /* Dikecilkan */
+        font-size: 26px !important; 
         font-weight: 700;
         line-height: 1.1; 
     }
     .card-label {
-        font-size: 11px !important; /* Dikecilkan */
+        font-size: 12px !important; 
         color: #7f8c8d;
         font-weight: 500;
         margin-top: 3px; 
@@ -356,7 +352,7 @@ def render_home_page():
         with col_logo:
             # Logo/Nama Aplikasi
             try:
-                st.image('assets/logo dicoding.png', width=80, output_format='PNG') 
+                st.image('assets/seiai.png', width=80, output_format='PNG') 
             except FileNotFoundError:
                 st.markdown('<p style="font-weight: bold; font-size: 20px; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True) 
 
@@ -546,7 +542,7 @@ def render_interview_page():
     # --- Logic Kontrol (Next/Previous) ---
 
     with col_control:
-        st.markdown("### Controls")
+        
         
         # Kondisi 'ready' sekarang hanya bergantung pada session_state.answers
         is_ready = st.session_state.answers.get(q_id_str) is not None
@@ -604,6 +600,7 @@ def render_processing_page():
                         # --- 1. Save Video 
                         progress_bar.progress((i-1)*10 + 1, text=f"Q{i}: Saving video...")
                         temp_video_path = os.path.join(temp_dir, f'video_{q_key_rubric}.mp4')
+                        # Penambahan Path Audio Temporer
                         temp_audio_path = os.path.join(temp_dir, f'audio_{q_key_rubric}.wav') 
                         
                         with open(temp_video_path, 'wb') as f:
@@ -612,6 +609,7 @@ def render_processing_page():
                         # --- 2. Audio Extraction & Noise Reduction
                         progress_bar.progress((i-1)*10 + 3, text=f"Q{i}: Extracting audio and Noise Reduction...")
                         
+                        # Pastikan video_to_wav dipanggil dengan 2 argumen:
                         video_to_wav(temp_video_path, temp_audio_path)
                         
                         noise_reduction(temp_audio_path, temp_audio_path) 
@@ -622,7 +620,6 @@ def render_processing_page():
                             temp_audio_path, STT_MODEL, SPELL_CHECKER, EMBEDDER_MODEL, ENGLISH_WORDS
                         )
                         
-                        # MENGAMBIL DATA CONFIDENCE SCORE SEBAGAI FLOAT MURNI (0.0 - 1.0)
                         final_confidence_score_0_1 = compute_confidence_score(transcript, log_prob_raw)
                         
                         # --- 4. Non-Verbal Analysis
@@ -647,7 +644,7 @@ def render_processing_page():
                             "transcript": transcript,
                             "final_score": final_score_value,
                             "rubric_reason": reason,
-                            "confidence_score": final_confidence_score_0_1, # DISIMPAN SEBAGAI FLOAT MURNI (0.0 - 1.0)
+                            "confidence_score": f"{final_confidence_score_0_1*100:.2f}",
                             "non_verbal": non_verbal_res
                         }
 
@@ -700,9 +697,8 @@ def render_final_summary_page():
     # --- 1. Combined Metrics Calculation ---
     try:
         all_scores = [int(res['final_score']) for res in st.session_state.results.values()]
-        
-        # MENGAMBIL CONFIDENCE SCORE SEBAGAI FLOAT MURNI (0.0 - 1.0)
-        all_confidence = [res['confidence_score'] for res in st.session_state.results.values()]
+        # Extract and clean data, handling potential non-numeric strings
+        all_confidence = [float(res['confidence_score'].split(' ')[0].replace('%', '')) for res in st.session_state.results.values()]
         
         all_tempo = []
         all_pause = []
@@ -720,7 +716,7 @@ def render_final_summary_page():
 
         # Calculate averages
         avg_score = np.mean(all_scores) if all_scores else 0
-        avg_confidence = np.mean(all_confidence) if all_confidence else 0 # RATA-RATA DALAM BENTUK FLOAT
+        avg_confidence = np.mean(all_confidence) if all_confidence else 0
         avg_tempo = np.mean(all_tempo) if all_tempo else 0
         total_pause = np.sum(all_pause) 
     
@@ -765,13 +761,13 @@ def render_final_summary_page():
     </div>
     """, unsafe_allow_html=True)
     
-    # Card 2: Average Transcript Accuracy (SEKARANG DIKALIKAN 100 SAAT TAMPIL)
+    # Card 2: Average Transcript Accuracy (LABEL DIPENDEKKAN)
     st.markdown(f"""
     <div class="modern-metric-card">
         <div class="card-content-wrapper">
             <div class="card-value-line">
                 <span class="card-icon accuracy-color">🤖</span>
-                <span class="card-value accuracy-color">{avg_confidence*100:.2f}%</span>
+                <span class="card-value accuracy-color">{avg_confidence:.2f}%</span>
             </div>
             <span class="card-label">Avg. Accuracy (%)</span>
         </div>
@@ -832,13 +828,10 @@ def render_final_summary_page():
             st.warning("* **Tempo Control:** Practice speaking within the 125-150 BPM range. Practice breathing exercises.")
         if total_pause > 120: 
             st.warning("* **Pause Management:** Reduce excessively long pauses. Consider using short pauses (2-3 seconds) for emphasis only.")
-        
-        # Ambil nilai avg_confidence dalam format persentase untuk perbandingan
-        avg_confidence_percent = avg_confidence * 100
-        if avg_confidence_percent < 90:
+        if avg_confidence < 90:
             st.warning("* **Vocal Clarity Improvement:** Speak louder and clearer. The recording environment should be minimally noisy.")
         
-        if avg_score >= 3.5 and 125 <= avg_tempo <= 150 and avg_confidence_percent >= 90:
+        if avg_score >= 3.5 and 125 <= avg_tempo <= 150 and avg_confidence >= 90:
              st.success("**Excellent Performance:** Your scores are consistently high across all metrics.")
 
         st.markdown('</div>', unsafe_allow_html=True)
@@ -863,20 +856,18 @@ def render_detailed_results_per_question():
         
         col_res1, col_res2, col_res3 = st.columns(3)
         with col_res1:
-            st.metric("Content Score", f"**{res['final_score']} / 4**")
+            st.metric("Content Score", f"{res['final_score']} / 4")
         with col_res2:
-            # Konversi float Confidence Score menjadi persentase untuk tampilan
-            display_confidence = f"{res['confidence_score']*100:.2f}%"
-            st.metric("Transcript Accuracy", display_confidence)
+            st.metric("Transcript Accuracy", res['confidence_score'])
         with col_res3:
-            st.metric("Communication Summary", res['non_verbal'].get('qualitative_summary', 'N/A').capitalize())
+            st.metric("Analysis Non-Verbal", res['non_verbal'].get('qualitative_summary', 'N/A').capitalize())
         
-        st.markdown("**Content Scoring Rationale:**")
+        st.markdown("**Reason:**")
         st.caption(res['rubric_reason'])
 
         st.markdown("**Detailed Audio Analysis:**")
-        st.markdown(f"* **Speaking Tempo:** {res['non_verbal'].get('tempo_bpm', 'N/A')}")
-        st.markdown(f"* **Total Pause Time:** {res['non_verbal'].get('total_pause_seconds', 'N/A')}")
+        st.markdown(f"* **Tempo:** {res['non_verbal'].get('tempo_bpm', 'N/A')}")
+        st.markdown(f"* **Total Pause :** {res['non_verbal'].get('total_pause_seconds', 'N/A')}")
 
         with st.expander("View Clean Transcript"):
             st.code(res['transcript'], language='text')
