@@ -49,7 +49,15 @@ if 'answers' not in st.session_state:
     st.session_state.answers = {}
 if 'results' not in st.session_state:
     st.session_state.results = None
-
+# TAMBAHKAN STATE UNTUK CREDENTIAL
+if 'user_credentials' not in st.session_state:
+    st.session_state.user_credentials = {
+        'name': '',
+        'email': '',
+        'phone': ''
+    }
+if 'credentials_completed' not in st.session_state:
+    st.session_state.credentials_completed = False
 # Konstanta
 TOTAL_QUESTIONS = 5
 VIDEO_MAX_SIZE_MB = 50
@@ -443,6 +451,197 @@ def render_home_page():
 
     st.markdown('</div>', unsafe_allow_html=True)
 
+def render_home_page():
+    # ... (kode render_home_page Anda yang ada) ...
+
+def render_credential_page():  # <-- LETAKKAN DI SINI (SETELAH render_home_page)
+    """Halaman untuk mengisi credential sebelum interview"""
+    
+    # Inject custom CSS untuk halaman credential
+    st.markdown("""
+    <style>
+    /* Style khusus untuk halaman credential */
+    .credential-container {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+    
+    .credential-card {
+        background-color: white;
+        border-radius: 12px;
+        padding: 40px 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border: 1px solid #f0f0f0;
+    }
+    
+    .credential-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #000000;
+        text-align: center;
+        margin-bottom: 8px;
+    }
+    
+    .credential-subtitle {
+        font-size: 16px;
+        color: #666666;
+        text-align: center;
+        margin-bottom: 35px;
+        line-height: 1.5;
+    }
+    
+    .credential-input {
+        margin-bottom: 25px;
+    }
+    
+    .credential-input label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333333;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    /* Style untuk tombol */
+    .credential-btn-container {
+        margin-top: 35px;
+        text-align: center;
+    }
+    
+    .credential-btn-container button {
+        width: 100%;
+        border-radius: 8px !important;
+        padding: 14px !important;
+        font-size: 16px !important;
+        font-weight: 500 !important;
+        background-color: black !important;
+        color: white !important;
+        border: none !important;
+    }
+    
+    .credential-btn-container button:hover {
+        background-color: #333333 !important;
+    }
+    
+    /* Back button */
+    .back-btn-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+    
+    .back-btn-container button {
+        background-color: transparent !important;
+        color: #666666 !important;
+        border: 1px solid #ddd !important;
+    }
+    
+    /* Success message */
+    .success-message {
+        background-color: #f0fff4;
+        border: 1px solid #c6f6d5;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 25px;
+    }
+    
+    /* Input fields styling */
+    .stTextInput input, .stTextInput input:focus {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 12px 15px;
+    }
+    
+    .stTextInput input:focus {
+        border-color: #000000;
+        box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+    }
+    
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Container utama
+    st.markdown('<div class="credential-container">', unsafe_allow_html=True)
+    
+    # Card credential
+    st.markdown('<div class="credential-card">', unsafe_allow_html=True)
+    
+    # Judul
+    st.markdown('<h1 class="credential-title">Complete Your Profile</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="credential-subtitle">Please fill in your details before starting the interview session</p>', unsafe_allow_html=True)
+    
+    # Tampilkan info jika credential sudah diisi
+    if st.session_state.credentials_completed:
+        st.markdown('<div class="success-message">✅ Your profile has been saved. You can proceed to the interview.</div>', unsafe_allow_html=True)
+    
+    # Form input
+    with st.form("credential_form"):
+        # Input Nama
+        st.markdown('<div class="credential-input">', unsafe_allow_html=True)
+        name = st.text_input(
+            "Full Name",
+            value=st.session_state.user_credentials['name'],
+            placeholder="Enter your full name",
+            key="credential_name"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Input Email
+        st.markdown('<div class="credential-input">', unsafe_allow_html=True)
+        email = st.text_input(
+            "Email Address",
+            value=st.session_state.user_credentials['email'],
+            placeholder="Enter your email address",
+            key="credential_email"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Input Phone
+        st.markdown('<div class="credential-input">', unsafe_allow_html=True)
+        phone = st.text_input(
+            "Phone Number",
+            value=st.session_state.user_credentials['phone'],
+            placeholder="Enter your phone number",
+            key="credential_phone"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Tombol Submit
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            submitted = st.form_submit_button("Start Interview", use_container_width=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)  # Tutup credential-card
+    
+    # Tombol Back
+    st.markdown('<div class="back-btn-container">', unsafe_allow_html=True)
+    if st.button("← Back to Home", key="credential_back"):
+        next_page('home')
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)  # Tutup credential-container
+    
+    # Logic ketika form disubmit
+    if submitted:
+        if name.strip() and email.strip() and phone.strip():
+            # Simpan ke session state
+            st.session_state.user_credentials = {
+                'name': name.strip(),
+                'email': email.strip(),
+                'phone': phone.strip()
+            }
+            st.session_state.credentials_completed = True
+            
+            # Reset state interview
+            st.session_state.answers = {}
+            st.session_state.results = None
+            st.session_state.current_q = 1
+            
+            # Redirect ke halaman interview
+            next_page('interview')
+            st.rerun()
+        else:
+            st.error("Please fill in all fields before proceeding.")
 
 def render_info_page():
     st.title("SEI-AI Application Information")
@@ -874,6 +1073,8 @@ def render_detailed_results_per_question():
 # Main App Execution Flow
 if st.session_state.page == 'home':
     render_home_page()
+elif st.session_state.page == 'credential':  # ← TAMBAHKAN INI
+    render_credential_page()
 elif st.session_state.page == 'info':
     render_info_page()
 elif st.session_state.page == 'interview':
