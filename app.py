@@ -1,4 +1,4 @@
-# app.py (Revisi Final Tampilan Landing Page)
+# app.py
 import streamlit as st
 import pandas as pd
 import json
@@ -13,6 +13,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'models'))
 
 # Import logic dari folder models
 try:
+    # PENTING: Pastikan file di folder models/ sudah terimplementasi dengan benar.
     from models.stt_processor import load_stt_model, load_text_models, video_to_wav, noise_reduction, transcribe_and_clean
     from models.scoring_logic import load_embedder_model, compute_confidence_score, score_with_rubric
     from models.nonverbal_analysis import analyze_non_verbal
@@ -51,6 +52,7 @@ def next_page(page_name):
 def get_models():
     """Load semua model berat (hanya sekali)."""
     try:
+        # PENTING: Ganti path model sesuai dengan implementasi Anda yang sebenarnya
         stt_model = load_stt_model()
         embedder_model = load_embedder_model()
         
@@ -93,8 +95,10 @@ RUBRIC_DATA = load_rubric_data()
 
 # --- Page Render Functions ---
 
+# --- LANDING PAGE CSS & REPORT CSS (Minimalist Modern with Horizontal Cards) ---
+
 def inject_custom_css():
-    """Menyuntikkan CSS kustom untuk Landing Page yang rapi dan terpusat."""
+    """Menyuntikkan CSS kustom untuk meniru desain Landing Page & Laporan."""
     st.markdown("""
     <style>
     /* 1. Reset Global dan Kontrol Padding */
@@ -110,19 +114,12 @@ def inject_custom_css():
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-    /* 2. Tata Letak Konten Utama (Memastikan Semua Konten Terpusat di Lebar Max) */
-    .stContainer {
-        padding: 0 20px;
-        /* HACK: Override lebar default agar konten terpusat dan rapi */
-        max-width: 1200px !important; 
-    }
-    
-    /* 3. Styling untuk Elemen Kustom */
+    /* 2. Styling untuk Elemen Kustom */
     .custom-header {
         background-color: white;
         padding: 0 50px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        height: 100px;
+        height: 100px; /* Tinggi Navbar */
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -131,13 +128,18 @@ def inject_custom_css():
         z-index: 1000;
     }
     
-    /* Memastikan tombol Navigasi sejajar dengan logo */
-    .header-nav {
+    /* Memaksa elemen di kolom nav Streamlit untuk rata kanan */
+    .header-nav > div[data-testid="stHorizontalBlock"] {
         display: flex;
+        justify-content: flex-end;
         align-items: center;
-        justify-content: flex-end; /* Rata kanan */
         width: 100%;
-        gap: 10px; /* Jarak antar tombol */
+    }
+    .header-nav > div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
+        margin-right: 20px;
+    }
+    .header-nav > div[data-testid="stHorizontalBlock"] > div:nth-child(2) {
+        margin-right: 10px;
     }
     .header-nav button {
         margin-top: 0px !important;
@@ -147,10 +149,9 @@ def inject_custom_css():
         height: 40px; 
     }
 
-    /* HERO SECTION */
     .hero-section {
         background-color: white;
-        padding: 80px 0; /* Padding vertikal yang disesuaikan */
+        padding: 100px 50px;
         text-align: center;
     }
     .hero-title {
@@ -165,55 +166,45 @@ def inject_custom_css():
         margin: 0 auto 40px auto;
     }
 
-    /* HOW TO USE STEPS */
-    .steps-section {
-        padding: 50px 0;
-        text-align: center; 
-    }
+    /* Styling How To Use Steps */
     .steps-container {
         display: flex;
         flex-wrap: wrap;
         gap: 30px;
-        justify-content: center; 
-        margin-top: 50px;
+        justify-content: center;
+        padding: 50px 0;
     }
     .step-card {
         background-color: #f9f9ff; 
-        border-radius: 10px; 
-        padding: 40px 15px 20px 15px;
+        border-radius: 6px;
+        padding: 40px 20px 20px 20px;
         text-align: center;
         position: relative;
-        flex: 1 1 180px; /* Fleksibel, lebar dasar 180px */
-        max-width: 200px; 
+        flex-grow: 1;
+        max-width: 300px;
         min-height: 250px; 
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s;
-    }
-    .step-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
     .step-number {
         position: absolute;
-        top: -20px;
+        top: -30px; 
         left: 50%;
         transform: translateX(-50%);
-        width: 40px;
-        height: 40px;
+        width: 60px;
+        height: 60px;
         background-color: black;
         border-radius: 50%;
         color: white;
-        font-size: 18px;
+        font-size: 20px;
         font-weight: bold;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
     }
     .step-title {
         font-size: 18px;
         font-weight: 600;
-        margin-top: 15px;
+        margin-top: 20px;
         margin-bottom: 10px;
     }
     .step-description {
@@ -223,17 +214,16 @@ def inject_custom_css():
 
     /* Styling Footer */
     .custom-footer {
-        background-color: #1c1c1c;
-        color: #b0b0c0; 
+        background-color: black;
+        color: #9795b4; 
         padding: 20px 50px;
         display: flex;
         justify-content: space-between;
         align-items: center;
         font-size: 13px;
-        margin-top: 50px;
     }
 
-    /* Tombol Utama */
+    /* Penyesuaian Tombol Hero Streamlit */
     .stButton>button {
         border-radius: 40px !important;
         padding: 15px 40px !important;
@@ -251,30 +241,70 @@ def inject_custom_css():
         transform: translateY(-2px);
     }
     
-    /* Laporan Metrics */
+    /* === CSS TAMBAHAN BARU UNTUK LAPORAN MINIMALIS HORIZONTAL METRIK === */
+    /* Container untuk kartu metrik */
     .metric-grid-container {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 20px;
         margin-bottom: 30px;
     }
+    /* Card Styling */
     .modern-metric-card {
-        /* CSS yang sama seperti sebelumnya */
+        background-color: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        text-align: left;
+        transition: transform 0.2s;
+    }
+    .modern-metric-card:hover {
+        transform: translateY(-3px);
+    }
+    
+    /* Kontainer untuk Nilai dan Label */
+    .card-content-wrapper {
+        display: flex;
+        flex-direction: column; /* Icon + Value di atas, Label di bawah (secara keseluruhan card) */
+        align-items: flex-start;
+    }
+
+    /* Kontainer untuk Icon dan Value agar sejajar horizontal */
+    .card-value-line {
+        display: flex;
+        flex-direction: row; /* BARIS UTAMA SEJAJAR HORIZONTAL */
+        align-items: center;
+        gap: 10px; 
+        margin-bottom: 5px;
+    }
+    
+    .card-icon {
+        font-size: 24px;
+        line-height: 1;
     }
     .card-value {
         font-size: 32px;
         font-weight: 700;
+        line-height: 1;
     }
-    .score-color { color: #2ecc71; }
-    .accuracy-color { color: #3498db; }
-    .tempo-color { color: #f39c12; }
-    .pause-color { color: #e74c3c; }
+    .card-label {
+        font-size: 14px;
+        color: #7f8c8d;
+        font-weight: 500;
+        margin-top: 5px; 
+    }
+    /* Warna untuk Skor dan Tempo */
+    .score-color { color: #2ecc71; } /* Hijau */
+    .accuracy-color { color: #3498db; } /* Biru */
+    .tempo-color { color: #f39c12; } /* Kuning */
+    .pause-color { color: #e74c3c; } /* Merah */
     
+    /* Styling untuk Summary dan Recommendations */
     .summary-box {
         border-radius: 12px;
         padding: 25px;
         margin-bottom: 20px;
-        background-color: #ecf0f1; 
+        background-color: #ecf0f1; /* Light gray background */
     }
     
     </style>
@@ -282,101 +312,104 @@ def inject_custom_css():
 
 
 def render_home_page():
+    # 1. Suntikkan CSS kustom
     inject_custom_css()
 
     # --- 1. Header (Navbar Kustom) ---
     with st.container():
         st.markdown('<div class="custom-header">', unsafe_allow_html=True)
         
-        # Menggunakan kolom untuk memisahkan Logo dan Navigasi
+        # Menggunakan dua kolom utama: Logo dan Navigasi
         col_logo, col_nav = st.columns([1, 4])
         
         with col_logo:
+            # Logo/Nama Aplikasi
             try:
+                # Ganti dengan path logo Anda jika berbeda
                 st.image('assets/logo dicoding.png', width=80, output_format='PNG') 
             except FileNotFoundError:
                 st.markdown('<p style="font-weight: bold; font-size: 20px; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True) 
 
         with col_nav:
-            # Menggunakan Streamlit Columns di dalam div kustom untuk layout horizontal yang lebih baik
-            col_info, col_start = st.columns([1, 1])
-            
-            # Memastikan tombol berada di dalam div kustom header-nav untuk styling alignment
+            # Kontainer Navigasi dengan class 'header-nav' untuk styling khusus
             st.markdown('<div class="header-nav">', unsafe_allow_html=True)
             
-            # Tombol "App Info"
-            if st.button("App Info", key="nav_info", type="secondary"):
-                next_page('info')
+            # Menggunakan 3 kolom di dalam col_nav: Home, Info, Start
+            col_home, col_info, col_start = st.columns([0.5, 1, 1])
             
-            # Tombol "Start Interview" (Sekunder - tidak merah)
-            if st.button("Start Interview", key="nav_start", type="secondary"):
-                st.session_state.answers = {}
-                st.session_state.results = None
-                st.session_state.current_q = 1
-                next_page('interview')
+            with col_home:
+                # Teks Home yang sejajar dengan tombol
+                st.markdown('<p style="font-size: 14px; font-weight: 500; margin-top: 10px;">Home</p>', unsafe_allow_html=True)
+            
+            with col_info:
+                # Tombol Info Aplikasi
+                if st.button("App Info", key="nav_info", type="secondary"):
+                    next_page('info')
+            
+            with col_start:
+                # Tombol Mulai Wawancara di Navbar
+                if st.button("Start Interview", key="nav_start", type="primary"):
+                    st.session_state.answers = {}
+                    st.session_state.results = None
+                    st.session_state.current_q = 1
+                    next_page('interview')
             
             st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
 
 
-    # --- 2. Kontainer Utama Konten (Memastikan Konten Terpusat) ---
-    # Membungkus semua konten Hero dan Steps dalam kontainer Streamlit utama
-    main_container = st.container()
+    # --- 2. Hero Section ---
+    st.markdown('<section class="hero-section">', unsafe_allow_html=True)
     
-    with main_container:
-        
-        # --- 2a. Hero Section ---
-        st.markdown('<section class="hero-section">', unsafe_allow_html=True)
-        
-        st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
-        st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job.</p>', unsafe_allow_html=True)
-        
-        # Tombol Aksi Hero Section (PRIMARY - Hitam)
-        st.markdown('<div class="primary-btn-container" style="display: flex; justify-content: center;">', unsafe_allow_html=True)
-        if st.button("▶️ Start Interview", key="hero_start"):
-            st.session_state.answers = {}
-            st.session_state.results = None
-            st.session_state.current_q = 1
-            next_page('interview')
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        st.markdown('</section>', unsafe_allow_html=True)
+    st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job.</p>', unsafe_allow_html=True)
+    
+    # Tombol Aksi Hero Section
+    st.markdown('<div class="primary-btn-container" style="display: flex; justify-content: center;">', unsafe_allow_html=True)
+    if st.button("▶️ Start Interview", key="hero_start"):
+        st.session_state.answers = {}
+        st.session_state.results = None
+        st.session_state.current_q = 1
+        next_page('interview')
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('</section>', unsafe_allow_html=True)
 
 
-        # --- 2b. How To Use Section (Langkah-Langkah) ---
-        st.markdown('<section class="steps-section">', unsafe_allow_html=True)
-        st.markdown('<h2 style="font-size: 40px; text-align: center; margin-bottom: 70px;">How To Use</h2>', unsafe_allow_html=True)
-        
-        st.markdown('<div class="steps-container">', unsafe_allow_html=True)
-        
-        steps_data = [
-            ("1", "Upload Answer Video", "Upload your video answer for each question given by the AI."),
-            ("2", "AI Processes Data", "The AI will process the video into a transcript and analyze non-verbal aspects."),
-            ("3", "Semantic Scoring", "Your answer is compared to an ideal rubric for semantic scoring (Content Relevance)."),
-            ("4", "Get Instant Feedback", "Receive final score, rationale, and instant communication analysis."),
-            ("5", "Improve Skills", "Use the recommendations to practice and improve until you are confident.")
-        ]
-        
-        # Menggunakan kolom Streamlit untuk 5 card
-        cols = st.columns(5)
-        
-        for i, (num, title, desc) in enumerate(steps_data):
-            with cols[i]:
-                # Struktur Card Kustom
-                st.markdown(f"""
-                <div class="step-card">
-                    <div class="step-number">{num}</div>
-                    <h3 class="step-title">{title}</h3>
-                    <p class="step-description">{desc}</p>
-                </div>
-                """, unsafe_allow_html=True)
+    # --- 3. How To Use Section (Langkah-Langkah) ---
+    st.markdown('<section style="padding: 50px; background-color: white;">', unsafe_allow_html=True)
+    st.markdown('<h2 style="font-size: 40px; text-align: center; margin-bottom: 70px;">How To Use</h2>', unsafe_allow_html=True)
+    
+    st.markdown('<div class="steps-container">', unsafe_allow_html=True)
+    
+    # Grid Langkah-Langkah: Menggunakan kolom Streamlit untuk 5 card
+    cols = st.columns(5)
+    
+    steps_data = [
+        ("1", "Upload Answer Video", "Upload your video answer for each question given by the AI."),
+        ("2", "AI Processes Data", "The AI will process the video into a transcript and analyze non-verbal aspects."),
+        ("3", "Semantic Scoring", "Your answer is compared to an ideal rubric for semantic scoring (Content Relevance)."),
+        ("4", "Get Instant Feedback", "Receive final score, rationale, and instant communication analysis."),
+        ("5", "Improve Skills", "Use the recommendations to practice and improve until you are confident.")
+    ]
+    
+    for i, (num, title, desc) in enumerate(steps_data):
+        with cols[i]:
+            # Struktur Card Kustom
+            st.markdown(f"""
+            <div class="step-card">
+                <div class="step-number">{num}</div>
+                <h3 class="step-title">{title}</h3>
+                <p class="step-description">{desc}</p>
+            </div>
+            """, unsafe_allow_html=True)
 
-        st.markdown('</div>', unsafe_allow_html=True)
-        st.markdown('</section>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</section>', unsafe_allow_html=True)
 
 
-    # --- 3. Footer Kustom ---
+    # --- 4. Footer Kustom ---
     st.markdown('<div class="custom-footer">', unsafe_allow_html=True)
     col_footer_left, col_footer_right = st.columns(2)
     
@@ -388,8 +421,6 @@ def render_home_page():
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-
-# --- (Fungsi render_info_page, render_interview_page, render_processing_page, render_final_summary_page, render_detailed_results_per_question tetap sama seperti sebelumnya) ---
 
 def render_info_page():
     st.title("SEI-AI Application Information")
@@ -433,6 +464,8 @@ def render_interview_page():
     
     col_upload, col_control = st.columns([3, 1])
     
+    current_uploaded_file = st.session_state.answers.get(q_id_str)
+
     with col_upload:
         uploaded_file = st.file_uploader(
             f"Upload Video Answer for Question {q_num} (Max {VIDEO_MAX_SIZE_MB}MB)",
@@ -449,12 +482,11 @@ def render_interview_page():
         if uploaded_file:
             st.success("File successfully uploaded.")
             st.video(uploaded_file, format=uploaded_file.type)
+        elif current_uploaded_file:
+            st.video(current_uploaded_file, format=current_uploaded_file.type)
+            st.info("Previous file detected.")
         else:
-            if st.session_state.answers.get(q_id_str):
-                st.info("Previous file detected.")
-                st.video(st.session_state.answers.get(q_id_str), format=st.session_state.answers.get(q_id_str).type)
-            else:
-                st.warning("Please upload your answer file to continue.")
+            st.warning("Please upload your answer file to continue.")
 
     with col_control:
         st.markdown("### Controls")
@@ -479,6 +511,7 @@ def render_processing_page():
     st.info("Please wait, this process may take a few minutes depending on the video duration.")
 
     if st.session_state.results is not None and st.session_state.results != {}:
+        # Redirect to the final summary page after processing
         next_page('final_summary') 
         return
 
@@ -507,28 +540,39 @@ def render_processing_page():
 
                     if video_file and q_key_rubric in RUBRIC_DATA and q_text:
                         
+                        st.markdown(f"### Processing Q{i}: {q_text[:50]}...")
+                        
+                        # --- 1. Save Video 
                         progress_bar.progress((i-1)*10 + 1, text=f"Q{i}: Saving video...")
                         temp_video_path = os.path.join(temp_dir, f'video_{q_key_rubric}.mp4')
                         with open(temp_video_path, 'wb') as f:
                             f.write(video_file.getbuffer())
 
+                        # --- 2. Audio Extraction & Noise Reduction
                         progress_bar.progress((i-1)*10 + 3, text=f"Q{i}: Extracting audio and Noise Reduction...")
                         temp_audio_path = os.path.join(temp_dir, f'audio_{q_key_rubric}.wav')
+                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         video_to_wav(temp_video_path, temp_audio_path)
                         
                         noise_reduction(temp_audio_path, temp_audio_path) 
                         
+                        # --- 3. Speech-to-Text (STT) & Cleaning
                         progress_bar.progress((i-1)*10 + 5, text=f"Q{i}: Transcription and Text Cleaning...")
+                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         transcript, log_prob_raw = transcribe_and_clean(
                             temp_audio_path, STT_MODEL, SPELL_CHECKER, EMBEDDER_MODEL, ENGLISH_WORDS
                         )
                         
                         final_confidence_score_0_1 = compute_confidence_score(transcript, log_prob_raw)
                         
+                        # --- 4. Non-Verbal Analysis
                         progress_bar.progress((i-1)*10 + 7, text=f"Q{i}: Non-Verbal Analysis...")
+                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         non_verbal_res = analyze_non_verbal(temp_audio_path)
 
+                        # --- 5. Answer Scoring (Semantic)
                         progress_bar.progress((i-1)*10 + 9, text=f"Q{i}: Semantic Scoring...")
+                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         score, reason = score_with_rubric(
                             q_key_rubric, q_text, transcript, RUBRIC_DATA, EMBEDDER_MODEL
                         )
@@ -539,6 +583,7 @@ def render_processing_page():
                             final_score_value = 0
                             reason = f"[ERROR: Score failed to calculate/Wrong data type. Default score 0 used.] {reason}"
                         
+                        # --- 6. Save Results
                         results[q_key_rubric] = {
                             "question": q_text,
                             "transcript": transcript,
@@ -554,6 +599,7 @@ def render_processing_page():
                     
                 st.session_state.results = results
                 progress_bar.progress(100, text="Process Complete! Redirecting to Final Report.")
+                # Pindah ke laporan akumulasi
                 next_page('final_summary')
 
         except Exception as e:
@@ -566,11 +612,26 @@ def render_processing_page():
                  next_page('home')
             return
 
+def render_results_page():
+    # Fungsi ini sekarang hanya pengalih/redirector
+    
+    if not st.session_state.results:
+        st.error("Results not found. Please try processing again.")
+        if st.button("🏠 Back to Home"):
+            st.session_state.clear()
+            next_page('home')
+        return
+        
+    # REDIRECT DIRECTLY TO THE FINAL ACCUMULATED REPORT
+    next_page('final_summary')
+
+
 def render_final_summary_page():
+    # Suntikkan CSS lagi untuk memastikan styling card berfungsi
     inject_custom_css() 
     
     st.title("🏆 Final Evaluation Report")
-    st.markdown("---") 
+    st.markdown("---") # Pemisah tipis untuk judul
 
     if not st.session_state.results:
         st.error("Result data not found.")
@@ -581,6 +642,7 @@ def render_final_summary_page():
     # --- 1. Combined Metrics Calculation ---
     try:
         all_scores = [int(res['final_score']) for res in st.session_state.results.values()]
+        # Extract and clean data, handling potential non-numeric strings
         all_confidence = [float(res['confidence_score'].split(' ')[0].replace('%', '')) for res in st.session_state.results.values()]
         
         all_tempo = []
@@ -727,13 +789,9 @@ def render_final_summary_page():
     with st.expander("View Detailed Report Per Question"):
         render_detailed_results_per_question() 
 
-    # Tombol utama di bagian paling bawah
-    st.markdown('<div class="primary-btn-container" style="margin-top: 30px;">', unsafe_allow_html=True)
     if st.button("Start New Interview 🔄", use_container_width=True, type="primary"):
         st.session_state.clear() 
         next_page('home')
-    st.markdown('</div>', unsafe_allow_html=True)
-
 
 def render_detailed_results_per_question():
     """Function to display results per question, nested within the expander (in English)."""
@@ -772,5 +830,7 @@ elif st.session_state.page == 'interview':
     render_interview_page()
 elif st.session_state.page == 'processing':
     render_processing_page()
+elif st.session_state.page == 'results':
+    render_results_page() 
 elif st.session_state.page == 'final_summary':
     render_final_summary_page()
