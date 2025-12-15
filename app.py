@@ -13,13 +13,14 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'models'))
 
 # Import logic dari folder models
 try:
+    # PENTING: Pastikan file di folder models/ sudah terimplementasi dengan benar.
     from models.stt_processor import load_stt_model, load_text_models, video_to_wav, noise_reduction, transcribe_and_clean
     from models.scoring_logic import load_embedder_model, compute_confidence_score, score_with_rubric
     from models.nonverbal_analysis import analyze_non_verbal
 except ImportError as e:
-    # Handle the error gracefully if modules fail to load
     st.error(f"Failed to load modules from the 'models' folder. Ensure the folder structure and files are correct. Error: {e}")
-    # st.stop() # Uncomment this if you want the app to stop on module load failure
+    # Jika Anda ingin aplikasi berhenti ketika gagal memuat modul, uncomment baris di bawah:
+    # st.stop() 
 
 # Konfigurasi Halaman & Load Data
 st.set_page_config(
@@ -51,6 +52,7 @@ def next_page(page_name):
 def get_models():
     """Load semua model berat (hanya sekali)."""
     try:
+        # PENTING: Ganti path model sesuai dengan implementasi Anda yang sebenarnya
         stt_model = load_stt_model()
         embedder_model = load_embedder_model()
         
@@ -93,7 +95,7 @@ RUBRIC_DATA = load_rubric_data()
 
 # --- Page Render Functions ---
 
-# --- LANDING PAGE CSS & REPORT CSS (Minimalist Modern) ---
+# --- LANDING PAGE CSS & REPORT CSS (Minimalist Modern with Horizontal Cards) ---
 
 def inject_custom_css():
     """Menyuntikkan CSS kustom untuk meniru desain Landing Page & Laporan."""
@@ -239,7 +241,7 @@ def inject_custom_css():
         transform: translateY(-2px);
     }
     
-    /* === CSS TAMBAHAN BARU UNTUK LAPORAN MINIMALIS === */
+    /* === CSS TAMBAHAN BARU UNTUK LAPORAN MINIMALIS HORIZONTAL METRIK === */
     /* Container untuk kartu metrik */
     .metric-grid-container {
         display: grid;
@@ -259,16 +261,37 @@ def inject_custom_css():
     .modern-metric-card:hover {
         transform: translateY(-3px);
     }
+    
+    /* Kontainer untuk Nilai dan Label */
+    .card-content-wrapper {
+        display: flex;
+        flex-direction: column; /* Icon + Value di atas, Label di bawah (secara keseluruhan card) */
+        align-items: flex-start;
+    }
+
+    /* Kontainer untuk Icon dan Value agar sejajar horizontal */
+    .card-value-line {
+        display: flex;
+        flex-direction: row; /* BARIS UTAMA SEJAJAR HORIZONTAL */
+        align-items: center;
+        gap: 10px; 
+        margin-bottom: 5px;
+    }
+    
+    .card-icon {
+        font-size: 24px;
+        line-height: 1;
+    }
     .card-value {
         font-size: 32px;
         font-weight: 700;
-        margin-bottom: 5px;
-        display: block;
+        line-height: 1;
     }
     .card-label {
         font-size: 14px;
         color: #7f8c8d;
         font-weight: 500;
+        margin-top: 5px; 
     }
     /* Warna untuk Skor dan Tempo */
     .score-color { color: #2ecc71; } /* Hijau */
@@ -521,19 +544,21 @@ def render_processing_page():
                         
                         # --- 1. Save Video 
                         progress_bar.progress((i-1)*10 + 1, text=f"Q{i}: Saving video...")
-                        temp_video_path = os.out_path(temp_dir, f'video_{q_key_rubric}.mp4')
+                        temp_video_path = os.path.join(temp_dir, f'video_{q_key_rubric}.mp4')
                         with open(temp_video_path, 'wb') as f:
                             f.write(video_file.getbuffer())
 
                         # --- 2. Audio Extraction & Noise Reduction
                         progress_bar.progress((i-1)*10 + 3, text=f"Q{i}: Extracting audio and Noise Reduction...")
                         temp_audio_path = os.path.join(temp_dir, f'audio_{q_key_rubric}.wav')
+                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         video_to_wav(temp_video_path, temp_audio_path)
                         
                         noise_reduction(temp_audio_path, temp_audio_path) 
                         
                         # --- 3. Speech-to-Text (STT) & Cleaning
                         progress_bar.progress((i-1)*10 + 5, text=f"Q{i}: Transcription and Text Cleaning...")
+                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         transcript, log_prob_raw = transcribe_and_clean(
                             temp_audio_path, STT_MODEL, SPELL_CHECKER, EMBEDDER_MODEL, ENGLISH_WORDS
                         )
@@ -542,10 +567,12 @@ def render_processing_page():
                         
                         # --- 4. Non-Verbal Analysis
                         progress_bar.progress((i-1)*10 + 7, text=f"Q{i}: Non-Verbal Analysis...")
+                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         non_verbal_res = analyze_non_verbal(temp_audio_path)
 
                         # --- 5. Answer Scoring (Semantic)
                         progress_bar.progress((i-1)*10 + 9, text=f"Q{i}: Semantic Scoring...")
+                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         score, reason = score_with_rubric(
                             q_key_rubric, q_text, transcript, RUBRIC_DATA, EMBEDDER_MODEL
                         )
@@ -586,7 +613,7 @@ def render_processing_page():
             return
 
 def render_results_page():
-    # This function is now a clean redirector
+    # Fungsi ini sekarang hanya pengalih/redirector
     
     if not st.session_state.results:
         st.error("Results not found. Please try processing again.")
@@ -660,7 +687,7 @@ def render_final_summary_page():
             comment.append("The overall speaking tempo is within the optimal range (125-150 BPM).")
         return " ".join(comment)
 
-    # --- 2. Average Metrics Display (Minimalist Grid Cards) ---
+    # --- 2. Average Metrics Display (Minimalist Grid Cards - Horizontal Look) ---
     st.subheader("📊 Performance Summary")
     
     # Menggunakan CSS Grid Container
@@ -669,32 +696,52 @@ def render_final_summary_page():
     # Card 1: Average Content Score
     st.markdown(f"""
     <div class="modern-metric-card">
-        <span class="card-value score-color">🎯 {avg_score:.2f} / 4</span>
-        <span class="card-label">Average Content Score</span>
+        <div class="card-content-wrapper">
+            <div class="card-value-line">
+                <span class="card-icon score-color">🎯</span>
+                <span class="card-value score-color">{avg_score:.2f} / 4</span>
+            </div>
+            <span class="card-label">Average Content Score</span>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
     # Card 2: Average Transcript Accuracy
     st.markdown(f"""
     <div class="modern-metric-card">
-        <span class="card-value accuracy-color">🤖 {avg_confidence:.2f}%</span>
-        <span class="card-label">Avg. Transcript Accuracy</span>
+        <div class="card-content-wrapper">
+            <div class="card-value-line">
+                <span class="card-icon accuracy-color">🤖</span>
+                <span class="card-value accuracy-color">{avg_confidence:.2f}%</span>
+            </div>
+            <span class="card-label">Avg. Transcript Accuracy</span>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
     # Card 3: Average Tempo
     st.markdown(f"""
     <div class="modern-metric-card">
-        <span class="card-value tempo-color">⏱️ {avg_tempo:.2f}</span>
-        <span class="card-label">Average Tempo (BPM)</span>
+        <div class="card-content-wrapper">
+            <div class="card-value-line">
+                <span class="card-icon tempo-color">⏱️</span>
+                <span class="card-value tempo-color">{avg_tempo:.2f}</span>
+            </div>
+            <span class="card-label">Average Tempo (BPM)</span>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
     # Card 4: Total Pause Time
     st.markdown(f"""
     <div class="modern-metric-card">
-        <span class="card-value pause-color">⏸️ {total_pause:.2f}</span>
-        <span class="card-label">Total Pause Time (sec)</span>
+        <div class="card-content-wrapper">
+            <div class="card-value-line">
+                <span class="card-icon pause-color">⏸️</span>
+                <span class="card-value pause-color">{total_pause:.2f}</span>
+            </div>
+            <span class="card-label">Total Pause Time (sec)</span>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -784,6 +831,6 @@ elif st.session_state.page == 'interview':
 elif st.session_state.page == 'processing':
     render_processing_page()
 elif st.session_state.page == 'results':
-    render_results_page() # Fungsi ini sekarang hanya pengalih
+    render_results_page() 
 elif st.session_state.page == 'final_summary':
-    render_final_summary_page() # Halaman Laporan Akumulasi Utama
+    render_final_summary_page()
