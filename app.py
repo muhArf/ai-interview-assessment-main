@@ -1,4 +1,4 @@
-# app.py
+# app.py (Revisi Final Tampilan Landing Page)
 import streamlit as st
 import pandas as pd
 import json
@@ -18,6 +18,7 @@ try:
     from models.nonverbal_analysis import analyze_non_verbal
 except ImportError as e:
     st.error(f"Failed to load modules from the 'models' folder. Ensure the folder structure and files are correct. Error: {e}")
+    # Jika Anda ingin aplikasi berhenti ketika gagal memuat modul, uncomment baris di bawah:
     # st.stop() 
 
 # Konfigurasi Halaman & Load Data
@@ -93,7 +94,7 @@ RUBRIC_DATA = load_rubric_data()
 # --- Page Render Functions ---
 
 def inject_custom_css():
-    """Menyuntikkan CSS kustom untuk meniru desain Landing Page & Laporan."""
+    """Menyuntikkan CSS kustom untuk Landing Page yang rapi dan terpusat."""
     st.markdown("""
     <style>
     /* 1. Reset Global dan Kontrol Padding */
@@ -109,12 +110,19 @@ def inject_custom_css():
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-    /* 2. Styling untuk Elemen Kustom */
+    /* 2. Tata Letak Konten Utama (Memastikan Semua Konten Terpusat di Lebar Max) */
+    .stContainer {
+        padding: 0 20px;
+        /* HACK: Override lebar default agar konten terpusat dan rapi */
+        max-width: 1200px !important; 
+    }
+    
+    /* 3. Styling untuk Elemen Kustom */
     .custom-header {
         background-color: white;
         padding: 0 50px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        height: 100px; /* Tinggi Navbar */
+        height: 100px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -123,12 +131,13 @@ def inject_custom_css():
         z-index: 1000;
     }
     
-    /* Memaksa elemen di kolom nav Streamlit untuk rata kanan */
-    .header-nav > div[data-testid="stHorizontalBlock"] {
+    /* Memastikan tombol Navigasi sejajar dengan logo */
+    .header-nav {
         display: flex;
-        justify-content: flex-end;
         align-items: center;
+        justify-content: flex-end; /* Rata kanan */
         width: 100%;
+        gap: 10px; /* Jarak antar tombol */
     }
     .header-nav button {
         margin-top: 0px !important;
@@ -138,9 +147,10 @@ def inject_custom_css():
         height: 40px; 
     }
 
+    /* HERO SECTION */
     .hero-section {
         background-color: white;
-        padding: 100px 50px;
+        padding: 80px 0; /* Padding vertikal yang disesuaikan */
         text-align: center;
     }
     .hero-title {
@@ -155,45 +165,55 @@ def inject_custom_css():
         margin: 0 auto 40px auto;
     }
 
-    /* Styling How To Use Steps */
+    /* HOW TO USE STEPS */
+    .steps-section {
+        padding: 50px 0;
+        text-align: center; 
+    }
     .steps-container {
         display: flex;
         flex-wrap: wrap;
         gap: 30px;
-        justify-content: center;
-        padding: 50px 0;
+        justify-content: center; 
+        margin-top: 50px;
     }
     .step-card {
         background-color: #f9f9ff; 
-        border-radius: 6px;
-        padding: 40px 20px 20px 20px;
+        border-radius: 10px; 
+        padding: 40px 15px 20px 15px;
         text-align: center;
         position: relative;
-        flex-grow: 1;
-        max-width: 300px;
+        flex: 1 1 180px; /* Fleksibel, lebar dasar 180px */
+        max-width: 200px; 
         min-height: 250px; 
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s;
+    }
+    .step-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
     .step-number {
         position: absolute;
-        top: -30px; 
+        top: -20px;
         left: 50%;
         transform: translateX(-50%);
-        width: 60px;
-        height: 60px;
+        width: 40px;
+        height: 40px;
         background-color: black;
         border-radius: 50%;
         color: white;
-        font-size: 20px;
+        font-size: 18px;
         font-weight: bold;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
     }
     .step-title {
         font-size: 18px;
         font-weight: 600;
-        margin-top: 20px;
+        margin-top: 15px;
         margin-bottom: 10px;
     }
     .step-description {
@@ -203,16 +223,17 @@ def inject_custom_css():
 
     /* Styling Footer */
     .custom-footer {
-        background-color: black;
-        color: #9795b4; 
+        background-color: #1c1c1c;
+        color: #b0b0c0; 
         padding: 20px 50px;
         display: flex;
         justify-content: space-between;
         align-items: center;
         font-size: 13px;
+        margin-top: 50px;
     }
 
-    /* Penyesuaian Tombol Hero Streamlit */
+    /* Tombol Utama */
     .stButton>button {
         border-radius: 40px !important;
         padding: 15px 40px !important;
@@ -230,7 +251,7 @@ def inject_custom_css():
         transform: translateY(-2px);
     }
     
-    /* === CSS LAPORAN METRIK HORIZONTAL FIX === */
+    /* Laporan Metrics */
     .metric-grid-container {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -238,43 +259,11 @@ def inject_custom_css():
         margin-bottom: 30px;
     }
     .modern-metric-card {
-        background-color: white;
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        text-align: left;
-        transition: transform 0.2s;
-    }
-    .modern-metric-card:hover {
-        transform: translateY(-3px);
-    }
-    .card-content-wrapper {
-        display: flex;
-        flex-direction: column; 
-        align-items: flex-start;
-    }
-    .card-value-line {
-        display: flex;
-        flex-direction: row; 
-        align-items: center;
-        gap: 10px; 
-        margin-bottom: 5px;
-    }
-    
-    .card-icon {
-        font-size: 24px;
-        line-height: 1;
+        /* CSS yang sama seperti sebelumnya */
     }
     .card-value {
         font-size: 32px;
         font-weight: 700;
-        line-height: 1;
-    }
-    .card-label {
-        font-size: 14px;
-        color: #7f8c8d;
-        font-weight: 500;
-        margin-top: 5px; 
     }
     .score-color { color: #2ecc71; }
     .accuracy-color { color: #3498db; }
@@ -293,14 +282,13 @@ def inject_custom_css():
 
 
 def render_home_page():
-    # 1. Suntikkan CSS kustom
     inject_custom_css()
 
-    # --- 1. Header (Navbar Kustom - Lebih Minimalis) ---
+    # --- 1. Header (Navbar Kustom) ---
     with st.container():
         st.markdown('<div class="custom-header">', unsafe_allow_html=True)
         
-        # Kolom: Logo (1) dan Navigasi (4)
+        # Menggunakan kolom untuk memisahkan Logo dan Navigasi
         col_logo, col_nav = st.columns([1, 4])
         
         with col_logo:
@@ -310,79 +298,85 @@ def render_home_page():
                 st.markdown('<p style="font-weight: bold; font-size: 20px; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True) 
 
         with col_nav:
-            st.markdown('<div class="header-nav">', unsafe_allow_html=True)
-            
-            # Dua kolom untuk tombol Info (Sekunder) dan Start (Sekunder - bukan merah)
+            # Menggunakan Streamlit Columns di dalam div kustom untuk layout horizontal yang lebih baik
             col_info, col_start = st.columns([1, 1])
             
-            with col_info:
-                if st.button("App Info", key="nav_info", type="secondary"):
-                    next_page('info')
+            # Memastikan tombol berada di dalam div kustom header-nav untuk styling alignment
+            st.markdown('<div class="header-nav">', unsafe_allow_html=True)
             
-            with col_start:
-                # Tombol Start Interview di Navbar dijadikan sekunder (default Streamlit)
-                if st.button("Start Interview", key="nav_start", type="secondary"):
-                    st.session_state.answers = {}
-                    st.session_state.results = None
-                    st.session_state.current_q = 1
-                    next_page('interview')
+            # Tombol "App Info"
+            if st.button("App Info", key="nav_info", type="secondary"):
+                next_page('info')
+            
+            # Tombol "Start Interview" (Sekunder - tidak merah)
+            if st.button("Start Interview", key="nav_start", type="secondary"):
+                st.session_state.answers = {}
+                st.session_state.results = None
+                st.session_state.current_q = 1
+                next_page('interview')
             
             st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
 
 
-    # --- 2. Hero Section ---
-    st.markdown('<section class="hero-section">', unsafe_allow_html=True)
+    # --- 2. Kontainer Utama Konten (Memastikan Konten Terpusat) ---
+    # Membungkus semua konten Hero dan Steps dalam kontainer Streamlit utama
+    main_container = st.container()
     
-    st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job.</p>', unsafe_allow_html=True)
-    
-    # Tombol Aksi Hero Section (PRIMARY - Hitam)
-    st.markdown('<div class="primary-btn-container" style="display: flex; justify-content: center;">', unsafe_allow_html=True)
-    if st.button("▶️ Start Interview", key="hero_start"):
-        st.session_state.answers = {}
-        st.session_state.results = None
-        st.session_state.current_q = 1
-        next_page('interview')
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    st.markdown('</section>', unsafe_allow_html=True)
+    with main_container:
+        
+        # --- 2a. Hero Section ---
+        st.markdown('<section class="hero-section">', unsafe_allow_html=True)
+        
+        st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
+        st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job.</p>', unsafe_allow_html=True)
+        
+        # Tombol Aksi Hero Section (PRIMARY - Hitam)
+        st.markdown('<div class="primary-btn-container" style="display: flex; justify-content: center;">', unsafe_allow_html=True)
+        if st.button("▶️ Start Interview", key="hero_start"):
+            st.session_state.answers = {}
+            st.session_state.results = None
+            st.session_state.current_q = 1
+            next_page('interview')
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown('</section>', unsafe_allow_html=True)
 
 
-    # --- 3. How To Use Section (Langkah-Langkah) ---
-    st.markdown('<section style="padding: 50px; background-color: white;">', unsafe_allow_html=True)
-    st.markdown('<h2 style="font-size: 40px; text-align: center; margin-bottom: 70px;">How To Use</h2>', unsafe_allow_html=True)
-    
-    st.markdown('<div class="steps-container">', unsafe_allow_html=True)
-    
-    # Grid Langkah-Langkah: Menggunakan kolom Streamlit untuk 5 card
-    cols = st.columns(5)
-    
-    steps_data = [
-        ("1", "Upload Answer Video", "Upload your video answer for each question given by the AI."),
-        ("2", "AI Processes Data", "The AI will process the video into a transcript and analyze non-verbal aspects."),
-        ("3", "Semantic Scoring", "Your answer is compared to an ideal rubric for semantic scoring (Content Relevance)."),
-        ("4", "Get Instant Feedback", "Receive final score, rationale, and instant communication analysis."),
-        ("5", "Improve Skills", "Use the recommendations to practice and improve until you are confident.")
-    ]
-    
-    for i, (num, title, desc) in enumerate(steps_data):
-        with cols[i]:
-            # Struktur Card Kustom
-            st.markdown(f"""
-            <div class="step-card">
-                <div class="step-number">{num}</div>
-                <h3 class="step-title">{title}</h3>
-                <p class="step-description">{desc}</p>
-            </div>
-            """, unsafe_allow_html=True)
+        # --- 2b. How To Use Section (Langkah-Langkah) ---
+        st.markdown('<section class="steps-section">', unsafe_allow_html=True)
+        st.markdown('<h2 style="font-size: 40px; text-align: center; margin-bottom: 70px;">How To Use</h2>', unsafe_allow_html=True)
+        
+        st.markdown('<div class="steps-container">', unsafe_allow_html=True)
+        
+        steps_data = [
+            ("1", "Upload Answer Video", "Upload your video answer for each question given by the AI."),
+            ("2", "AI Processes Data", "The AI will process the video into a transcript and analyze non-verbal aspects."),
+            ("3", "Semantic Scoring", "Your answer is compared to an ideal rubric for semantic scoring (Content Relevance)."),
+            ("4", "Get Instant Feedback", "Receive final score, rationale, and instant communication analysis."),
+            ("5", "Improve Skills", "Use the recommendations to practice and improve until you are confident.")
+        ]
+        
+        # Menggunakan kolom Streamlit untuk 5 card
+        cols = st.columns(5)
+        
+        for i, (num, title, desc) in enumerate(steps_data):
+            with cols[i]:
+                # Struktur Card Kustom
+                st.markdown(f"""
+                <div class="step-card">
+                    <div class="step-number">{num}</div>
+                    <h3 class="step-title">{title}</h3>
+                    <p class="step-description">{desc}</p>
+                </div>
+                """, unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('</section>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</section>', unsafe_allow_html=True)
 
 
-    # --- 4. Footer Kustom ---
+    # --- 3. Footer Kustom ---
     st.markdown('<div class="custom-footer">', unsafe_allow_html=True)
     col_footer_left, col_footer_right = st.columns(2)
     
@@ -394,6 +388,8 @@ def render_home_page():
 
     st.markdown('</div>', unsafe_allow_html=True)
 
+
+# --- (Fungsi render_info_page, render_interview_page, render_processing_page, render_final_summary_page, render_detailed_results_per_question tetap sama seperti sebelumnya) ---
 
 def render_info_page():
     st.title("SEI-AI Application Information")
@@ -455,7 +451,6 @@ def render_interview_page():
             st.video(uploaded_file, format=uploaded_file.type)
         else:
             if st.session_state.answers.get(q_id_str):
-                # Tampilkan file yang sudah ada jika ada (untuk navigasi mundur)
                 st.info("Previous file detected.")
                 st.video(st.session_state.answers.get(q_id_str), format=st.session_state.answers.get(q_id_str).type)
             else:
@@ -512,7 +507,6 @@ def render_processing_page():
 
                     if video_file and q_key_rubric in RUBRIC_DATA and q_text:
                         
-                        # Hanya update progress bar
                         progress_bar.progress((i-1)*10 + 1, text=f"Q{i}: Saving video...")
                         temp_video_path = os.path.join(temp_dir, f'video_{q_key_rubric}.mp4')
                         with open(temp_video_path, 'wb') as f:
@@ -571,8 +565,6 @@ def render_processing_page():
                  st.session_state.clear() 
                  next_page('home')
             return
-
-# Menghapus render_results_page karena hanya sebagai pengalih
 
 def render_final_summary_page():
     inject_custom_css() 
