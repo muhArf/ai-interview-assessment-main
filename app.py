@@ -8,6 +8,7 @@ import sys
 import numpy as np
 
 # Tambahkan direktori saat ini dan 'models' ke PATH
+# Catatan: Pastikan Anda menjalankan Streamlit dari direktori yang sama dengan folder 'models' dan 'assets'
 sys.path.append(os.path.dirname(__file__))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'models'))
 
@@ -128,18 +129,13 @@ def inject_custom_css():
         z-index: 1000;
     }
     
-    /* Memaksa elemen di kolom nav Streamlit untuk rata kanan */
-    .header-nav > div[data-testid="stHorizontalBlock"] {
+    /* Perbaikan Navbar: Memastikan elemen Navigasi sejajar */
+    .header-nav {
         display: flex;
-        justify-content: flex-end;
         align-items: center;
+        justify-content: flex-end;
         width: 100%;
-    }
-    .header-nav > div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
-        margin-right: 20px;
-    }
-    .header-nav > div[data-testid="stHorizontalBlock"] > div:nth-child(2) {
-        margin-right: 10px;
+        gap: 10px; 
     }
     .header-nav button {
         margin-top: 0px !important;
@@ -148,7 +144,17 @@ def inject_custom_css():
         border-radius: 6px !important;
         height: 40px; 
     }
+    /* Mengatasi Streamlit elements inside the column block */
+    .header-nav > div[data-testid="stHorizontalBlock"] {
+        align-items: center;
+    }
+    .header-nav p {
+        margin: 0; 
+        padding-top: 10px; /* Menyelaraskan teks 'Home' */
+    }
 
+
+    /* HERO SECTION */
     .hero-section {
         background-color: white;
         padding: 100px 50px;
@@ -183,6 +189,12 @@ def inject_custom_css():
         flex-grow: 1;
         max-width: 300px;
         min-height: 250px; 
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); 
+        transition: all 0.3s;
+    }
+    .step-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
     .step-number {
         position: absolute;
@@ -221,9 +233,10 @@ def inject_custom_css():
         justify-content: space-between;
         align-items: center;
         font-size: 13px;
+        margin-top: 50px;
     }
 
-    /* Penyesuaian Tombol Hero Streamlit */
+    /* Tombol Utama */
     .stButton>button {
         border-radius: 40px !important;
         padding: 15px 40px !important;
@@ -241,15 +254,15 @@ def inject_custom_css():
         transform: translateY(-2px);
     }
     
-    /* === CSS TAMBAHAN BARU UNTUK LAPORAN MINIMALIS HORIZONTAL METRIK === */
-    /* Container untuk kartu metrik */
+    /* === CARD METRIK HORIZONTAL === */
     .metric-grid-container {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(4, 1fr); /* 4 kolom sama lebar */
         gap: 20px;
         margin-bottom: 30px;
+        width: 100%; 
     }
-    /* Card Styling */
+    
     .modern-metric-card {
         background-color: white;
         border-radius: 12px;
@@ -257,35 +270,20 @@ def inject_custom_css():
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         text-align: left;
         transition: transform 0.2s;
-    }
-    .modern-metric-card:hover {
-        transform: translateY(-3px);
+        height: auto; 
     }
     
-    /* Kontainer untuk Nilai dan Label */
-    .card-content-wrapper {
-        display: flex;
-        flex-direction: column; /* Icon + Value di atas, Label di bawah (secara keseluruhan card) */
-        align-items: flex-start;
-    }
-
-    /* Kontainer untuk Icon dan Value agar sejajar horizontal */
     .card-value-line {
         display: flex;
-        flex-direction: row; /* BARIS UTAMA SEJAJAR HORIZONTAL */
+        flex-direction: row; 
         align-items: center;
         gap: 10px; 
         margin-bottom: 5px;
     }
     
-    .card-icon {
-        font-size: 24px;
-        line-height: 1;
-    }
     .card-value {
         font-size: 32px;
         font-weight: 700;
-        line-height: 1;
     }
     .card-label {
         font-size: 14px;
@@ -294,12 +292,17 @@ def inject_custom_css():
         margin-top: 5px; 
     }
     /* Warna untuk Skor dan Tempo */
-    .score-color { color: #2ecc71; } /* Hijau */
-    .accuracy-color { color: #3498db; } /* Biru */
-    .tempo-color { color: #f39c12; } /* Kuning */
-    .pause-color { color: #e74c3c; } /* Merah */
+    .score-color { color: #2ecc71; } 
+    .accuracy-color { color: #3498db; } 
+    .tempo-color { color: #f39c12; } 
+    .pause-color { color: #e74c3c; } 
     
-
+    .summary-box {
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+        background-color: #ecf0f1; 
+    }
     
     </style>
     """, unsafe_allow_html=True)
@@ -319,7 +322,6 @@ def render_home_page():
         with col_logo:
             # Logo/Nama Aplikasi
             try:
-                # Ganti dengan path logo Anda jika berbeda
                 st.image('assets/logo dicoding.png', width=80, output_format='PNG') 
             except FileNotFoundError:
                 st.markdown('<p style="font-weight: bold; font-size: 20px; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True) 
@@ -544,15 +546,12 @@ def render_processing_page():
 
                         # --- 2. Audio Extraction & Noise Reduction
                         progress_bar.progress((i-1)*10 + 3, text=f"Q{i}: Extracting audio and Noise Reduction...")
-                        temp_audio_path = os.path.join(temp_dir, f'audio_{q_key_rubric}.wav')
-                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         video_to_wav(temp_video_path, temp_audio_path)
                         
                         noise_reduction(temp_audio_path, temp_audio_path) 
                         
                         # --- 3. Speech-to-Text (STT) & Cleaning
                         progress_bar.progress((i-1)*10 + 5, text=f"Q{i}: Transcription and Text Cleaning...")
-                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         transcript, log_prob_raw = transcribe_and_clean(
                             temp_audio_path, STT_MODEL, SPELL_CHECKER, EMBEDDER_MODEL, ENGLISH_WORDS
                         )
@@ -561,12 +560,10 @@ def render_processing_page():
                         
                         # --- 4. Non-Verbal Analysis
                         progress_bar.progress((i-1)*10 + 7, text=f"Q{i}: Non-Verbal Analysis...")
-                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         non_verbal_res = analyze_non_verbal(temp_audio_path)
 
                         # --- 5. Answer Scoring (Semantic)
                         progress_bar.progress((i-1)*10 + 9, text=f"Q{i}: Semantic Scoring...")
-                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         score, reason = score_with_rubric(
                             q_key_rubric, q_text, transcript, RUBRIC_DATA, EMBEDDER_MODEL
                         )
@@ -684,7 +681,7 @@ def render_final_summary_page():
     # --- 2. Average Metrics Display (Minimalist Grid Cards - Horizontal Look) ---
     st.subheader("📊 Performance Summary")
     
-    # Menggunakan CSS Grid Container
+    # Kunci: Gunakan div kustom dengan display: grid yang kuat.
     st.markdown('<div class="metric-grid-container">', unsafe_allow_html=True)
     
     # Card 1: Average Content Score
@@ -742,7 +739,7 @@ def render_final_summary_page():
     st.markdown('</div>', unsafe_allow_html=True)
     st.markdown("---") 
 
-    # --- 3. Objective Evaluation and Recommendations (Grouped Container) ---
+    # --- 3. Objective Evaluation and Recommendations ---
     st.subheader("💡 Objective Evaluation & Action Plan")
     
     col_eval, col_recom = st.columns(2)
@@ -779,7 +776,6 @@ def render_final_summary_page():
 
     # --- 4. Action Buttons ---
     
-    # Option to view detailed results (tetap tersembunyi)
     with st.expander("View Detailed Report Per Question"):
         render_detailed_results_per_question() 
 
