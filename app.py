@@ -13,13 +13,14 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'models'))
 
 # Import logic dari folder models
 try:
+    # PENTING: Pastikan file di folder models/ sudah terimplementasi dengan benar.
     from models.stt_processor import load_stt_model, load_text_models, video_to_wav, noise_reduction, transcribe_and_clean
     from models.scoring_logic import load_embedder_model, compute_confidence_score, score_with_rubric
     from models.nonverbal_analysis import analyze_non_verbal
 except ImportError as e:
-    # Handle the error gracefully if modules fail to load
     st.error(f"Failed to load modules from the 'models' folder. Ensure the folder structure and files are correct. Error: {e}")
-    # st.stop() # Uncomment this if you want the app to stop on module load failure
+    # Jika Anda ingin aplikasi berhenti ketika gagal memuat modul, uncomment baris di bawah:
+    # st.stop() 
 
 # Konfigurasi Halaman & Load Data
 st.set_page_config(
@@ -256,31 +257,30 @@ def inject_custom_css():
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         text-align: left;
         transition: transform 0.2s;
-        /* Tambahan: Menggunakan Flexbox untuk tata letak konten di dalam card */
-        display: flex;
-        flex-direction: column; 
-        justify-content: center;
     }
     .modern-metric-card:hover {
         transform: translateY(-3px);
     }
-    /* Kontainer untuk Nilai dan Label agar sejajar */
+    
+    /* Kontainer untuk Nilai dan Label */
     .card-content-wrapper {
         display: flex;
-        flex-direction: column; 
-        align-items: flex-start; /* Konten dimulai dari kiri */
+        flex-direction: column; /* Icon + Value di atas, Label di bawah (secara keseluruhan card) */
+        align-items: flex-start;
     }
+
     /* Kontainer untuk Icon dan Value agar sejajar horizontal */
     .card-value-line {
         display: flex;
+        flex-direction: row; /* BARIS UTAMA SEJAJAR HORIZONTAL */
         align-items: center;
-        gap: 10px; /* Jarak antara ikon dan nilai */
+        gap: 10px; 
         margin-bottom: 5px;
     }
     
     .card-icon {
         font-size: 24px;
-        line-height: 1; /* Penting untuk alignment vertikal */
+        line-height: 1;
     }
     .card-value {
         font-size: 32px;
@@ -291,7 +291,7 @@ def inject_custom_css():
         font-size: 14px;
         color: #7f8c8d;
         font-weight: 500;
-        margin-top: 5px; /* Jarak dari nilai */
+        margin-top: 5px; 
     }
     /* Warna untuk Skor dan Tempo */
     .score-color { color: #2ecc71; } /* Hijau */
@@ -551,12 +551,14 @@ def render_processing_page():
                         # --- 2. Audio Extraction & Noise Reduction
                         progress_bar.progress((i-1)*10 + 3, text=f"Q{i}: Extracting audio and Noise Reduction...")
                         temp_audio_path = os.path.join(temp_dir, f'audio_{q_key_rubric}.wav')
+                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         video_to_wav(temp_video_path, temp_audio_path)
                         
                         noise_reduction(temp_audio_path, temp_audio_path) 
                         
                         # --- 3. Speech-to-Text (STT) & Cleaning
                         progress_bar.progress((i-1)*10 + 5, text=f"Q{i}: Transcription and Text Cleaning...")
+                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         transcript, log_prob_raw = transcribe_and_clean(
                             temp_audio_path, STT_MODEL, SPELL_CHECKER, EMBEDDER_MODEL, ENGLISH_WORDS
                         )
@@ -565,10 +567,12 @@ def render_processing_page():
                         
                         # --- 4. Non-Verbal Analysis
                         progress_bar.progress((i-1)*10 + 7, text=f"Q{i}: Non-Verbal Analysis...")
+                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         non_verbal_res = analyze_non_verbal(temp_audio_path)
 
                         # --- 5. Answer Scoring (Semantic)
                         progress_bar.progress((i-1)*10 + 9, text=f"Q{i}: Semantic Scoring...")
+                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         score, reason = score_with_rubric(
                             q_key_rubric, q_text, transcript, RUBRIC_DATA, EMBEDDER_MODEL
                         )
@@ -609,7 +613,7 @@ def render_processing_page():
             return
 
 def render_results_page():
-    # This function is now a clean redirector
+    # Fungsi ini sekarang hanya pengalih/redirector
     
     if not st.session_state.results:
         st.error("Results not found. Please try processing again.")
