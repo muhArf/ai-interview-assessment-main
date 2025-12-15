@@ -94,7 +94,7 @@ RUBRIC_DATA = load_rubric_data()
 
 # --- Page Render Functions ---
 
-# --- LANDING PAGE CSS ---
+# --- LANDING PAGE CSS & REPORT CSS (Minimalist Modern) ---
 
 def inject_custom_css():
     """Menyuntikkan CSS kustom untuk meniru desain Landing Page & Laporan."""
@@ -240,28 +240,49 @@ def inject_custom_css():
         transform: translateY(-2px);
     }
     
-    /* === CSS TAMBAHAN UNTUK LAPORAN PROFESIONAL (FINAL SUMMARY) === */
-    .report-metric-card {
-        background-color: #ffffff;
+    /* === CSS TAMBAHAN BARU UNTUK LAPORAN MINIMALIS === */
+    /* Container untuk kartu metrik */
+    .metric-grid-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    /* Card Styling */
+    .modern-metric-card {
+        background-color: white;
         border-radius: 12px;
-        padding: 15px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        text-align: center;
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        text-align: left;
+        transition: transform 0.2s;
     }
-    .metric-value {
-        font-size: 28px;
+    .modern-metric-card:hover {
+        transform: translateY(-3px);
+    }
+    .card-value {
+        font-size: 32px;
         font-weight: 700;
-        color: #2c3e50;
         margin-bottom: 5px;
+        display: block;
     }
-    .metric-label {
+    .card-label {
         font-size: 14px;
         color: #7f8c8d;
         font-weight: 500;
+    }
+    /* Warna untuk Skor dan Tempo */
+    .score-color { color: #2ecc71; } /* Hijau */
+    .accuracy-color { color: #3498db; } /* Biru */
+    .tempo-color { color: #f39c12; } /* Kuning */
+    .pause-color { color: #e74c3c; } /* Merah */
+    
+    /* Styling untuk Summary dan Recommendations */
+    .summary-box {
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+        background-color: #ecf0f1; /* Light gray background */
     }
     
     </style>
@@ -580,9 +601,8 @@ def render_results_page():
 
 
 def render_final_summary_page():
-    st.title("🏆 Final Evaluation Report (Accumulated)")
-    st.markdown("This report presents combined metrics from all 5 questions to reduce subjective bias and provide an objective overview of performance.")
-    st.markdown("---")
+    st.title("🏆 Final Evaluation Report")
+    st.markdown("---") # Pemisah tipis untuk judul
 
     if not st.session_state.results:
         st.error("Result data not found.")
@@ -623,89 +643,102 @@ def render_final_summary_page():
     # Qualitative logic (in English)
     def get_overall_comment(avg_score, avg_tempo):
         comment = []
-        
-        # Content Comment
         if avg_score >= 3.5:
             comment.append("The content and relevance of the answers were strong and well-structured.")
         elif avg_score >= 2.5:
             comment.append("Answer content was adequate, but could be improved for deeper material understanding.")
         else:
             comment.append("Answer content was less relevant to the questions; focus is needed on rubric alignment.")
-            
-        # Non-Verbal Comment
+        
         if avg_tempo > 150:
             comment.append("The overall speaking tempo tends to be too fast; practice slowing down for clarity.")
         elif avg_tempo < 125:
             comment.append("The overall speaking tempo is too slow, potentially losing interviewer attention.")
         else:
             comment.append("The overall speaking tempo is within the optimal range (125-150 BPM).")
-            
         return " ".join(comment)
 
-    # --- 2. Average Metrics Display (Using Custom CSS Cards) ---
-    st.subheader("📊 Accumulated Metrics Summary")
-    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+    # --- 2. Average Metrics Display (Minimalist Grid Cards) ---
+    st.subheader("📊 Performance Summary")
     
-    with col_m1:
-        st.markdown(f"""
-        <div class="report-metric-card" style="border-left: 5px solid #27ae60;">
-            <p class="metric-value">🎯 {avg_score:.2f} / 4</p>
-            <p class="metric-label">Average Content Score</p>
-        </div>
-        """, unsafe_allow_html=True)
+    # Menggunakan CSS Grid Container
+    st.markdown('<div class="metric-grid-container">', unsafe_allow_html=True)
+    
+    # Card 1: Average Content Score
+    st.markdown(f"""
+    <div class="modern-metric-card">
+        <span class="card-value score-color">🎯 {avg_score:.2f} / 4</span>
+        <span class="card-label">Average Content Score</span>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Card 2: Average Transcript Accuracy
+    st.markdown(f"""
+    <div class="modern-metric-card">
+        <span class="card-value accuracy-color">🤖 {avg_confidence:.2f}%</span>
+        <span class="card-label">Avg. Transcript Accuracy</span>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Card 3: Average Tempo
+    st.markdown(f"""
+    <div class="modern-metric-card">
+        <span class="card-value tempo-color">⏱️ {avg_tempo:.2f}</span>
+        <span class="card-label">Average Tempo (BPM)</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Card 4: Total Pause Time
+    st.markdown(f"""
+    <div class="modern-metric-card">
+        <span class="card-value pause-color">⏸️ {total_pause:.2f}</span>
+        <span class="card-label">Total Pause Time (sec)</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("---") 
+
+    # --- 3. Objective Evaluation and Recommendations (Grouped Container) ---
+    st.subheader("💡 Objective Evaluation & Action Plan")
+    
+    col_eval, col_recom = st.columns(2)
+    
+    # Evaluation Box
+    with col_eval:
+        st.markdown('<div class="summary-box">', unsafe_allow_html=True)
+        st.markdown("### Performance Conclusion")
+        st.info(get_overall_comment(avg_score, avg_tempo))
+        st.caption("This conclusion is automatically generated based on data metrics.")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Recommendation Box
+    with col_recom:
+        st.markdown('<div class="summary-box">', unsafe_allow_html=True)
+        st.markdown("### Key Development Areas")
         
-    with col_m2:
-        st.markdown(f"""
-        <div class="report-metric-card" style="border-left: 5px solid #f39c12;">
-            <p class="metric-value">🤖 {avg_confidence:.2f}%</p>
-            <p class="metric-label">Average Transcript Accuracy</p>
-        </div>
-        """, unsafe_allow_html=True)
+        # Recommendations
+        if avg_score < 3.0:
+            st.warning("* **Content Development:** Focus on deepening answers according to the rubric. Use the *STAR method* for structure.")
+        if avg_tempo > 150 or avg_tempo < 125:
+            st.warning("* **Tempo Control:** Practice speaking within the 125-150 BPM range. Practice breathing exercises.")
+        if total_pause > 120: 
+            st.warning("* **Pause Management:** Reduce excessively long pauses. Consider using short pauses (2-3 seconds) for emphasis only.")
+        if avg_confidence < 90:
+            st.warning("* **Vocal Clarity Improvement:** Speak louder and clearer. The recording environment should be minimally noisy.")
         
-    with col_m3:
-        st.markdown(f"""
-        <div class="report-metric-card" style="border-left: 5px solid #3498db;">
-            <p class="metric-value">⏱️ {avg_tempo:.2f}</p>
-            <p class="metric-label">Average Tempo (BPM)</p>
-        </div>
-        """, unsafe_allow_html=True)
+        if avg_score >= 3.5 and 125 <= avg_tempo <= 150 and avg_confidence >= 90:
+             st.success("**Excellent Performance:** Your scores are consistently high across all metrics.")
 
-    with col_m4:
-        st.markdown(f"""
-        <div class="report-metric-card" style="border-left: 5px solid #e74c3c;">
-            <p class="metric-value">⏸️ {total_pause:.2f}</p>
-            <p class="metric-label">Total Pause Time (sec)</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True) 
-
-    # --- 3. Qualitative Evaluation and Recommendations ---
-    st.subheader("💡 Objective Evaluation and Recommendations")
-    
-    # Evaluation (Data-Driven)
-    with st.container(border=True):
-        st.markdown("### Performance Conclusion:")
-        st.success(get_overall_comment(avg_score, avg_tempo))
-        st.caption("This conclusion is automatically generated based on your average semantic score and speaking tempo, minimizing interviewer bias.")
-    
-    # Recommendations
-    st.markdown("### Key Development Areas:")
-    if avg_score < 3.0:
-        st.warning("* **Content Development:** Focus on deepening answers according to the rubric. Use the *STAR method* for structure.")
-    if avg_tempo > 150 or avg_tempo < 125:
-        st.warning("* **Tempo Control:** Practice speaking within the 125-150 BPM range. Practice breathing exercises.")
-    if total_pause > 120: 
-        st.warning("* **Pause Management:** Reduce excessively long pauses. Consider using short pauses (2-3 seconds) for emphasis only.")
-    if avg_confidence < 90:
-        st.warning("* **Vocal Clarity Improvement:** Speak louder and clearer. The recording environment should be minimally noisy.")
+        st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("---")
 
-    # --- 4. Tombol Aksi ---
-    # Tambahkan opsi untuk melihat detail per pertanyaan (opsional, jika Anda ingin menyembunyikannya)
-    with st.expander("View Detailed Report Per Question", expanded=False):
-        render_detailed_results_per_question() # Memanggil fungsi detail yang disembunyikan
+    # --- 4. Action Buttons ---
+    
+    # Option to view detailed results (tetap tersembunyi)
+    with st.expander("View Detailed Report Per Question"):
+        render_detailed_results_per_question() 
 
     if st.button("Start New Interview 🔄", use_container_width=True, type="primary"):
         st.session_state.clear() 
