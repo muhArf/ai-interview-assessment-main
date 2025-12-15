@@ -856,7 +856,7 @@ def render_detailed_results_per_question():
         
         col_res1, col_res2, col_res3 = st.columns(3)
         with col_res1:
-            st.metric("Content Score", f"**{res['final_score']} / 4**")
+            st.metric("Content Score", f"{res['final_score']} / 4")
         with col_res2:
             st.metric("Transcript Accuracy", res['confidence_score'])
         with col_res3:
