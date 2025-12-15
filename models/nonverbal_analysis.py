@@ -55,8 +55,8 @@ def analyze_non_verbal(file_path):
         summary = f"{tempo_qualitative} tempo and {pause_qualitative}"
 
         return {
-            "tempo_bpm": f"{tempo:.2f}",
-            "total_pause_seconds": f"{total_silent_time_sec:.2f}",
+            "tempo_bpm": f"{tempo:.2f} per minute",
+            "total_pause_seconds": f"{total_silent_time_sec:.2f} seconds",
             "pause_percent": f"{pause_percentage:.2f}%",
             "qualitative_summary": summary
         }
