@@ -316,7 +316,7 @@ def inject_custom_css():
         line-height: 1.1; 
     }
     .card-label {
-        font-size: 12px !important; 
+        font-size: 8px !important; 
         color: #7f8c8d;
         font-weight: 500;
         margin-top: 3px; 
