@@ -147,14 +147,11 @@ def inject_custom_css():
     .custom-header {
         background-color: white;
         padding: 0 50px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         height: 100px; /* Tinggi Navbar */
         display: flex;
         align-items: center;
         justify-content: space-between;
-        position: sticky;
-        top: 0;
-        z-index: 1000;
+        border-bottom: 1px solid #eaeaea;
     }
     
     /* Perbaikan Navbar: Memastikan elemen Navigasi sejajar */
@@ -165,39 +162,29 @@ def inject_custom_css():
         width: 100%;
         gap: 10px; 
     }
-    .header-nav button {
-        margin-top: 0px !important;
-        padding: 8px 15px !important;
-        font-size: 14px !important;
-        border-radius: 6px !important;
-        height: 40px; 
-    }
-    /* Mengatasi Streamlit elements inside the column block */
-    .header-nav > div[data-testid="stHorizontalBlock"] {
-        align-items: center;
-    }
     .header-nav p {
         margin: 0; 
         padding-top: 10px; /* Menyelaraskan teks 'Home' */
     }
 
-
     /* HERO SECTION */
     .hero-section {
         background-color: white;
-        padding: 100px 50px;
+        padding: 80px 50px;
         text-align: center;
     }
     .hero-title {
         font-size: 48px;
         font-weight: 700;
         margin-bottom: 20px;
+        color: #1a1a1a;
     }
     .hero-subtitle {
         font-size: 18px;
-        color: #5d5988;
+        color: #666666;
         max-width: 600px;
         margin: 0 auto 40px auto;
+        line-height: 1.6;
     }
 
     /* Styling How To Use Steps */
@@ -209,59 +196,63 @@ def inject_custom_css():
         padding: 50px 0;
     }
     .step-card {
-        background-color: #f9f9ff; 
-        border-radius: 6px;
+        background-color: #ffffff;
+        border-radius: 8px;
         padding: 40px 20px 20px 20px;
         text-align: center;
         position: relative;
         flex-grow: 1;
         max-width: 300px;
-        min-height: 250px; 
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); 
+        min-height: 250px;
+        border: 1px solid #eaeaea;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         transition: all 0.3s;
     }
     .step-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
     }
     .step-number {
         position: absolute;
-        top: -30px; 
+        top: -25px;
         left: 50%;
         transform: translateX(-50%);
-        width: 60px;
-        height: 60px;
-        background-color: black;
+        width: 50px;
+        height: 50px;
+        background-color: #1a1a1a;
         border-radius: 50%;
         color: white;
-        font-size: 20px;
+        font-size: 18px;
         font-weight: bold;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
     }
     .step-title {
         font-size: 18px;
         font-weight: 600;
         margin-top: 20px;
         margin-bottom: 10px;
+        color: #1a1a1a;
     }
     .step-description {
         font-size: 14px;
-        color: #5d5988;
+        color: #666666;
+        line-height: 1.5;
     }
 
     /* Styling Footer */
     .custom-footer {
-        background-color: black;
-        color: #9795b4; 
-        padding: 20px 50px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 13px;
+        background-color: #f8f9fa;
+        color: #666666;
+        padding: 30px 50px;
+        text-align: center;
+        border-top: 1px solid #eaeaea;
         margin-top: 50px;
+    }
+    .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
     }
 
     /* Tombol Utama */
@@ -270,14 +261,12 @@ def inject_custom_css():
         padding: 15px 40px !important;
         font-size: 16px !important;
         font-weight: 500 !important;
-    }
-    .primary-btn-container button {
-        background-color: black !important;
+        background-color: #1a1a1a !important;
         color: white !important;
         border: none !important;
         transition: all 0.3s;
     }
-    .primary-btn-container button:hover {
+    .stButton>button:hover {
         background-color: #333333 !important;
         transform: translateY(-2px);
     }
@@ -331,7 +320,26 @@ def inject_custom_css():
         border-radius: 12px;
         padding: 25px;
         margin-bottom: 20px;
-        background-color: #ecf0f1; 
+        background-color: #f8f9fa;
+        border: 1px solid #eaeaea;
+    }
+    
+    /* Style untuk section heading */
+    .section-heading {
+        font-size: 40px;
+        text-align: center;
+        margin-bottom: 70px;
+        color: #1a1a1a;
+    }
+    
+    /* Info page button */
+    .info-btn {
+        background-color: transparent !important;
+        color: #1a1a1a !important;
+        border: 1px solid #1a1a1a !important;
+    }
+    .info-btn:hover {
+        background-color: #f8f9fa !important;
     }
     
     </style>
@@ -354,31 +362,15 @@ def render_home_page():
             try:
                 st.image('assets/seiai.png', width=80, output_format='PNG') 
             except FileNotFoundError:
-                st.markdown('<p style="font-weight: bold; font-size: 20px; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True) 
+                st.markdown('<p style="font-weight: bold; font-size: 24px; color: #1a1a1a; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True) 
 
         with col_nav:
             # Kontainer Navigasi dengan class 'header-nav' untuk styling khusus
             st.markdown('<div class="header-nav">', unsafe_allow_html=True)
             
-            # Menggunakan 3 kolom di dalam col_nav: Home, Info, Start
-            col_home, col_info, col_start = st.columns([0.5, 1, 1])
-            
-            with col_home:
-                # Teks Home yang sejajar dengan tombol
-                st.markdown('<p style="font-size: 14px; font-weight: 500; margin-top: 10px;">Home</p>', unsafe_allow_html=True)
-            
-            with col_info:
-                # Tombol Info Aplikasi
-                if st.button("App Info", key="nav_info", type="secondary"):
-                    next_page('info')
-            
-            with col_start:
-                # Tombol Mulai Wawancara di Navbar
-                if st.button("Start Interview", key="nav_start", type="primary"):
-                    st.session_state.answers = {}
-                    st.session_state.results = None
-                    st.session_state.current_q = 1
-                    next_page('interview')
+            # Tombol Info Aplikasi saja di navbar (tidak ada tombol Start Interview)
+            if st.button("About", key="nav_info", type="secondary", use_container_width=False):
+                next_page('info')
             
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -392,20 +384,18 @@ def render_home_page():
     st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job.</p>', unsafe_allow_html=True)
     
     # Tombol Aksi Hero Section
-    st.markdown('<div class="primary-btn-container" style="display: flex; justify-content: center;">', unsafe_allow_html=True)
-    if st.button("▶️ Start Interview", key="hero_start"):
+    if st.button("▶️ Start Interview", key="hero_start", use_container_width=False):
         st.session_state.answers = {}
         st.session_state.results = None
         st.session_state.current_q = 1
         next_page('interview')
-    st.markdown('</div>', unsafe_allow_html=True)
     
     st.markdown('</section>', unsafe_allow_html=True)
 
 
     # --- 3. How To Use Section (Langkah-Langkah) ---
     st.markdown('<section style="padding: 50px; background-color: white;">', unsafe_allow_html=True)
-    st.markdown('<h2 style="font-size: 40px; text-align: center; margin-bottom: 70px;">How To Use</h2>', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-heading">How To Use</h2>', unsafe_allow_html=True)
     
     st.markdown('<div class="steps-container">', unsafe_allow_html=True)
     
@@ -437,18 +427,36 @@ def render_home_page():
 
     # --- 4. Footer Kustom ---
     st.markdown('<div class="custom-footer">', unsafe_allow_html=True)
-    col_footer_left, col_footer_right = st.columns(2)
+    st.markdown('<div class="footer-content">', unsafe_allow_html=True)
     
-    with col_footer_left:
-        st.markdown('<p style="font-weight: bold; color: white; font-size: 16px;">SEI-AI Interviewer</p>', unsafe_allow_html=True)
+    st.markdown('<p style="font-weight: bold; color: #1a1a1a; font-size: 18px; margin-bottom: 10px;">SEI-AI Interviewer</p>', unsafe_allow_html=True)
+    st.markdown('<p style="margin-bottom: 15px;">AI-powered interview preparation platform</p>', unsafe_allow_html=True)
+    st.markdown('<p style="font-size: 12px; color: #999;">Copyright © 2024 SEI-AI Interviewer. All Rights Reserved.</p>', unsafe_allow_html=True)
     
-    with col_footer_right:
-        st.markdown('<p style="text-align: right;">Copyright © 2024 SEI-AI Interviewer. All Rights Reserved.</p>', unsafe_allow_html=True)
-
+    st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 
 def render_info_page():
+    inject_custom_css()
+    
+    # Header sederhana untuk info page
+    with st.container():
+        st.markdown('<div class="custom-header">', unsafe_allow_html=True)
+        col_logo, col_nav = st.columns([1, 4])
+        
+        with col_logo:
+            try:
+                st.image('assets/seiai.png', width=80, output_format='PNG') 
+            except FileNotFoundError:
+                st.markdown('<p style="font-weight: bold; font-size: 24px; color: #1a1a1a; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True)
+        
+        with col_nav:
+            if st.button("← Back to Home", key="back_home", use_container_width=False):
+                next_page('home')
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+    
     st.title("SEI-AI Application Information")
     st.markdown("""
     This application uses Machine Learning and Natural Language Processing (NLP) technologies to analyze video interview answers.
@@ -464,10 +472,28 @@ def render_info_page():
     * **Format:** MP4, MOV, or WebM.
     * **Maximum Size:** 50MB.
     """)
-    if st.button("🏠 Back to Home"):
-        next_page('home')
 
 def render_interview_page():
+    # CSS untuk interview page
+    inject_custom_css()
+    
+    # Header sederhana
+    with st.container():
+        st.markdown('<div class="custom-header">', unsafe_allow_html=True)
+        col_logo, col_nav = st.columns([1, 4])
+        
+        with col_logo:
+            try:
+                st.image('assets/seiai.png', width=60, output_format='PNG') 
+            except FileNotFoundError:
+                st.markdown('<p style="font-weight: bold; font-size: 20px; color: #1a1a1a; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True)
+        
+        with col_nav:
+            if st.button("← Back to Home", key="interview_back", use_container_width=False):
+                next_page('home')
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+    
     st.title(f"Interview Question {st.session_state.current_q} of {TOTAL_QUESTIONS}")
     
     q_num = st.session_state.current_q
@@ -562,6 +588,21 @@ def render_interview_page():
 
 
 def render_processing_page():
+    inject_custom_css()
+    
+    # Header sederhana
+    with st.container():
+        st.markdown('<div class="custom-header">', unsafe_allow_html=True)
+        col_logo, _ = st.columns([1, 4])
+        
+        with col_logo:
+            try:
+                st.image('assets/seiai.png', width=60, output_format='PNG') 
+            except FileNotFoundError:
+                st.markdown('<p style="font-weight: bold; font-size: 20px; color: #1a1a1a; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+    
     st.title("⚙️ Answer Analysis Process")
     st.info("Please wait, this process may take a few minutes depending on the video duration.")
 
@@ -684,6 +725,19 @@ def render_results_page():
 def render_final_summary_page():
     # Suntikkan CSS lagi untuk memastikan styling card berfungsi
     inject_custom_css() 
+    
+    # Header sederhana
+    with st.container():
+        st.markdown('<div class="custom-header">', unsafe_allow_html=True)
+        col_logo, _ = st.columns([1, 4])
+        
+        with col_logo:
+            try:
+                st.image('assets/seiai.png', width=60, output_format='PNG') 
+            except FileNotFoundError:
+                st.markdown('<p style="font-weight: bold; font-size: 20px; color: #1a1a1a; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
     
     st.title("🏆 Final Evaluation Report")
     st.markdown("---") # Pemisah tipis untuk judul
