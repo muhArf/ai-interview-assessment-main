@@ -8,7 +8,6 @@ import sys
 import numpy as np
 
 # Tambahkan direktori saat ini dan 'models' ke PATH
-# Catatan: Pastikan Anda menjalankan Streamlit dari direktori yang sama dengan folder 'models' dan 'assets'
 sys.path.append(os.path.dirname(__file__))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'models'))
 
@@ -95,8 +94,6 @@ QUESTIONS = load_questions()
 RUBRIC_DATA = load_rubric_data()
 
 # --- Page Render Functions ---
-
-# --- LANDING PAGE CSS & REPORT CSS (Minimalist Modern with Horizontal Cards) ---
 
 def inject_custom_css():
     """Menyuntikkan CSS kustom untuk meniru desain Landing Page & Laporan."""
@@ -254,11 +251,11 @@ def inject_custom_css():
         transform: translateY(-2px);
     }
     
-    /* === CARD METRIK HORIZONTAL === */
+    /* === CARD METRIK HORIZONTAL SUMMARY (Perbaikan Optimal) === */
     .metric-grid-container {
         display: grid;
-        grid-template-columns: repeat(4, 1fr); /* 4 kolom sama lebar */
-        gap: 20px;
+        grid-template-columns: repeat(4, 1fr) !important; 
+        gap: 10px !important; /* Perkecil Gap */
         margin-bottom: 30px;
         width: 100%; 
     }
@@ -266,7 +263,7 @@ def inject_custom_css():
     .modern-metric-card {
         background-color: white;
         border-radius: 12px;
-        padding: 20px;
+        padding: 15px !important; /* Perkecil Padding */
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         text-align: left;
         transition: transform 0.2s;
@@ -277,19 +274,20 @@ def inject_custom_css():
         display: flex;
         flex-direction: row; 
         align-items: center;
-        gap: 10px; 
-        margin-bottom: 5px;
+        gap: 5px !important; /* Perkecil Gap */
+        margin-bottom: 3px !important;
     }
     
     .card-value {
-        font-size: 32px;
+        font-size: 26px !important; /* Perkecil Font Value */
         font-weight: 700;
+        line-height: 1.1;
     }
     .card-label {
-        font-size: 14px;
+        font-size: 12px !important; /* Perkecil Font Label */
         color: #7f8c8d;
         font-weight: 500;
-        margin-top: 5px; 
+        margin-top: 3px; 
     }
     /* Warna untuk Skor dan Tempo */
     .score-color { color: #2ecc71; } 
@@ -302,6 +300,15 @@ def inject_custom_css():
         padding: 25px;
         margin-bottom: 20px;
         background-color: #ecf0f1; 
+    }
+    
+    /* === PERBAIKAN METRIK BAWAAN STREAMLIT (DETAIL REPORT) === */
+    div[data-testid="stMetricValue"] {
+        font-size: 16px !important; /* Perkecil Font Value Metrik Streamlit */
+        font-weight: bold;
+    }
+    div[data-testid="stMetricLabel"] {
+        font-size: 12px !important; /* Perkecil Font Label Metrik Streamlit */
     }
     
     </style>
@@ -331,7 +338,7 @@ def render_home_page():
             st.markdown('<div class="header-nav">', unsafe_allow_html=True)
             
             # Menggunakan 3 kolom di dalam col_nav: Home, Info, Start
-            col_home, col_info, col_start = st.columns([0.5, 1, 1])
+            col_home, col_info = st.columns([0.5, 1]) # DIHILANGKAN COL START
             
             with col_home:
                 # Teks Home yang sejajar dengan tombol
@@ -342,14 +349,8 @@ def render_home_page():
                 if st.button("App Info", key="nav_info", type="secondary"):
                     next_page('info')
             
-            with col_start:
-                # Tombol Mulai Wawancara di Navbar
-                if st.button("Start Interview", key="nav_start", type="primary"):
-                    st.session_state.answers = {}
-                    st.session_state.results = None
-                    st.session_state.current_q = 1
-                    next_page('interview')
-            
+            # Tombol "Start Interview" di Navbar DIHAPUS
+
             st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
@@ -361,7 +362,7 @@ def render_home_page():
     st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
     st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job.</p>', unsafe_allow_html=True)
     
-    # Tombol Aksi Hero Section
+    # Tombol Aksi Hero Section (Hanya ini yang tersisa)
     st.markdown('<div class="primary-btn-container" style="display: flex; justify-content: center;">', unsafe_allow_html=True)
     if st.button("▶️ Start Interview", key="hero_start"):
         st.session_state.answers = {}
@@ -458,11 +459,14 @@ def render_interview_page():
     
     st.markdown("---")
     
+    # HANYA SATU KOLOM UNTUK UPLOAD & VIDEO
     col_upload, col_control = st.columns([3, 1])
     
+    # Mengambil file yang sudah ada dari session state
     current_uploaded_file = st.session_state.answers.get(q_id_str)
 
     with col_upload:
+        # File uploader. KEY diset agar Streamlit mengingat input.
         uploaded_file = st.file_uploader(
             f"Upload Video Answer for Question {q_num} (Max {VIDEO_MAX_SIZE_MB}MB)",
             type=['mp4', 'mov', 'webm'],
@@ -471,34 +475,47 @@ def render_interview_page():
 
         if uploaded_file and uploaded_file.size > VIDEO_MAX_SIZE_MB * 1024 * 1024:
             st.error(f"File size exceeds the {VIDEO_MAX_SIZE_MB}MB limit. The file will not be processed.")
-            uploaded_file = None
+            # Hapus file jika terlalu besar
+            st.session_state.answers[q_id_str] = None
+        elif uploaded_file:
+            # Jika ada upload baru, simpan ke session state
+            st.session_state.answers[q_id_str] = uploaded_file
+        elif current_uploaded_file and uploaded_file is None:
+            # Penting: Jika user menekan tombol 'Clear' (X) pada file uploader,
+            # 'uploaded_file' akan menjadi None, sehingga kita harus menghapusnya dari state.
+            # Namun, jika uploaded_file == None, kita cek apakah ada di state.
+            # Jika user navigasi kembali, uploaded_file akan jadi None, tapi current_uploaded_file ada.
+            pass
         
-        st.session_state.answers[q_id_str] = uploaded_file
+        # Perbarui current_uploaded_file untuk ditampilkan
+        file_to_display = st.session_state.answers.get(q_id_str)
 
-        if uploaded_file:
-            st.success("File successfully uploaded.")
-            st.video(uploaded_file, format=uploaded_file.type)
-        elif current_uploaded_file:
-            st.video(current_uploaded_file, format=current_uploaded_file.type)
-            st.info("Previous file detected.")
+        if file_to_display:
+            st.success("File successfully uploaded/detected.")
+            st.video(file_to_display, format=file_to_display.type)
         else:
             st.warning("Please upload your answer file to continue.")
 
     with col_control:
-        st.markdown("### Controls")
+        # st.markdown("### Controls") # MENGHILANGKAN KATA "KONTROL"
+        st.markdown("### Navigation") # Mengganti dengan Navigation
         
         is_ready = st.session_state.answers.get(q_id_str) is not None
         
+        # Tombol Next
         if q_num < TOTAL_QUESTIONS:
             if st.button("Next Question ⏩", use_container_width=True, disabled=(not is_ready)):
+                # JANGAN RERUN, TAPI LANGSUNG UBAH STATE CURRENT_Q
                 st.session_state.current_q += 1
                 st.rerun()
         elif q_num == TOTAL_QUESTIONS:
             if st.button("Finish & Process ▶️", use_container_width=True, disabled=(not is_ready)):
                 next_page('processing')
 
+        # Tombol Previous
         if q_num > 1:
             if st.button("⏪ Previous Question", use_container_width=True):
+                # JANGAN RERUN, TAPI LANGSUNG UBAH STATE CURRENT_Q
                 st.session_state.current_q -= 1
                 st.rerun()
 
@@ -541,8 +558,12 @@ def render_processing_page():
                         # --- 1. Save Video 
                         progress_bar.progress((i-1)*10 + 1, text=f"Q{i}: Saving video...")
                         temp_video_path = os.path.join(temp_dir, f'video_{q_key_rubric}.mp4')
+                        temp_audio_path = os.path.join(temp_dir, f'audio_{q_key_rubric}.wav') # Mendefinisikan temp_audio_path
+                        
+                        # Memastikan file ditulis dengan benar
+                        video_file.seek(0)
                         with open(temp_video_path, 'wb') as f:
-                            f.write(video_file.getbuffer())
+                            f.write(video_file.read())
 
                         # --- 2. Audio Extraction & Noise Reduction
                         progress_bar.progress((i-1)*10 + 3, text=f"Q{i}: Extracting audio and Noise Reduction...")
@@ -572,14 +593,15 @@ def render_processing_page():
                             final_score_value = int(score) if score is not None else 0
                         except (ValueError, TypeError):
                             final_score_value = 0
-                            reason = f"[ERROR: Score failed to calculate/Wrong data type. Default score 0 used.] {reason}"
+                            # Memperbaiki pesan error agar tetap masuk akal
+                            reason = f"[ERROR: Score calculation failed. Default score 0 used.] {reason}"
                         
                         # --- 6. Save Results
                         results[q_key_rubric] = {
                             "question": q_text,
                             "transcript": transcript,
                             "final_score": final_score_value,
-                            "rubric_reason": reason,
+                            "rubric_reason": reason, # reason disimpan di sini
                             "confidence_score": f"{final_confidence_score_0_1*100:.2f}",
                             "non_verbal": non_verbal_res
                         }
@@ -684,7 +706,7 @@ def render_final_summary_page():
     # Kunci: Gunakan div kustom dengan display: grid yang kuat.
     st.markdown('<div class="metric-grid-container">', unsafe_allow_html=True)
     
-    # Card 1: Average Content Score
+    # Card 1: Average Content Score (LABEL DIPENDEKKAN)
     st.markdown(f"""
     <div class="modern-metric-card">
         <div class="card-content-wrapper">
@@ -692,12 +714,12 @@ def render_final_summary_page():
                 <span class="card-icon score-color">🎯</span>
                 <span class="card-value score-color">{avg_score:.2f} / 4</span>
             </div>
-            <span class="card-label">Average Content Score</span>
+            <span class="card-label">Avg. Content Score</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Card 2: Average Transcript Accuracy
+    # Card 2: Average Transcript Accuracy (LABEL DIPENDEKKAN)
     st.markdown(f"""
     <div class="modern-metric-card">
         <div class="card-content-wrapper">
@@ -705,12 +727,12 @@ def render_final_summary_page():
                 <span class="card-icon accuracy-color">🤖</span>
                 <span class="card-value accuracy-color">{avg_confidence:.2f}%</span>
             </div>
-            <span class="card-label">Avg. Transcript Accuracy</span>
+            <span class="card-label">Avg. Accuracy (%)</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Card 3: Average Tempo
+    # Card 3: Average Tempo (LABEL DIPENDEKKAN)
     st.markdown(f"""
     <div class="modern-metric-card">
         <div class="card-content-wrapper">
@@ -718,12 +740,12 @@ def render_final_summary_page():
                 <span class="card-icon tempo-color">⏱️</span>
                 <span class="card-value tempo-color">{avg_tempo:.2f}</span>
             </div>
-            <span class="card-label">Average Tempo (BPM)</span>
+            <span class="card-label">Avg. Tempo (BPM)</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Card 4: Total Pause Time
+    # Card 4: Total Pause Time (LABEL DIPENDEKKAN)
     st.markdown(f"""
     <div class="modern-metric-card">
         <div class="card-content-wrapper">
@@ -731,7 +753,7 @@ def render_final_summary_page():
                 <span class="card-icon pause-color">⏸️</span>
                 <span class="card-value pause-color">{total_pause:.2f}</span>
             </div>
-            <span class="card-label">Total Pause Time (sec)</span>
+            <span class="card-label">Total Pause (sec)</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -792,14 +814,15 @@ def render_detailed_results_per_question():
         
         col_res1, col_res2, col_res3 = st.columns(3)
         with col_res1:
-            st.metric("Content Score", f"**{res['final_score']} / 4**")
+            # Metrik Streamlit, yang nilai valuenya dikecilkan di CSS global
+            st.metric("Content Score", f"{res['final_score']} / 4")
         with col_res2:
             st.metric("Transcript Accuracy", res['confidence_score'])
         with col_res3:
             st.metric("Communication Summary", res['non_verbal'].get('qualitative_summary', 'N/A').capitalize())
         
-        st.markdown("**Content Scoring Rationale:**")
-        st.caption(res['rubric_reason'])
+        st.markdown("**Content Scoring Reason:**") # MENGGANTI RATIONALE MENJADI REASON
+        st.caption(res['rubric_reason']) # Memastikan ini menampilkan reason dari model
 
         st.markdown("**Detailed Audio Analysis:**")
         st.markdown(f"* **Speaking Tempo:** {res['non_verbal'].get('tempo_bpm', 'N/A')}")
