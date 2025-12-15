@@ -26,12 +26,12 @@ try:
     def score_with_rubric(q_key_rubric, q_text, transcript, RUBRIC_DATA, embedder_model): return 4, "Excellent relevance and structural clarity."
     
     # Ganti dengan import yang sebenarnya jika modul sudah ada
-    # from models.stt_processor import load_stt_model, load_text_models, video_to_wav, noise_reduction, transcribe_and_clean
-    # from models.scoring_logic import load_embedder_model, compute_confidence_score, score_with_rubric
-    # from models.nonverbal_analysis import analyze_non_verbal
+    from models.stt_processor import load_stt_model, load_text_models, video_to_wav, noise_reduction, transcribe_and_clean
+    from models.scoring_logic import load_embedder_model, compute_confidence_score, score_with_rubric
+    from models.nonverbal_analysis import analyze_non_verbal
 except ImportError as e:
     st.error(f"Failed to load modules from the 'models' folder. Ensure the folder structure and files are correct. Error: {e}")
-    # st.stop() 
+    st.stop() 
 
 # Konfigurasi Halaman & Load Data
 st.set_page_config(
