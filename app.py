@@ -347,10 +347,10 @@ def inject_custom_css():
 
 
 def render_home_page():
-    # 1. Suntikkan CSS kustom
+    # Suntikkan CSS kustom
     inject_custom_css()
 
-    # --- 1. Header (Navbar Kustom) ---
+    # --- Navbar Kustom ---
     with st.container():
         st.markdown('<div class="custom-header">', unsafe_allow_html=True)
         
@@ -362,15 +362,31 @@ def render_home_page():
             try:
                 st.image('assets/seiai.png', width=80, output_format='PNG') 
             except FileNotFoundError:
-                st.markdown('<p style="font-weight: bold; font-size: 24px; color: #1a1a1a; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True) 
+                st.markdown('<p style="font-weight: bold; font-size: 20px; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True) 
 
         with col_nav:
             # Kontainer Navigasi dengan class 'header-nav' untuk styling khusus
             st.markdown('<div class="header-nav">', unsafe_allow_html=True)
             
-            # Tombol Info Aplikasi saja di navbar (tidak ada tombol Start Interview)
-            if st.button("About", key="nav_info", type="secondary", use_container_width=False):
-                next_page('info')
+            # Menggunakan 3 kolom di dalam col_nav: Home, Info, Start
+            col_home, col_info, col_start = st.columns([0.5, 1, 1])
+            
+            with col_home:
+                # Teks Home yang sejajar dengan tombol
+                st.markdown('<p style="font-size: 14px; font-weight: 500; margin-top: 10px;">Home</p>', unsafe_allow_html=True)
+            
+            with col_info:
+                # Tombol Info Aplikasi
+                if st.button("App Info", key="nav_info", type="secondary"):
+                    next_page('info')
+            
+            with col_start:
+                # Tombol Mulai Wawancara di Navbar
+                if st.button("Start Interview", key="nav_start", type="primary"):
+                    st.session_state.answers = {}
+                    st.session_state.results = None
+                    st.session_state.current_q = 1
+                    next_page('interview')
             
             st.markdown('</div>', unsafe_allow_html=True)
 
