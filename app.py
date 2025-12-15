@@ -13,14 +13,12 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'models'))
 
 # Import logic dari folder models
 try:
-    # PENTING: Pastikan file di folder models/ sudah terimplementasi dengan benar.
     from models.stt_processor import load_stt_model, load_text_models, video_to_wav, noise_reduction, transcribe_and_clean
     from models.scoring_logic import load_embedder_model, compute_confidence_score, score_with_rubric
     from models.nonverbal_analysis import analyze_non_verbal
 except ImportError as e:
     st.error(f"Failed to load modules from the 'models' folder. Ensure the folder structure and files are correct. Error: {e}")
-    # Jika Anda ingin aplikasi berhenti ketika gagal memuat modul, uncomment baris di bawah:
-    # st.stop() 
+    # st.stop() # Uncomment this if you want the app to stop on module load failure
 
 # Konfigurasi Halaman & Load Data
 st.set_page_config(
@@ -52,7 +50,6 @@ def next_page(page_name):
 def get_models():
     """Load semua model berat (hanya sekali)."""
     try:
-        # PENTING: Ganti path model sesuai dengan implementasi Anda yang sebenarnya
         stt_model = load_stt_model()
         embedder_model = load_embedder_model()
         
@@ -95,7 +92,7 @@ RUBRIC_DATA = load_rubric_data()
 
 # --- Page Render Functions ---
 
-# --- LANDING PAGE CSS & REPORT CSS (Minimalist Modern with Horizontal Cards) ---
+# --- LANDING PAGE CSS & REPORT CSS (Minimalist Modern with Horizontal Cards FIX) ---
 
 def inject_custom_css():
     """Menyuntikkan CSS kustom untuk meniru desain Landing Page & Laporan."""
@@ -242,14 +239,16 @@ def inject_custom_css():
     }
     
     /* === CSS TAMBAHAN BARU UNTUK LAPORAN MINIMALIS HORIZONTAL METRIK === */
-    /* Container untuk kartu metrik */
+    
+    /* 1. Grid Container (Memastikan 4 kolom) */
     .metric-grid-container {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 20px;
         margin-bottom: 30px;
     }
-    /* Card Styling */
+
+    /* 2. Card Styling */
     .modern-metric-card {
         background-color: white;
         border-radius: 12px;
@@ -262,17 +261,17 @@ def inject_custom_css():
         transform: translateY(-3px);
     }
     
-    /* Kontainer untuk Nilai dan Label */
+    /* 3. Wrapper Konten Card (Membuat Konten Utama Berbaris Horizontal, lalu Label di bawahnya) */
     .card-content-wrapper {
         display: flex;
-        flex-direction: column; /* Icon + Value di atas, Label di bawah (secara keseluruhan card) */
+        flex-direction: column; /* Mengatur blok (Line + Label) secara Vertikal */
         align-items: flex-start;
     }
 
-    /* Kontainer untuk Icon dan Value agar sejajar horizontal */
+    /* 4. Garis Nilai + Icon (Memaksa Horizontal) */
     .card-value-line {
         display: flex;
-        flex-direction: row; /* BARIS UTAMA SEJAJAR HORIZONTAL */
+        flex-direction: row; /* BARIS UTAMA SEJAJAR HORIZONTAL FIX */
         align-items: center;
         gap: 10px; 
         margin-bottom: 5px;
@@ -281,11 +280,13 @@ def inject_custom_css():
     .card-icon {
         font-size: 24px;
         line-height: 1;
+        min-width: 24px; /* Memastikan ruang tetap */
     }
     .card-value {
         font-size: 32px;
         font-weight: 700;
         line-height: 1;
+        flex-grow: 1;
     }
     .card-label {
         font-size: 14px;
@@ -319,35 +320,27 @@ def render_home_page():
     with st.container():
         st.markdown('<div class="custom-header">', unsafe_allow_html=True)
         
-        # Menggunakan dua kolom utama: Logo dan Navigasi
         col_logo, col_nav = st.columns([1, 4])
         
         with col_logo:
-            # Logo/Nama Aplikasi
             try:
-                # Ganti dengan path logo Anda jika berbeda
                 st.image('assets/logo dicoding.png', width=80, output_format='PNG') 
             except FileNotFoundError:
                 st.markdown('<p style="font-weight: bold; font-size: 20px; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True) 
 
         with col_nav:
-            # Kontainer Navigasi dengan class 'header-nav' untuk styling khusus
             st.markdown('<div class="header-nav">', unsafe_allow_html=True)
             
-            # Menggunakan 3 kolom di dalam col_nav: Home, Info, Start
             col_home, col_info, col_start = st.columns([0.5, 1, 1])
             
             with col_home:
-                # Teks Home yang sejajar dengan tombol
                 st.markdown('<p style="font-size: 14px; font-weight: 500; margin-top: 10px;">Home</p>', unsafe_allow_html=True)
             
             with col_info:
-                # Tombol Info Aplikasi
                 if st.button("App Info", key="nav_info", type="secondary"):
                     next_page('info')
             
             with col_start:
-                # Tombol Mulai Wawancara di Navbar
                 if st.button("Start Interview", key="nav_start", type="primary"):
                     st.session_state.answers = {}
                     st.session_state.results = None
@@ -550,15 +543,12 @@ def render_processing_page():
 
                         # --- 2. Audio Extraction & Noise Reduction
                         progress_bar.progress((i-1)*10 + 3, text=f"Q{i}: Extracting audio and Noise Reduction...")
-                        temp_audio_path = os.path.join(temp_dir, f'audio_{q_key_rubric}.wav')
-                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         video_to_wav(temp_video_path, temp_audio_path)
                         
                         noise_reduction(temp_audio_path, temp_audio_path) 
                         
                         # --- 3. Speech-to-Text (STT) & Cleaning
                         progress_bar.progress((i-1)*10 + 5, text=f"Q{i}: Transcription and Text Cleaning...")
-                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         transcript, log_prob_raw = transcribe_and_clean(
                             temp_audio_path, STT_MODEL, SPELL_CHECKER, EMBEDDER_MODEL, ENGLISH_WORDS
                         )
@@ -567,12 +557,10 @@ def render_processing_page():
                         
                         # --- 4. Non-Verbal Analysis
                         progress_bar.progress((i-1)*10 + 7, text=f"Q{i}: Non-Verbal Analysis...")
-                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         non_verbal_res = analyze_non_verbal(temp_audio_path)
 
                         # --- 5. Answer Scoring (Semantic)
                         progress_bar.progress((i-1)*10 + 9, text=f"Q{i}: Semantic Scoring...")
-                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         score, reason = score_with_rubric(
                             q_key_rubric, q_text, transcript, RUBRIC_DATA, EMBEDDER_MODEL
                         )
@@ -622,7 +610,6 @@ def render_results_page():
             next_page('home')
         return
         
-    # REDIRECT DIRECTLY TO THE FINAL ACCUMULATED REPORT
     next_page('final_summary')
 
 
@@ -642,7 +629,6 @@ def render_final_summary_page():
     # --- 1. Combined Metrics Calculation ---
     try:
         all_scores = [int(res['final_score']) for res in st.session_state.results.values()]
-        # Extract and clean data, handling potential non-numeric strings
         all_confidence = [float(res['confidence_score'].split(' ')[0].replace('%', '')) for res in st.session_state.results.values()]
         
         all_tempo = []
