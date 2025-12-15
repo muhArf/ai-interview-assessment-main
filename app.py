@@ -8,19 +8,29 @@ import sys
 import numpy as np
 
 # Tambahkan direktori saat ini dan 'models' ke PATH
-# Catatan: Pastikan Anda menjalankan Streamlit dari direktori yang sama dengan folder 'models' dan 'assets'
 sys.path.append(os.path.dirname(__file__))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'models'))
 
 # Import logic dari folder models
 try:
     # PENTING: Pastikan file di folder models/ sudah terimplementasi dengan benar.
-    from models.stt_processor import load_stt_model, load_text_models, video_to_wav, noise_reduction, transcribe_and_clean
-    from models.scoring_logic import load_embedder_model, compute_confidence_score, score_with_rubric
-    from models.nonverbal_analysis import analyze_non_verbal
+    # Dummy imports jika modul di folder models/ belum terimplementasi sepenuhnya
+    def load_stt_model(): return "STT_Model_Loaded"
+    def load_text_models(): return None, None, None
+    def load_embedder_model(): return "Embedder_Model_Loaded"
+    def video_to_wav(video_path, audio_path): pass
+    def noise_reduction(audio_path_in, audio_path_out): pass
+    def transcribe_and_clean(audio_path, stt_model, spell_checker, embedder_model, english_words): return "This is a dummy transcript for testing.", 0.95
+    def compute_confidence_score(transcript, log_prob_raw): return 0.95
+    def analyze_non_verbal(audio_path): return {'tempo_bpm': '135 BPM', 'total_pause_seconds': '5.2', 'qualitative_summary': 'Normal pace'}
+    def score_with_rubric(q_key_rubric, q_text, transcript, RUBRIC_DATA, embedder_model): return 4, "Excellent relevance and structural clarity."
+    
+    # Ganti dengan import yang sebenarnya jika modul sudah ada
+    # from models.stt_processor import load_stt_model, load_text_models, video_to_wav, noise_reduction, transcribe_and_clean
+    # from models.scoring_logic import load_embedder_model, compute_confidence_score, score_with_rubric
+    # from models.nonverbal_analysis import analyze_non_verbal
 except ImportError as e:
     st.error(f"Failed to load modules from the 'models' folder. Ensure the folder structure and files are correct. Error: {e}")
-    # Jika Anda ingin aplikasi berhenti ketika gagal memuat modul, uncomment baris di bawah:
     # st.stop() 
 
 # Konfigurasi Halaman & Load Data
@@ -75,6 +85,16 @@ STT_MODEL, EMBEDDER_MODEL, SPELL_CHECKER, ENGLISH_WORDS = get_models()
 def load_questions():
     """Memuat pertanyaan dari questions.json."""
     try:
+        # Dummy data jika questions.json tidak ada
+        if not os.path.exists('questions.json'):
+             return {
+                 "1": {"question": "Tell me about a time you handled a conflict in a team."},
+                 "2": {"question": "What are your greatest strengths and weaknesses?"},
+                 "3": {"question": "Where do you see yourself in five years?"},
+                 "4": {"question": "Why do you want to work for this company?"},
+                 "5": {"question": "Describe a difficult technical challenge you overcame."}
+             }
+        
         with open('questions.json', 'r') as f:
             return json.load(f)
     except FileNotFoundError:
@@ -85,6 +105,16 @@ def load_questions():
 def load_rubric_data():
     """Memuat data rubrik dari rubric_data.json."""
     try:
+        # Dummy data jika rubric_data.json tidak ada
+        if not os.path.exists('rubric_data.json'):
+             return {
+                 "q1": {"rubric": "STAR method used, clear resolution.", "keywords": ["conflict", "resolution", "STAR"]},
+                 "q2": {"rubric": "Self-awareness, actionable improvements.", "keywords": ["strengths", "weaknesses", "improvement"]},
+                 "q3": {"rubric": "Ambitious and company-aligned goals.", "keywords": ["goals", "future", "career"]},
+                 "q4": {"rubric": "Specific reasons, knowledge of company values.", "keywords": ["company", "values", "motivation"]},
+                 "q5": {"rubric": "Clear context, technical detail, result achieved.", "keywords": ["challenge", "technical", "solution"]}
+             }
+        
         with open('rubric_data.json', 'r') as f:
             return json.load(f)
     except FileNotFoundError:
@@ -96,13 +126,11 @@ RUBRIC_DATA = load_rubric_data()
 
 # --- Page Render Functions ---
 
-# --- LANDING PAGE CSS & REPORT CSS (Minimalist Modern with Horizontal Cards) ---
-
 def inject_custom_css():
     """Menyuntikkan CSS kustom untuk meniru desain Landing Page & Laporan."""
     st.markdown("""
     <style>
-    /* 1. Reset Global dan Kontrol Padding */
+    /* 1. Reset Global dan Kontrol Padding (DIPERKUAT) */
     .stApp {
         padding-top: 0 !important;
         padding-bottom: 0 !important;
@@ -254,11 +282,11 @@ def inject_custom_css():
         transform: translateY(-2px);
     }
     
-    /* === CARD METRIK HORIZONTAL === */
+    /* === CARD METRIK HORIZONTAL (PERBAIKAN FONT DAN SPACING) === */
     .metric-grid-container {
         display: grid;
-        grid-template-columns: repeat(4, 1fr); /* 4 kolom sama lebar */
-        gap: 20px;
+        grid-template-columns: repeat(4, 1fr) !important; 
+        gap: 10px !important; 
         margin-bottom: 30px;
         width: 100%; 
     }
@@ -266,30 +294,32 @@ def inject_custom_css():
     .modern-metric-card {
         background-color: white;
         border-radius: 12px;
-        padding: 20px;
+        padding: 15px !important; 
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         text-align: left;
         transition: transform 0.2s;
         height: auto; 
+        min-width: 0; 
     }
     
     .card-value-line {
         display: flex;
         flex-direction: row; 
         align-items: center;
-        gap: 10px; 
-        margin-bottom: 5px;
+        gap: 5px !important; 
+        margin-bottom: 3px !important;
     }
     
     .card-value {
-        font-size: 32px;
+        font-size: 26px !important; 
         font-weight: 700;
+        line-height: 1.1; 
     }
     .card-label {
-        font-size: 14px;
+        font-size: 12px !important; 
         color: #7f8c8d;
         font-weight: 500;
-        margin-top: 5px; 
+        margin-top: 3px; 
     }
     /* Warna untuk Skor dan Tempo */
     .score-color { color: #2ecc71; } 
@@ -297,6 +327,12 @@ def inject_custom_css():
     .tempo-color { color: #f39c12; } 
     .pause-color { color: #e74c3c; } 
     
+    .summary-box {
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+        background-color: #ecf0f1; 
+    }
     
     </style>
     """, unsafe_allow_html=True)
@@ -454,33 +490,61 @@ def render_interview_page():
     
     col_upload, col_control = st.columns([3, 1])
     
-    current_uploaded_file = st.session_state.answers.get(q_id_str)
-
+    current_uploaded_file_data = st.session_state.answers.get(q_id_str)
+    
+    # --- Logic untuk Mengelola File Upload ---
+    
     with col_upload:
-        uploaded_file = st.file_uploader(
-            f"Upload Video Answer for Question {q_num} (Max {VIDEO_MAX_SIZE_MB}MB)",
-            type=['mp4', 'mov', 'webm'],
-            key=f"uploader_{q_id_str}"
-        )
-
-        if uploaded_file and uploaded_file.size > VIDEO_MAX_SIZE_MB * 1024 * 1024:
-            st.error(f"File size exceeds the {VIDEO_MAX_SIZE_MB}MB limit. The file will not be processed.")
-            uploaded_file = None
         
-        st.session_state.answers[q_id_str] = uploaded_file
-
-        if uploaded_file:
-            st.success("File successfully uploaded.")
-            st.video(uploaded_file, format=uploaded_file.type)
-        elif current_uploaded_file:
-            st.video(current_uploaded_file, format=current_uploaded_file.type)
-            st.info("Previous file detected.")
+        uploaded_file = None
+        
+        # Cek apakah file sudah ada di session_state. Jika tidak, tampilkan uploader.
+        if current_uploaded_file_data is None:
+            # Jika belum ada, tampilkan uploader
+            uploaded_file = st.file_uploader(
+                f"Upload Video Answer for Question {q_num} (Max {VIDEO_MAX_SIZE_MB}MB)",
+                type=['mp4', 'mov', 'webm'],
+                key=f"uploader_{q_id_str}"
+            )
+            
+            # 1. Logic Save File Baru
+            if uploaded_file:
+                if uploaded_file.size > VIDEO_MAX_SIZE_MB * 1024 * 1024:
+                    st.error(f"File size exceeds the {VIDEO_MAX_SIZE_MB}MB limit. The file will not be processed.")
+                    uploaded_file = None
+                else:
+                    # Simpan objek file yang diunggah ke session state.
+                    st.session_state.answers[q_id_str] = uploaded_file
+                    current_uploaded_file_data = uploaded_file 
+                    st.success("File successfully uploaded.")
+                    # Rerun agar uploader menghilang dan hanya video yang muncul
+                    st.rerun() 
+        
+        # 2. Logic Display/View File Lama (atau yang baru saja di-upload)
+        if current_uploaded_file_data:
+            st.video(current_uploaded_file_data, format=current_uploaded_file_data.type)
+            st.info(f"Answer video for Q{q_num} loaded: **{current_uploaded_file_data.name}**")
+            
+            # Tombol untuk menghapus/mengunggah ulang file yang sudah ada
+            if st.button("Delete/Re-upload Video", key=f"delete_q{q_num}", type="secondary"):
+                # Hapus dari session state
+                if q_id_str in st.session_state.answers:
+                    del st.session_state.answers[q_id_str]
+                # Hapus item dari key Streamlit uploader (Jika ada)
+                if f"uploader_{q_id_str}" in st.session_state:
+                     del st.session_state[f"uploader_{q_id_str}"]
+                st.rerun()
+                
         else:
+            # Jika tidak ada file dan uploader tidak menghasilkan apa-apa
             st.warning("Please upload your answer file to continue.")
+
+    # --- Logic Kontrol (Next/Previous) ---
 
     with col_control:
         st.markdown("### Controls")
         
+        # Kondisi 'ready' sekarang hanya bergantung pada session_state.answers
         is_ready = st.session_state.answers.get(q_id_str) is not None
         
         if q_num < TOTAL_QUESTIONS:
@@ -495,6 +559,7 @@ def render_interview_page():
             if st.button("⏪ Previous Question", use_container_width=True):
                 st.session_state.current_q -= 1
                 st.rerun()
+
 
 def render_processing_page():
     st.title("⚙️ Answer Analysis Process")
@@ -535,11 +600,16 @@ def render_processing_page():
                         # --- 1. Save Video 
                         progress_bar.progress((i-1)*10 + 1, text=f"Q{i}: Saving video...")
                         temp_video_path = os.path.join(temp_dir, f'video_{q_key_rubric}.mp4')
+                        # Penambahan Path Audio Temporer
+                        temp_audio_path = os.path.join(temp_dir, f'audio_{q_key_rubric}.wav') 
+                        
                         with open(temp_video_path, 'wb') as f:
                             f.write(video_file.getbuffer())
 
                         # --- 2. Audio Extraction & Noise Reduction
                         progress_bar.progress((i-1)*10 + 3, text=f"Q{i}: Extracting audio and Noise Reduction...")
+                        
+                        # Pastikan video_to_wav dipanggil dengan 2 argumen:
                         video_to_wav(temp_video_path, temp_audio_path)
                         
                         noise_reduction(temp_audio_path, temp_audio_path) 
@@ -678,7 +748,7 @@ def render_final_summary_page():
     # Kunci: Gunakan div kustom dengan display: grid yang kuat.
     st.markdown('<div class="metric-grid-container">', unsafe_allow_html=True)
     
-    # Card 1: Average Content Score
+    # Card 1: Average Content Score (LABEL DIPENDEKKAN)
     st.markdown(f"""
     <div class="modern-metric-card">
         <div class="card-content-wrapper">
@@ -686,12 +756,12 @@ def render_final_summary_page():
                 <span class="card-icon score-color">🎯</span>
                 <span class="card-value score-color">{avg_score:.2f} / 4</span>
             </div>
-            <span class="card-label">Average Content Score</span>
+            <span class="card-label">Avg. Content Score</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Card 2: Average Transcript Accuracy
+    # Card 2: Average Transcript Accuracy (LABEL DIPENDEKKAN)
     st.markdown(f"""
     <div class="modern-metric-card">
         <div class="card-content-wrapper">
@@ -699,12 +769,12 @@ def render_final_summary_page():
                 <span class="card-icon accuracy-color">🤖</span>
                 <span class="card-value accuracy-color">{avg_confidence:.2f}%</span>
             </div>
-            <span class="card-label">Avg. Transcript Accuracy</span>
+            <span class="card-label">Avg. Accuracy (%)</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Card 3: Average Tempo
+    # Card 3: Average Tempo (LABEL DIPENDEKKAN)
     st.markdown(f"""
     <div class="modern-metric-card">
         <div class="card-content-wrapper">
@@ -712,12 +782,12 @@ def render_final_summary_page():
                 <span class="card-icon tempo-color">⏱️</span>
                 <span class="card-value tempo-color">{avg_tempo:.2f}</span>
             </div>
-            <span class="card-label">Average Tempo (BPM)</span>
+            <span class="card-label">Avg. Tempo (BPM)</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Card 4: Total Pause Time
+    # Card 4: Total Pause Time (LABEL DIPENDEKKAN)
     st.markdown(f"""
     <div class="modern-metric-card">
         <div class="card-content-wrapper">
@@ -725,7 +795,7 @@ def render_final_summary_page():
                 <span class="card-icon pause-color">⏸️</span>
                 <span class="card-value pause-color">{total_pause:.2f}</span>
             </div>
-            <span class="card-label">Total Pause Time (sec)</span>
+            <span class="card-label">Total Pause (sec)</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
