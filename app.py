@@ -545,7 +545,8 @@ def render_processing_page():
             return
 
 def render_results_page():
-    st.title("✅ Hasil Analisis Wawancara")
+    # Mengganti judul menjadi Laporan
+    st.title("✅ Laporan Hasil Analisis Wawancara")
     
     if not st.session_state.results:
         st.error("Hasil tidak ditemukan. Silakan coba proses ulang.")
@@ -554,49 +555,54 @@ def render_results_page():
             next_page('home')
         return
 
-    processed_q = len(st.session_state.results)
-    if processed_q > 0:
-        total_score = sum(int(res['final_score']) for res in st.session_state.results.values())
-        max_score = processed_q * 4 
-    else:
-        total_score = 0
-        max_score = 0
-    
-    st.markdown("---")
-    st.header(f"Skor Total Wawancara: **{total_score} / {max_score}**")
-    st.markdown("---")
+    # --- SKOR TOTAL DIHILANGKAN SESUAI PERMINTAAN ---
+    st.markdown("---") 
 
     for q_key, res in st.session_state.results.items():
         q_num = q_key.replace('q', '')
         
-        st.subheader(f"Pertanyaan {q_num}: {res['question']}")
+        # Header untuk setiap pertanyaan
+        st.header(f"Laporan Analisis Pertanyaan {q_num}")
+        st.info(f"**Pertanyaan:** {res['question']}")
         
+        # --- 1. Key Metrics (Skor dan Rangkuman) ---
         col_res1, col_res2, col_res3 = st.columns(3)
         with col_res1:
             score_str = str(res['final_score'])
-            st.metric("Skor Final (Semantik)", f"**{score_str} / 4**")
+            # Tampilkan skor Kualitas Jawaban
+            st.metric("Skor Konten (Maks 4)", f"**{score_str} / 4**")
         with col_res2:
-            confidence_val = float(res['confidence_score'].replace('%', ''))
-            st.metric("Confidence Score", f"{confidence_val:.2f}%")
+            # Mengganti Confidence Score menjadi Akurasi Transkrip
+            confidence_val = float(res['confidence_score'].replace('%', '').replace(' per minute', '').replace(' seconds', ''))
+            st.metric("Akurasi Transkrip (STT)", f"{confidence_val:.2f}%")
         with col_res3:
             summary = res['non_verbal'].get('qualitative_summary', 'N/A')
-            st.metric("Rangkuman Non-Verbal", summary.capitalize())
+            # Mengganti Rangkuman Non-Verbal menjadi Rangkuman Komunikasi
+            st.metric("Rangkuman Komunikasi", summary.capitalize())
         
-        st.markdown("---")
+        st.markdown("<br>", unsafe_allow_html=True) # Tambahkan jarak
 
-        st.markdown("**Rubrik Penilaian (Alasan Semantik)**")
-        st.caption(f"**Alasan Pemberian Skor:** {res['rubric_reason']}")
+        # --- 2. Detail Penilaian Konten (Expanded by default) ---
+        with st.expander("📝 Detail Penilaian Konten (Rubrik Semantik)", expanded=True):
+            st.subheader("Alasan Penilaian Skor")
+            st.write(res['rubric_reason'])
 
-        st.markdown("**Analisis Audio (Non-Verbal Detail)**")
-        tempo = res['non_verbal'].get('tempo_bpm', 'N/A')
-        pause = res['non_verbal'].get('total_pause_seconds', 'N/A')
-        st.markdown(f"* **Tempo Bicara (BPM):** {tempo}")
-        st.markdown(f"* **Total Jeda (Detik):** {pause}")
+        # --- 3. Detail Analisis Non-Verbal (Collapsed by default) ---
+        with st.expander("🗣️ Detail Analisis Non-Verbal (Audio)", expanded=False):
+            # Asumsi data tempo dan pause sudah diformat dengan satuan di nonverbal_analysis.py
+            tempo = res['non_verbal'].get('tempo_bpm', 'N/A')
+            pause = res['non_verbal'].get('total_pause_seconds', 'N/A')
+            
+            st.markdown(f"* **Tempo Bicara:** {tempo}")
+            st.markdown(f"* **Total Jeda (Keheningan):** {pause}")
 
-        st.markdown("**Transkrip Jawaban Bersih**")
-        st.code(res['transcript'], language='text')
+        # --- 4. Transkrip Jawaban Bersih (Collapsed by default) ---
+        with st.expander("📄 Transkrip Jawaban Bersih", expanded=False):
+            st.code(res['transcript'], language='text')
         
-        st.markdown("---")
+        # Pemisah tebal antar pertanyaan
+        st.markdown("<br><hr style='border: 4px solid #f0f2f6; border-radius: 5px;'>", unsafe_allow_html=True) 
+        st.markdown("<br>", unsafe_allow_html=True) 
 
 
     if st.button("🏠 Selesai & Kembali ke Awal", use_container_width=True):
