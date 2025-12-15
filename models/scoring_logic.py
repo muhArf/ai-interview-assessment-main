@@ -41,7 +41,7 @@ def is_non_relevant(text: str) -> bool:
 
 # --- FUNGSI CONFIDENCE SCORE (DARI NOTEBOOK 1) ---
 
-def compute_confidence_score(transcript: str, text_confidence: float) -> float:
+def compute_confidence_score(transcript: str, text_confidence: int) -> int:
     """
     Menghitung skor kepercayaan (confidence score) akhir.
     text_confidence adalah output dari Whisper (avg_log_prob).
