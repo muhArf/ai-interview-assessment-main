@@ -127,211 +127,320 @@ RUBRIC_DATA = load_rubric_data()
 # --- Page Render Functions ---
 
 def inject_custom_css():
+    """Menyuntikkan CSS kustom untuk meniru desain Landing Page & Laporan."""
     st.markdown("""
     <style>
-    /* ===== GLOBAL RESET ===== */
+    /* 1. Reset Global dan Kontrol Padding (DIPERKUAT) */
     .stApp {
-        padding: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
         margin: 0 !important;
     }
-    header, footer, #MainMenu {
-        display: none !important;
-    }
+    /* Sembunyikan Header dan Footer Streamlit Default */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
 
-    /* ===== NAVBAR ===== */
-    .navbar {
-        position: sticky;
-        top: 0;
-        z-index: 999;
-        background: white;
-        height: 80px;
-        padding: 0 60px;
+    /* 2. Styling untuk Elemen Kustom */
+    .custom-header {
+        background-color: white;
+        padding: 0 50px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        height: 100px; /* Tinggi Navbar */
         display: flex;
         align-items: center;
         justify-content: space-between;
-        box-shadow: 0 2px 10px rgba(0,0,0,.08);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
     }
-
-    .nav-right {
+    
+    /* Perbaikan Navbar: Memastikan elemen Navigasi sejajar */
+    .header-nav {
         display: flex;
-        gap: 12px;
+        align-items: center;
+        justify-content: flex-end;
+        width: 100%;
+        gap: 10px; 
+    }
+    .header-nav button {
+        margin-top: 0px !important;
+        padding: 8px 15px !important;
+        font-size: 14px !important;
+        border-radius: 6px !important;
+        height: 40px; 
+    }
+    /* Mengatasi Streamlit elements inside the column block */
+    .header-nav > div[data-testid="stHorizontalBlock"] {
         align-items: center;
     }
-
-    /* ===== HERO ===== */
-    .hero {
-        padding: 120px 40px;
-        text-align: center;
-        background: #ffffff;
+    .header-nav p {
+        margin: 0; 
+        padding-top: 10px; /* Menyelaraskan teks 'Home' */
     }
 
-    .hero h1 {
+
+    /* HERO SECTION */
+    .hero-section {
+        background-color: white;
+        padding: 100px 50px;
+        text-align: center;
+    }
+    .hero-title {
         font-size: 48px;
         font-weight: 700;
         margin-bottom: 20px;
     }
-
-    .hero p {
+    .hero-subtitle {
         font-size: 18px;
         color: #5d5988;
         max-width: 600px;
-        margin: 0 auto 40px;
+        margin: 0 auto 40px auto;
     }
 
-    /* ===== BUTTON ===== */
-    .stButton > button {
-        border-radius: 999px !important;
-        padding: 14px 36px !important;
-        font-size: 16px !important;
-        font-weight: 500 !important;
-    }
-
-    /* ===== HOW TO USE ===== */
-    .howto {
-        padding: 80px 60px;
-        background: #fafafa;
-    }
-
-    .howto h2 {
-        text-align: center;
-        font-size: 38px;
-        margin-bottom: 60px;
-    }
-
-    .step-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    /* Styling How To Use Steps */
+    .steps-container {
+        display: flex;
+        flex-wrap: wrap;
         gap: 30px;
-        max-width: 1200px;
-        margin: auto;
+        justify-content: center;
+        padding: 50px 0;
     }
-
     .step-card {
-        background: white;
-        border-radius: 12px;
-        padding: 40px 20px 30px;
+        background-color: #f9f9ff; 
+        border-radius: 6px;
+        padding: 40px 20px 20px 20px;
         text-align: center;
         position: relative;
-        box-shadow: 0 8px 24px rgba(0,0,0,.06);
+        flex-grow: 1;
+        max-width: 300px;
+        min-height: 250px; 
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); 
+        transition: all 0.3s;
     }
-
-    .step-num {
+    .step-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    .step-number {
         position: absolute;
-        top: -28px;
+        top: -30px; 
         left: 50%;
         transform: translateX(-50%);
-        width: 56px;
-        height: 56px;
-        background: black;
-        color: white;
+        width: 60px;
+        height: 60px;
+        background-color: black;
         border-radius: 50%;
+        color: white;
+        font-size: 20px;
+        font-weight: bold;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 700;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
     }
-
-    .step-card h4 {
-        margin-top: 24px;
-        margin-bottom: 10px;
+    .step-title {
         font-size: 18px;
+        font-weight: 600;
+        margin-top: 20px;
+        margin-bottom: 10px;
     }
-
-    .step-card p {
+    .step-description {
         font-size: 14px;
-        color: #6b6b6b;
+        color: #5d5988;
     }
 
-    /* ===== FOOTER ===== */
-    .footer {
-        background: black;
-        color: #aaa;
-        padding: 24px 60px;
+    /* Styling Footer */
+    .custom-footer {
+        background-color: black;
+        color: #9795b4; 
+        padding: 20px 50px;
         display: flex;
         justify-content: space-between;
+        align-items: center;
         font-size: 13px;
+        margin-top: 50px;
     }
+
+    /* Tombol Utama */
+    .stButton>button {
+        border-radius: 40px !important;
+        padding: 15px 40px !important;
+        font-size: 16px !important;
+        font-weight: 500 !important;
+    }
+    .primary-btn-container button {
+        background-color: black !important;
+        color: white !important;
+        border: none !important;
+        transition: all 0.3s;
+    }
+    .primary-btn-container button:hover {
+        background-color: #333333 !important;
+        transform: translateY(-2px);
+    }
+    
+    /* === CARD METRIK HORIZONTAL (PERBAIKAN FONT DAN SPACING) === */
+    .metric-grid-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr) !important; 
+        gap: 10px !important; 
+        margin-bottom: 30px;
+        width: 100%; 
+    }
+    
+    .modern-metric-card {
+        background-color: white;
+        border-radius: 12px;
+        padding: 15px !important; 
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        text-align: left;
+        transition: transform 0.2s;
+        height: auto; 
+        min-width: 0; 
+    }
+    
+    .card-value-line {
+        display: flex;
+        flex-direction: row; 
+        align-items: center;
+        gap: 5px !important; 
+        margin-bottom: 3px !important;
+    }
+    
+    .card-value {
+        font-size: 26px !important; 
+        font-weight: 700;
+        line-height: 1.1; 
+    }
+    .card-label {
+        font-size: 12px !important; 
+        color: #7f8c8d;
+        font-weight: 500;
+        margin-top: 3px; 
+    }
+    /* Warna untuk Skor dan Tempo */
+    .score-color { color: #2ecc71; } 
+    .accuracy-color { color: #3498db; } 
+    .tempo-color { color: #f39c12; } 
+    .pause-color { color: #e74c3c; } 
+    
+    }
+    
     </style>
     """, unsafe_allow_html=True)
 
 
 def render_home_page():
+    # 1. Suntikkan CSS kustom
     inject_custom_css()
 
-    # ===== NAVBAR =====
-    st.markdown("""
-    <div class="navbar">
-        <strong style="font-size:20px;">SEI-AI</strong>
-        <div class="nav-right">
-    """, unsafe_allow_html=True)
+    # --- 1. Header (Navbar Kustom) ---
+    with st.container():
+        st.markdown('<div class="custom-header">', unsafe_allow_html=True)
+        
+        # Menggunakan dua kolom utama: Logo dan Navigasi
+        col_logo, col_nav = st.columns([1, 4])
+        
+        with col_logo:
+            # Logo/Nama Aplikasi
+            try:
+                st.image('assets/seiai.png', width=80, output_format='PNG') 
+            except FileNotFoundError:
+                st.markdown('<p style="font-weight: bold; font-size: 20px; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True) 
 
-    if st.button("App Info"):
-        next_page("info")
+        with col_nav:
+            # Kontainer Navigasi dengan class 'header-nav' untuk styling khusus
+            st.markdown('<div class="header-nav">', unsafe_allow_html=True)
+            
+            # Menggunakan 3 kolom di dalam col_nav: Home, Info, Start
+            col_home, col_info, col_start = st.columns([0.5, 1, 1])
+            
+            with col_home:
+                # Teks Home yang sejajar dengan tombol
+                st.markdown('<p style="font-size: 14px; font-weight: 500; margin-top: 10px;">Home</p>', unsafe_allow_html=True)
+            
+            with col_info:
+                # Tombol Info Aplikasi
+                if st.button("App Info", key="nav_info", type="secondary"):
+                    next_page('info')
+            
+            with col_start:
+                # Tombol Mulai Wawancara di Navbar
+                if st.button("Start Interview", key="nav_start", type="primary"):
+                    st.session_state.answers = {}
+                    st.session_state.results = None
+                    st.session_state.current_q = 1
+                    next_page('interview')
+            
+            st.markdown('</div>', unsafe_allow_html=True)
 
-    if st.button("Start Interview"):
-        st.session_state.clear()
-        st.session_state.page = "interview"
-        st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("</div></div>", unsafe_allow_html=True)
 
-    # ===== HERO =====
-    st.markdown("""
-    <section class="hero">
-        <h1>AI-Powered Interview Practice</h1>
-        <p>
-            Practice interview questions, get AI-driven semantic,
-            confidence, and non-verbal feedback — all in one platform.
-        </p>
-    """, unsafe_allow_html=True)
+    # --- 2. Hero Section ---
+    st.markdown('<section class="hero-section">', unsafe_allow_html=True)
+    
+    st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job.</p>', unsafe_allow_html=True)
+    
+    # Tombol Aksi Hero Section
+    st.markdown('<div class="primary-btn-container" style="display: flex; justify-content: center;">', unsafe_allow_html=True)
+    if st.button("▶️ Start Interview", key="hero_start"):
+        st.session_state.answers = {}
+        st.session_state.results = None
+        st.session_state.current_q = 1
+        next_page('interview')
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('</section>', unsafe_allow_html=True)
 
-    if st.button("▶ Start Interview Now"):
-        st.session_state.clear()
-        next_page("interview")
 
-    st.markdown("</section>", unsafe_allow_html=True)
-
-    # ===== HOW TO USE =====
-    st.markdown("""
-    <section class="howto">
-        <h2>How It Works</h2>
-        <div class="step-grid">
+    # --- 3. How To Use Section (Langkah-Langkah) ---
+    st.markdown('<section style="padding: 50px; background-color: white;">', unsafe_allow_html=True)
+    st.markdown('<h2 style="font-size: 40px; text-align: center; margin-bottom: 70px;">How To Use</h2>', unsafe_allow_html=True)
+    
+    st.markdown('<div class="steps-container">', unsafe_allow_html=True)
+    
+    # Grid Langkah-Langkah: Menggunakan kolom Streamlit untuk 5 card
+    cols = st.columns(5)
+    
+    steps_data = [
+        ("1", "Upload Answer Video", "Upload your video answer for each question given by the AI."),
+        ("2", "AI Processes Data", "The AI will process the video into a transcript and analyze non-verbal aspects."),
+        ("3", "Semantic Scoring", "Your answer is compared to an ideal rubric for semantic scoring (Content Relevance)."),
+        ("4", "Get Instant Feedback", "Receive final score, rationale, and instant communication analysis."),
+        ("5", "Improve Skills", "Use the recommendations to practice and improve until you are confident.")
+    ]
+    
+    for i, (num, title, desc) in enumerate(steps_data):
+        with cols[i]:
+            # Struktur Card Kustom
+            st.markdown(f"""
             <div class="step-card">
-                <div class="step-num">1</div>
-                <h4>Upload Video</h4>
-                <p>Answer each interview question using video.</p>
+                <div class="step-number">{num}</div>
+                <h3 class="step-title">{title}</h3>
+                <p class="step-description">{desc}</p>
             </div>
-            <div class="step-card">
-                <div class="step-num">2</div>
-                <h4>AI Processing</h4>
-                <p>Speech-to-text & non-verbal analysis.</p>
-            </div>
-            <div class="step-card">
-                <div class="step-num">3</div>
-                <h4>Semantic Scoring</h4>
-                <p>Answer compared with ideal rubric.</p>
-            </div>
-            <div class="step-card">
-                <div class="step-num">4</div>
-                <h4>Instant Feedback</h4>
-                <p>Score, reasoning, tempo & pauses.</p>
-            </div>
-            <div class="step-card">
-                <div class="step-num">5</div>
-                <h4>Improve Skills</h4>
-                <p>Practice again using AI insights.</p>
-            </div>
-        </div>
-    </section>
-    """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
 
-    # ===== FOOTER =====
-    st.markdown("""
-    <div class="footer">
-        <div><strong style="color:white;">SEI-AI Interviewer</strong></div>
-        <div>© 2024 All Rights Reserved</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</section>', unsafe_allow_html=True)
+
+
+    # --- 4. Footer Kustom ---
+    st.markdown('<div class="custom-footer">', unsafe_allow_html=True)
+    col_footer_left, col_footer_right = st.columns(2)
+    
+    with col_footer_left:
+        st.markdown('<p style="font-weight: bold; color: white; font-size: 16px;">SEI-AI Interviewer</p>', unsafe_allow_html=True)
+    
+    with col_footer_right:
+        st.markdown('<p style="text-align: right;">Copyright © 2024 SEI-AI Interviewer. All Rights Reserved.</p>', unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
 
 def render_info_page():
