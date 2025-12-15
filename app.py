@@ -144,18 +144,7 @@ def inject_custom_css():
     header {visibility: hidden;}
 
     /* 2. Styling untuk Elemen Kustom */
-    .custom-header {
-        background-color: white;
-        padding: 0 50px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        height: 100px; /* Tinggi Navbar */
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-    }
+    
     
     /* Perbaikan Navbar: Memastikan elemen Navigasi sejajar */
     .header-nav {
