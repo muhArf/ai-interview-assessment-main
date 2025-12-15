@@ -545,8 +545,8 @@ def render_processing_page():
             return
 
 def render_results_page():
-    # Mengganti judul menjadi Laporan
-    st.title("✅ Laporan Hasil Analisis Wawancara")
+    # Fungsi ini sekarang hanya bertindak sebagai pengalih (redirector)
+    # untuk memastikan pengguna langsung melihat Laporan Akumulasi Akhir.
     
     if not st.session_state.results:
         st.error("Hasil tidak ditemukan. Silakan coba proses ulang.")
@@ -554,6 +554,9 @@ def render_results_page():
             st.session_state.clear()
             next_page('home')
         return
+        
+    # --- PENGALIHAN LANGSUNG KE LAPORAN AKUMULASI AKHIR ---
+    next_page('final_summary')
 
     # --- SKOR TOTAL DIHILANGKAN SESUAI PERMINTAAN ---
     st.markdown("---") 
@@ -619,4 +622,6 @@ elif st.session_state.page == 'interview':
 elif st.session_state.page == 'processing':
     render_processing_page()
 elif st.session_state.page == 'results':
-    render_results_page()
+    render_results_page() # Fungsi ini sekarang hanya pengalih
+elif st.session_state.page == 'final_summary':
+    render_final_summary_page() # Halaman Laporan Akumulasi Utama
