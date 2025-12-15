@@ -92,8 +92,6 @@ RUBRIC_DATA = load_rubric_data()
 
 # --- Page Render Functions ---
 
-# --- LANDING PAGE CSS & REPORT CSS (Minimalist Modern with Horizontal Cards) ---
-
 def inject_custom_css():
     """Menyuntikkan CSS kustom untuk meniru desain Landing Page & Laporan."""
     st.markdown("""
@@ -132,7 +130,6 @@ def inject_custom_css():
         align-items: center;
         width: 100%;
     }
-    /* Hapus penyesuaian margin yang terlalu spesifik */
     .header-nav button {
         margin-top: 0px !important;
         padding: 8px 15px !important;
@@ -258,7 +255,7 @@ def inject_custom_css():
     }
     .card-value-line {
         display: flex;
-        flex-direction: row; /* BARIS UTAMA SEJAJAR HORIZONTAL */
+        flex-direction: row; 
         align-items: center;
         gap: 10px; 
         margin-bottom: 5px;
@@ -303,11 +300,10 @@ def render_home_page():
     with st.container():
         st.markdown('<div class="custom-header">', unsafe_allow_html=True)
         
-        # Kolom: Logo, Navigasi (Info, Start)
+        # Kolom: Logo (1) dan Navigasi (4)
         col_logo, col_nav = st.columns([1, 4])
         
         with col_logo:
-            # Logo/Nama Aplikasi
             try:
                 st.image('assets/logo dicoding.png', width=80, output_format='PNG') 
             except FileNotFoundError:
@@ -316,7 +312,7 @@ def render_home_page():
         with col_nav:
             st.markdown('<div class="header-nav">', unsafe_allow_html=True)
             
-            # Hanya dua kolom untuk tombol Info dan Start
+            # Dua kolom untuk tombol Info (Sekunder) dan Start (Sekunder - bukan merah)
             col_info, col_start = st.columns([1, 1])
             
             with col_info:
@@ -324,7 +320,8 @@ def render_home_page():
                     next_page('info')
             
             with col_start:
-                if st.button("Start Interview", key="nav_start", type="primary"):
+                # Tombol Start Interview di Navbar dijadikan sekunder (default Streamlit)
+                if st.button("Start Interview", key="nav_start", type="secondary"):
                     st.session_state.answers = {}
                     st.session_state.results = None
                     st.session_state.current_q = 1
@@ -341,7 +338,7 @@ def render_home_page():
     st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
     st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job.</p>', unsafe_allow_html=True)
     
-    # Tombol Aksi Hero Section
+    # Tombol Aksi Hero Section (PRIMARY - Hitam)
     st.markdown('<div class="primary-btn-container" style="display: flex; justify-content: center;">', unsafe_allow_html=True)
     if st.button("▶️ Start Interview", key="hero_start"):
         st.session_state.answers = {}
@@ -440,8 +437,6 @@ def render_interview_page():
     
     col_upload, col_control = st.columns([3, 1])
     
-    # current_uploaded_file = st.session_state.answers.get(q_id_str) # Dibuang
-
     with col_upload:
         uploaded_file = st.file_uploader(
             f"Upload Video Answer for Question {q_num} (Max {VIDEO_MAX_SIZE_MB}MB)",
@@ -457,11 +452,10 @@ def render_interview_page():
 
         if uploaded_file:
             st.success("File successfully uploaded.")
-            # Streamlit secara otomatis menampilkan video yang diunggah jika `uploaded_file` tidak None
             st.video(uploaded_file, format=uploaded_file.type)
         else:
-            # Jika tidak ada file, periksa apakah file sebelumnya ada di session (untuk navigasi mundur)
             if st.session_state.answers.get(q_id_str):
+                # Tampilkan file yang sudah ada jika ada (untuk navigasi mundur)
                 st.info("Previous file detected.")
                 st.video(st.session_state.answers.get(q_id_str), format=st.session_state.answers.get(q_id_str).type)
             else:
@@ -496,7 +490,6 @@ def render_processing_page():
     if st.session_state.results is None:
         
         results = {}
-        # Progress bar di tempat yang lebih fokus
         progress_bar = st.progress(0, text="Starting Process...")
         
         if not all([STT_MODEL, EMBEDDER_MODEL]):
@@ -519,7 +512,7 @@ def render_processing_page():
 
                     if video_file and q_key_rubric in RUBRIC_DATA and q_text:
                         
-                        # Hanya update progress bar, buang st.markdown() per pertanyaan
+                        # Hanya update progress bar
                         progress_bar.progress((i-1)*10 + 1, text=f"Q{i}: Saving video...")
                         temp_video_path = os.path.join(temp_dir, f'video_{q_key_rubric}.mp4')
                         with open(temp_video_path, 'wb') as f:
@@ -579,9 +572,7 @@ def render_processing_page():
                  next_page('home')
             return
 
-# Menghapus render_results_page karena hanya redirector
-# def render_results_page():
-#     ...
+# Menghapus render_results_page karena hanya sebagai pengalih
 
 def render_final_summary_page():
     inject_custom_css() 
@@ -789,6 +780,5 @@ elif st.session_state.page == 'interview':
     render_interview_page()
 elif st.session_state.page == 'processing':
     render_processing_page()
-# Menghapus kondisi 'results' karena sudah di-redirect ke 'final_summary'
 elif st.session_state.page == 'final_summary':
     render_final_summary_page()
