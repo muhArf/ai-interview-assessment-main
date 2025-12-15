@@ -337,40 +337,53 @@ def inject_custom_css():
     </style>
     """, unsafe_allow_html=True)
 
+
 def render_home_page():
-    # Suntikkan CSS kustom
+    # 1. Suntikkan CSS kustom
     inject_custom_css()
 
-    # --- Navbar Kustom ---
+    # --- 1. Header (Navbar Kustom) ---
     with st.container():
-        st.markdown("""
-        <div style="
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            background-color: #f8f9fa;  /* Warna navbar terang */
-            padding: 10px 50px;
-            height: 80px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        ">
-            <!-- Logo -->
-            <div style="display: flex; align-items: center;">
-                <img src='assets/seiai.png' width='80' style='display: block;'/>
-            </div>
+        st.markdown('<div class="custom-header">', unsafe_allow_html=True)
+        
+        # Menggunakan dua kolom utama: Logo dan Navigasi
+        col_logo, col_nav = st.columns([1, 4])
+        
+        with col_logo:
+            # Logo/Nama Aplikasi
+            try:
+                st.image('assets/seiai.png', width=80, output_format='PNG') 
+            except FileNotFoundError:
+                st.markdown('<p style="font-weight: bold; font-size: 20px; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True) 
 
-            <!-- Navigasi -->
-            <div style="display: flex; align-items: center; gap: 30px;">
-                <p style="color: #1f2937; font-size: 16px; margin: 0; cursor: pointer;">Home</p>
-        """, unsafe_allow_html=True)
+        with col_nav:
+            # Kontainer Navigasi dengan class 'header-nav' untuk styling khusus
+            st.markdown('<div class="header-nav">', unsafe_allow_html=True)
+            
+            # Menggunakan 3 kolom di dalam col_nav: Home, Info, Start
+            col_home, col_info, col_start = st.columns([0.5, 1, 1])
+            
+            with col_home:
+                # Teks Home yang sejajar dengan tombol
+                st.markdown('<p style="font-size: 14px; font-weight: 500; margin-top: 10px;">Home</p>', unsafe_allow_html=True)
+            
+            with col_info:
+                # Tombol Info Aplikasi
+                if st.button("App Info", key="nav_info", type="secondary"):
+                    next_page('info')
+            
+            with col_start:
+                # Tombol Mulai Wawancara di Navbar
+                if st.button("Start Interview", key="nav_start", type="primary"):
+                    st.session_state.answers = {}
+                    st.session_state.results = None
+                    st.session_state.current_q = 1
+                    next_page('interview')
+            
+            st.markdown('</div>', unsafe_allow_html=True)
 
-        # Tombol App Info
-        if st.button("App Info", key="nav_info", type="secondary"):
-            next_page('info')
+        st.markdown('</div>', unsafe_allow_html=True)
 
-        st.markdown("""
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
 
     # --- 2. Hero Section ---
     st.markdown('<section class="hero-section">', unsafe_allow_html=True)
