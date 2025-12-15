@@ -860,7 +860,7 @@ def render_detailed_results_per_question():
         with col_res2:
             st.metric("Transcript Accuracy", res['confidence_score'])
         with col_res3:
-            st.metric("Summary", res['non_verbal'].get('qualitative_summary', 'N/A').capitalize())
+            st.metric("Analysis Non-Verbal", res['non_verbal'].get('qualitative_summary', 'N/A').capitalize())
         
         st.markdown("**Reason:**")
         st.caption(res['rubric_reason'])
