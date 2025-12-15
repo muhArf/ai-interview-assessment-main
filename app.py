@@ -860,14 +860,14 @@ def render_detailed_results_per_question():
         with col_res2:
             st.metric("Transcript Accuracy", res['confidence_score'])
         with col_res3:
-            st.metric("Communication Summary", res['non_verbal'].get('qualitative_summary', 'N/A').capitalize())
+            st.metric("Summary", res['non_verbal'].get('qualitative_summary', 'N/A').capitalize())
         
         st.markdown("**Content Scoring Rationale:**")
         st.caption(res['rubric_reason'])
 
         st.markdown("**Detailed Audio Analysis:**")
-        st.markdown(f"* **Speaking Tempo:** {res['non_verbal'].get('tempo_bpm', 'N/A')}")
-        st.markdown(f"* **Total Pause Time:** {res['non_verbal'].get('total_pause_seconds', 'N/A')}")
+        st.markdown(f"* **Tempo:** {res['non_verbal'].get('tempo_bpm', 'N/A')}")
+        st.markdown(f"* **Total Pause :** {res['non_verbal'].get('total_pause_seconds', 'N/A')}")
 
         with st.expander("View Clean Transcript"):
             st.code(res['transcript'], language='text')
