@@ -1,4 +1,4 @@
-# app.py
+# app.py (Kode Lengkap yang Sudah Diperbaiki)
 import streamlit as st
 import pandas as pd
 import json
@@ -254,11 +254,11 @@ def inject_custom_css():
         transform: translateY(-2px);
     }
     
-    /* === CARD METRIK HORIZONTAL === */
+    /* === CARD METRIK HORIZONTAL DENGAN PERBAIKAN === */
     .metric-grid-container {
         display: grid;
         grid-template-columns: repeat(4, 1fr); /* 4 kolom sama lebar */
-        gap: 20px;
+        gap: 15px; /* Kurangi gap dari 20px ke 15px */
         margin-bottom: 30px;
         width: 100%; 
     }
@@ -266,30 +266,31 @@ def inject_custom_css():
     .modern-metric-card {
         background-color: white;
         border-radius: 12px;
-        padding: 20px;
+        padding: 15px; /* Sedikit kurangi padding vertikal/horizontal */
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         text-align: left;
         transition: transform 0.2s;
         height: auto; 
+        min-width: 0; /* Penting untuk Grid agar bisa menciut */
     }
     
     .card-value-line {
         display: flex;
         flex-direction: row; 
         align-items: center;
-        gap: 10px; 
-        margin-bottom: 5px;
+        gap: 8px; /* Kurangi gap di baris nilai */
+        margin-bottom: 3px; /* Kurangi margin bawah */
     }
     
     .card-value {
-        font-size: 32px;
+        font-size: 28px; /* Kurangi ukuran font nilai utama dari 32px ke 28px */
         font-weight: 700;
     }
     .card-label {
-        font-size: 14px;
+        font-size: 13px; /* Sedikit kurangi ukuran font label dari 14px ke 13px */
         color: #7f8c8d;
         font-weight: 500;
-        margin-top: 5px; 
+        margin-top: 3px; 
     }
     /* Warna untuk Skor dan Tempo */
     .score-color { color: #2ecc71; } 
@@ -322,6 +323,7 @@ def render_home_page():
         with col_logo:
             # Logo/Nama Aplikasi
             try:
+                # PASTIKAN PATH GAMBAR BENAR
                 st.image('assets/logo dicoding.png', width=80, output_format='PNG') 
             except FileNotFoundError:
                 st.markdown('<p style="font-weight: bold; font-size: 20px; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True) 
@@ -383,10 +385,10 @@ def render_home_page():
     cols = st.columns(5)
     
     steps_data = [
-        ("1", "Upload Answer Video", "Upload your video answer for each question given by the AI."),
-        ("2", "AI Processes Data", "The AI will process the video into a transcript and analyze non-verbal aspects."),
-        ("3", "Semantic Scoring", "Your answer is compared to an ideal rubric for semantic scoring (Content Relevance)."),
-        ("4", "Get Instant Feedback", "Receive final score, rationale, and instant communication analysis."),
+        ("1", "Upload Video", "Upload your video answer for each question given by the AI."),
+        ("2", "AI Process", "The AI will process the video into a transcript and analyze non-verbal aspects."),
+        ("3", "Semantic Score", "Your answer is compared to an ideal rubric for content relevance."),
+        ("4", "Instant Feedback", "Receive final score, rationale, and instant communication analysis."),
         ("5", "Improve Skills", "Use the recommendations to practice and improve until you are confident.")
     ]
     
@@ -479,6 +481,10 @@ def render_interview_page():
             st.success("File successfully uploaded.")
             st.video(uploaded_file, format=uploaded_file.type)
         elif current_uploaded_file:
+            # Perlu diperhatikan: video_to_wav memerlukan path file, bukan Streamlit UploadedFile object.
+            # Jika Anda ingin menampilkan video yang sudah diupload sebelumnya, simpan file secara persisten 
+            # atau ulangi logika file_uploader dengan state yang sesuai.
+            # Untuk demo, kita berasumsi file masih tersedia di current_uploaded_file
             st.video(current_uploaded_file, format=current_uploaded_file.type)
             st.info("Previous file detected.")
         else:
@@ -541,6 +547,9 @@ def render_processing_page():
                         # --- 1. Save Video 
                         progress_bar.progress((i-1)*10 + 1, text=f"Q{i}: Saving video...")
                         temp_video_path = os.path.join(temp_dir, f'video_{q_key_rubric}.mp4')
+                        # Menghindari error UnboundLocalError jika video_to_wav error
+                        temp_audio_path = os.path.join(temp_dir, f'audio_{q_key_rubric}.wav') 
+
                         with open(temp_video_path, 'wb') as f:
                             f.write(video_file.getbuffer())
 
@@ -684,7 +693,7 @@ def render_final_summary_page():
     # Kunci: Gunakan div kustom dengan display: grid yang kuat.
     st.markdown('<div class="metric-grid-container">', unsafe_allow_html=True)
     
-    # Card 1: Average Content Score
+    # Card 1: Average Content Score (Dipendekkan)
     st.markdown(f"""
     <div class="modern-metric-card">
         <div class="card-content-wrapper">
@@ -692,12 +701,12 @@ def render_final_summary_page():
                 <span class="card-icon score-color">🎯</span>
                 <span class="card-value score-color">{avg_score:.2f} / 4</span>
             </div>
-            <span class="card-label">Average Content Score</span>
+            <span class="card-label">Avg. Content Score</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Card 2: Average Transcript Accuracy
+    # Card 2: Average Transcript Accuracy (Dipendekkan)
     st.markdown(f"""
     <div class="modern-metric-card">
         <div class="card-content-wrapper">
@@ -705,12 +714,12 @@ def render_final_summary_page():
                 <span class="card-icon accuracy-color">🤖</span>
                 <span class="card-value accuracy-color">{avg_confidence:.2f}%</span>
             </div>
-            <span class="card-label">Avg. Transcript Accuracy</span>
+            <span class="card-label">Avg. Accuracy (%)</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Card 3: Average Tempo
+    # Card 3: Average Tempo (Dipendekkan)
     st.markdown(f"""
     <div class="modern-metric-card">
         <div class="card-content-wrapper">
@@ -718,12 +727,12 @@ def render_final_summary_page():
                 <span class="card-icon tempo-color">⏱️</span>
                 <span class="card-value tempo-color">{avg_tempo:.2f}</span>
             </div>
-            <span class="card-label">Average Tempo (BPM)</span>
+            <span class="card-label">Avg. Tempo (BPM)</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Card 4: Total Pause Time
+    # Card 4: Total Pause Time (Dipendekkan)
     st.markdown(f"""
     <div class="modern-metric-card">
         <div class="card-content-wrapper">
@@ -731,7 +740,7 @@ def render_final_summary_page():
                 <span class="card-icon pause-color">⏸️</span>
                 <span class="card-value pause-color">{total_pause:.2f}</span>
             </div>
-            <span class="card-label">Total Pause Time (sec)</span>
+            <span class="card-label">Total Pause (sec)</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
