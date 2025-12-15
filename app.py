@@ -297,12 +297,6 @@ def inject_custom_css():
     .tempo-color { color: #f39c12; } 
     .pause-color { color: #e74c3c; } 
     
-    .summary-box {
-        border-radius: 12px;
-        padding: 25px;
-        margin-bottom: 20px;
-        background-color: #ecf0f1; 
-    }
     
     </style>
     """, unsafe_allow_html=True)
