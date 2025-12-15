@@ -19,8 +19,7 @@ try:
 except ImportError as e:
     # Handle the error gracefully if modules fail to load
     st.error(f"Failed to load modules from the 'models' folder. Ensure the folder structure and files are correct. Error: {e}")
-    # Jika Anda ingin aplikasi berhenti total di sini, gunakan:
-    # st.stop()
+    # st.stop() # Uncomment this if you want the app to stop on module load failure
 
 # Konfigurasi Halaman & Load Data
 st.set_page_config(
@@ -522,7 +521,7 @@ def render_processing_page():
                         
                         # --- 1. Save Video 
                         progress_bar.progress((i-1)*10 + 1, text=f"Q{i}: Saving video...")
-                        temp_video_path = os.path.join(temp_dir, f'video_{q_key_rubric}.mp4')
+                        temp_video_path = os.out_path(temp_dir, f'video_{q_key_rubric}.mp4')
                         with open(temp_video_path, 'wb') as f:
                             f.write(video_file.getbuffer())
 
@@ -601,6 +600,9 @@ def render_results_page():
 
 
 def render_final_summary_page():
+    # Suntikkan CSS lagi untuk memastikan styling card berfungsi
+    inject_custom_css() 
+    
     st.title("🏆 Final Evaluation Report")
     st.markdown("---") # Pemisah tipis untuk judul
 
