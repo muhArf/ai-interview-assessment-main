@@ -13,13 +13,11 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'models'))
 
 # Import logic dari folder models
 try:
-    # PENTING: Pastikan file di folder models/ sudah terimplementasi dengan benar.
     from models.stt_processor import load_stt_model, load_text_models, video_to_wav, noise_reduction, transcribe_and_clean
     from models.scoring_logic import load_embedder_model, compute_confidence_score, score_with_rubric
     from models.nonverbal_analysis import analyze_non_verbal
 except ImportError as e:
     st.error(f"Failed to load modules from the 'models' folder. Ensure the folder structure and files are correct. Error: {e}")
-    # Jika Anda ingin aplikasi berhenti ketika gagal memuat modul, uncomment baris di bawah:
     # st.stop() 
 
 # Konfigurasi Halaman & Load Data
@@ -52,7 +50,6 @@ def next_page(page_name):
 def get_models():
     """Load semua model berat (hanya sekali)."""
     try:
-        # PENTING: Ganti path model sesuai dengan implementasi Anda yang sebenarnya
         stt_model = load_stt_model()
         embedder_model = load_embedder_model()
         
@@ -135,12 +132,7 @@ def inject_custom_css():
         align-items: center;
         width: 100%;
     }
-    .header-nav > div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
-        margin-right: 20px;
-    }
-    .header-nav > div[data-testid="stHorizontalBlock"] > div:nth-child(2) {
-        margin-right: 10px;
-    }
+    /* Hapus penyesuaian margin yang terlalu spesifik */
     .header-nav button {
         margin-top: 0px !important;
         padding: 8px 15px !important;
@@ -241,15 +233,13 @@ def inject_custom_css():
         transform: translateY(-2px);
     }
     
-    /* === CSS TAMBAHAN BARU UNTUK LAPORAN MINIMALIS HORIZONTAL METRIK === */
-    /* Container untuk kartu metrik */
+    /* === CSS LAPORAN METRIK HORIZONTAL FIX === */
     .metric-grid-container {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 20px;
         margin-bottom: 30px;
     }
-    /* Card Styling */
     .modern-metric-card {
         background-color: white;
         border-radius: 12px;
@@ -261,15 +251,11 @@ def inject_custom_css():
     .modern-metric-card:hover {
         transform: translateY(-3px);
     }
-    
-    /* Kontainer untuk Nilai dan Label */
     .card-content-wrapper {
         display: flex;
-        flex-direction: column; /* Icon + Value di atas, Label di bawah (secara keseluruhan card) */
+        flex-direction: column; 
         align-items: flex-start;
     }
-
-    /* Kontainer untuk Icon dan Value agar sejajar horizontal */
     .card-value-line {
         display: flex;
         flex-direction: row; /* BARIS UTAMA SEJAJAR HORIZONTAL */
@@ -293,18 +279,16 @@ def inject_custom_css():
         font-weight: 500;
         margin-top: 5px; 
     }
-    /* Warna untuk Skor dan Tempo */
-    .score-color { color: #2ecc71; } /* Hijau */
-    .accuracy-color { color: #3498db; } /* Biru */
-    .tempo-color { color: #f39c12; } /* Kuning */
-    .pause-color { color: #e74c3c; } /* Merah */
+    .score-color { color: #2ecc71; }
+    .accuracy-color { color: #3498db; }
+    .tempo-color { color: #f39c12; }
+    .pause-color { color: #e74c3c; }
     
-    /* Styling untuk Summary dan Recommendations */
     .summary-box {
         border-radius: 12px;
         padding: 25px;
         margin-bottom: 20px;
-        background-color: #ecf0f1; /* Light gray background */
+        background-color: #ecf0f1; 
     }
     
     </style>
@@ -315,39 +299,31 @@ def render_home_page():
     # 1. Suntikkan CSS kustom
     inject_custom_css()
 
-    # --- 1. Header (Navbar Kustom) ---
+    # --- 1. Header (Navbar Kustom - Lebih Minimalis) ---
     with st.container():
         st.markdown('<div class="custom-header">', unsafe_allow_html=True)
         
-        # Menggunakan dua kolom utama: Logo dan Navigasi
+        # Kolom: Logo, Navigasi (Info, Start)
         col_logo, col_nav = st.columns([1, 4])
         
         with col_logo:
             # Logo/Nama Aplikasi
             try:
-                # Ganti dengan path logo Anda jika berbeda
                 st.image('assets/logo dicoding.png', width=80, output_format='PNG') 
             except FileNotFoundError:
                 st.markdown('<p style="font-weight: bold; font-size: 20px; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True) 
 
         with col_nav:
-            # Kontainer Navigasi dengan class 'header-nav' untuk styling khusus
             st.markdown('<div class="header-nav">', unsafe_allow_html=True)
             
-            # Menggunakan 3 kolom di dalam col_nav: Home, Info, Start
-            col_home, col_info, col_start = st.columns([0.5, 1, 1])
-            
-            with col_home:
-                # Teks Home yang sejajar dengan tombol
-                st.markdown('<p style="font-size: 14px; font-weight: 500; margin-top: 10px;">Home</p>', unsafe_allow_html=True)
+            # Hanya dua kolom untuk tombol Info dan Start
+            col_info, col_start = st.columns([1, 1])
             
             with col_info:
-                # Tombol Info Aplikasi
                 if st.button("App Info", key="nav_info", type="secondary"):
                     next_page('info')
             
             with col_start:
-                # Tombol Mulai Wawancara di Navbar
                 if st.button("Start Interview", key="nav_start", type="primary"):
                     st.session_state.answers = {}
                     st.session_state.results = None
@@ -464,7 +440,7 @@ def render_interview_page():
     
     col_upload, col_control = st.columns([3, 1])
     
-    current_uploaded_file = st.session_state.answers.get(q_id_str)
+    # current_uploaded_file = st.session_state.answers.get(q_id_str) # Dibuang
 
     with col_upload:
         uploaded_file = st.file_uploader(
@@ -481,12 +457,15 @@ def render_interview_page():
 
         if uploaded_file:
             st.success("File successfully uploaded.")
+            # Streamlit secara otomatis menampilkan video yang diunggah jika `uploaded_file` tidak None
             st.video(uploaded_file, format=uploaded_file.type)
-        elif current_uploaded_file:
-            st.video(current_uploaded_file, format=current_uploaded_file.type)
-            st.info("Previous file detected.")
         else:
-            st.warning("Please upload your answer file to continue.")
+            # Jika tidak ada file, periksa apakah file sebelumnya ada di session (untuk navigasi mundur)
+            if st.session_state.answers.get(q_id_str):
+                st.info("Previous file detected.")
+                st.video(st.session_state.answers.get(q_id_str), format=st.session_state.answers.get(q_id_str).type)
+            else:
+                st.warning("Please upload your answer file to continue.")
 
     with col_control:
         st.markdown("### Controls")
@@ -511,13 +490,13 @@ def render_processing_page():
     st.info("Please wait, this process may take a few minutes depending on the video duration.")
 
     if st.session_state.results is not None and st.session_state.results != {}:
-        # Redirect to the final summary page after processing
         next_page('final_summary') 
         return
 
     if st.session_state.results is None:
         
         results = {}
+        # Progress bar di tempat yang lebih fokus
         progress_bar = st.progress(0, text="Starting Process...")
         
         if not all([STT_MODEL, EMBEDDER_MODEL]):
@@ -540,39 +519,29 @@ def render_processing_page():
 
                     if video_file and q_key_rubric in RUBRIC_DATA and q_text:
                         
-                        st.markdown(f"### Processing Q{i}: {q_text[:50]}...")
-                        
-                        # --- 1. Save Video 
+                        # Hanya update progress bar, buang st.markdown() per pertanyaan
                         progress_bar.progress((i-1)*10 + 1, text=f"Q{i}: Saving video...")
                         temp_video_path = os.path.join(temp_dir, f'video_{q_key_rubric}.mp4')
                         with open(temp_video_path, 'wb') as f:
                             f.write(video_file.getbuffer())
 
-                        # --- 2. Audio Extraction & Noise Reduction
                         progress_bar.progress((i-1)*10 + 3, text=f"Q{i}: Extracting audio and Noise Reduction...")
                         temp_audio_path = os.path.join(temp_dir, f'audio_{q_key_rubric}.wav')
-                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         video_to_wav(temp_video_path, temp_audio_path)
                         
                         noise_reduction(temp_audio_path, temp_audio_path) 
                         
-                        # --- 3. Speech-to-Text (STT) & Cleaning
                         progress_bar.progress((i-1)*10 + 5, text=f"Q{i}: Transcription and Text Cleaning...")
-                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         transcript, log_prob_raw = transcribe_and_clean(
                             temp_audio_path, STT_MODEL, SPELL_CHECKER, EMBEDDER_MODEL, ENGLISH_WORDS
                         )
                         
                         final_confidence_score_0_1 = compute_confidence_score(transcript, log_prob_raw)
                         
-                        # --- 4. Non-Verbal Analysis
                         progress_bar.progress((i-1)*10 + 7, text=f"Q{i}: Non-Verbal Analysis...")
-                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         non_verbal_res = analyze_non_verbal(temp_audio_path)
 
-                        # --- 5. Answer Scoring (Semantic)
                         progress_bar.progress((i-1)*10 + 9, text=f"Q{i}: Semantic Scoring...")
-                        # PENTING: Fungsi ini bergantung pada implementasi Anda di models/
                         score, reason = score_with_rubric(
                             q_key_rubric, q_text, transcript, RUBRIC_DATA, EMBEDDER_MODEL
                         )
@@ -583,7 +552,6 @@ def render_processing_page():
                             final_score_value = 0
                             reason = f"[ERROR: Score failed to calculate/Wrong data type. Default score 0 used.] {reason}"
                         
-                        # --- 6. Save Results
                         results[q_key_rubric] = {
                             "question": q_text,
                             "transcript": transcript,
@@ -599,7 +567,6 @@ def render_processing_page():
                     
                 st.session_state.results = results
                 progress_bar.progress(100, text="Process Complete! Redirecting to Final Report.")
-                # Pindah ke laporan akumulasi
                 next_page('final_summary')
 
         except Exception as e:
@@ -612,26 +579,15 @@ def render_processing_page():
                  next_page('home')
             return
 
-def render_results_page():
-    # Fungsi ini sekarang hanya pengalih/redirector
-    
-    if not st.session_state.results:
-        st.error("Results not found. Please try processing again.")
-        if st.button("🏠 Back to Home"):
-            st.session_state.clear()
-            next_page('home')
-        return
-        
-    # REDIRECT DIRECTLY TO THE FINAL ACCUMULATED REPORT
-    next_page('final_summary')
-
+# Menghapus render_results_page karena hanya redirector
+# def render_results_page():
+#     ...
 
 def render_final_summary_page():
-    # Suntikkan CSS lagi untuk memastikan styling card berfungsi
     inject_custom_css() 
     
     st.title("🏆 Final Evaluation Report")
-    st.markdown("---") # Pemisah tipis untuk judul
+    st.markdown("---") 
 
     if not st.session_state.results:
         st.error("Result data not found.")
@@ -642,7 +598,6 @@ def render_final_summary_page():
     # --- 1. Combined Metrics Calculation ---
     try:
         all_scores = [int(res['final_score']) for res in st.session_state.results.values()]
-        # Extract and clean data, handling potential non-numeric strings
         all_confidence = [float(res['confidence_score'].split(' ')[0].replace('%', '')) for res in st.session_state.results.values()]
         
         all_tempo = []
@@ -789,9 +744,13 @@ def render_final_summary_page():
     with st.expander("View Detailed Report Per Question"):
         render_detailed_results_per_question() 
 
+    # Tombol utama di bagian paling bawah
+    st.markdown('<div class="primary-btn-container" style="margin-top: 30px;">', unsafe_allow_html=True)
     if st.button("Start New Interview 🔄", use_container_width=True, type="primary"):
         st.session_state.clear() 
         next_page('home')
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
 def render_detailed_results_per_question():
     """Function to display results per question, nested within the expander (in English)."""
@@ -830,7 +789,6 @@ elif st.session_state.page == 'interview':
     render_interview_page()
 elif st.session_state.page == 'processing':
     render_processing_page()
-elif st.session_state.page == 'results':
-    render_results_page() 
+# Menghapus kondisi 'results' karena sudah di-redirect ke 'final_summary'
 elif st.session_state.page == 'final_summary':
     render_final_summary_page()
