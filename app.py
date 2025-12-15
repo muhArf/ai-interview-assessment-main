@@ -542,7 +542,7 @@ def render_interview_page():
     # --- Logic Kontrol (Next/Previous) ---
 
     with col_control:
-        st.markdown("### Controls")
+        
         
         # Kondisi 'ready' sekarang hanya bergantung pada session_state.answers
         is_ready = st.session_state.answers.get(q_id_str) is not None
