@@ -17,8 +17,10 @@ try:
     from models.scoring_logic import load_embedder_model, compute_confidence_score, score_with_rubric
     from models.nonverbal_analysis import analyze_non_verbal
 except ImportError as e:
+    # Handle the error gracefully if modules fail to load
     st.error(f"Failed to load modules from the 'models' folder. Ensure the folder structure and files are correct. Error: {e}")
-    # st.stop() # Uncomment this if you want the app to stop on module load failure
+    # Jika Anda ingin aplikasi berhenti total di sini, gunakan:
+    # st.stop()
 
 # Konfigurasi Halaman & Load Data
 st.set_page_config(
@@ -92,7 +94,7 @@ RUBRIC_DATA = load_rubric_data()
 
 # --- Page Render Functions ---
 
-# --- LANDING PAGE CSS & REPORT CSS (Minimalist Modern with Horizontal Cards FIX) ---
+# --- LANDING PAGE CSS ---
 
 def inject_custom_css():
     """Menyuntikkan CSS kustom untuk meniru desain Landing Page & Laporan."""
@@ -238,74 +240,28 @@ def inject_custom_css():
         transform: translateY(-2px);
     }
     
-    /* === CSS TAMBAHAN BARU UNTUK LAPORAN MINIMALIS HORIZONTAL METRIK === */
-    
-    /* 1. Grid Container (Memastikan 4 kolom) */
-    .metric-grid-container {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-
-    /* 2. Card Styling */
-    .modern-metric-card {
-        background-color: white;
+    /* === CSS TAMBAHAN UNTUK LAPORAN PROFESIONAL (FINAL SUMMARY) === */
+    .report-metric-card {
+        background-color: #ffffff;
         border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        text-align: left;
-        transition: transform 0.2s;
-    }
-    .modern-metric-card:hover {
-        transform: translateY(-3px);
-    }
-    
-    /* 3. Wrapper Konten Card (Membuat Konten Utama Berbaris Horizontal, lalu Label di bawahnya) */
-    .card-content-wrapper {
+        padding: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        height: 100%;
         display: flex;
-        flex-direction: column; /* Mengatur blok (Line + Label) secara Vertikal */
-        align-items: flex-start;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
     }
-
-    /* 4. Garis Nilai + Icon (Memaksa Horizontal) */
-    .card-value-line {
-        display: flex;
-        flex-direction: row; /* BARIS UTAMA SEJAJAR HORIZONTAL FIX */
-        align-items: center;
-        gap: 10px; 
+    .metric-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #2c3e50;
         margin-bottom: 5px;
     }
-    
-    .card-icon {
-        font-size: 24px;
-        line-height: 1;
-        min-width: 24px; /* Memastikan ruang tetap */
-    }
-    .card-value {
-        font-size: 32px;
-        font-weight: 700;
-        line-height: 1;
-        flex-grow: 1;
-    }
-    .card-label {
+    .metric-label {
         font-size: 14px;
         color: #7f8c8d;
         font-weight: 500;
-        margin-top: 5px; 
-    }
-    /* Warna untuk Skor dan Tempo */
-    .score-color { color: #2ecc71; } /* Hijau */
-    .accuracy-color { color: #3498db; } /* Biru */
-    .tempo-color { color: #f39c12; } /* Kuning */
-    .pause-color { color: #e74c3c; } /* Merah */
-    
-    /* Styling untuk Summary dan Recommendations */
-    .summary-box {
-        border-radius: 12px;
-        padding: 25px;
-        margin-bottom: 20px;
-        background-color: #ecf0f1; /* Light gray background */
     }
     
     </style>
@@ -320,27 +276,35 @@ def render_home_page():
     with st.container():
         st.markdown('<div class="custom-header">', unsafe_allow_html=True)
         
+        # Menggunakan dua kolom utama: Logo dan Navigasi
         col_logo, col_nav = st.columns([1, 4])
         
         with col_logo:
+            # Logo/Nama Aplikasi
             try:
+                # Ganti dengan path logo Anda jika berbeda
                 st.image('assets/logo dicoding.png', width=80, output_format='PNG') 
             except FileNotFoundError:
                 st.markdown('<p style="font-weight: bold; font-size: 20px; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True) 
 
         with col_nav:
+            # Kontainer Navigasi dengan class 'header-nav' untuk styling khusus
             st.markdown('<div class="header-nav">', unsafe_allow_html=True)
             
+            # Menggunakan 3 kolom di dalam col_nav: Home, Info, Start
             col_home, col_info, col_start = st.columns([0.5, 1, 1])
             
             with col_home:
+                # Teks Home yang sejajar dengan tombol
                 st.markdown('<p style="font-size: 14px; font-weight: 500; margin-top: 10px;">Home</p>', unsafe_allow_html=True)
             
             with col_info:
+                # Tombol Info Aplikasi
                 if st.button("App Info", key="nav_info", type="secondary"):
                     next_page('info')
             
             with col_start:
+                # Tombol Mulai Wawancara di Navbar
                 if st.button("Start Interview", key="nav_start", type="primary"):
                     st.session_state.answers = {}
                     st.session_state.results = None
@@ -543,6 +507,7 @@ def render_processing_page():
 
                         # --- 2. Audio Extraction & Noise Reduction
                         progress_bar.progress((i-1)*10 + 3, text=f"Q{i}: Extracting audio and Noise Reduction...")
+                        temp_audio_path = os.path.join(temp_dir, f'audio_{q_key_rubric}.wav')
                         video_to_wav(temp_video_path, temp_audio_path)
                         
                         noise_reduction(temp_audio_path, temp_audio_path) 
@@ -601,7 +566,7 @@ def render_processing_page():
             return
 
 def render_results_page():
-    # Fungsi ini sekarang hanya pengalih/redirector
+    # This function is now a clean redirector
     
     if not st.session_state.results:
         st.error("Results not found. Please try processing again.")
@@ -610,15 +575,14 @@ def render_results_page():
             next_page('home')
         return
         
+    # REDIRECT DIRECTLY TO THE FINAL ACCUMULATED REPORT
     next_page('final_summary')
 
 
 def render_final_summary_page():
-    # Suntikkan CSS lagi untuk memastikan styling card berfungsi
-    inject_custom_css() 
-    
-    st.title("🏆 Final Evaluation Report")
-    st.markdown("---") # Pemisah tipis untuk judul
+    st.title("🏆 Final Evaluation Report (Accumulated)")
+    st.markdown("This report presents combined metrics from all 5 questions to reduce subjective bias and provide an objective overview of performance.")
+    st.markdown("---")
 
     if not st.session_state.results:
         st.error("Result data not found.")
@@ -629,6 +593,7 @@ def render_final_summary_page():
     # --- 1. Combined Metrics Calculation ---
     try:
         all_scores = [int(res['final_score']) for res in st.session_state.results.values()]
+        # Extract and clean data, handling potential non-numeric strings
         all_confidence = [float(res['confidence_score'].split(' ')[0].replace('%', '')) for res in st.session_state.results.values()]
         
         all_tempo = []
@@ -658,122 +623,89 @@ def render_final_summary_page():
     # Qualitative logic (in English)
     def get_overall_comment(avg_score, avg_tempo):
         comment = []
+        
+        # Content Comment
         if avg_score >= 3.5:
             comment.append("The content and relevance of the answers were strong and well-structured.")
         elif avg_score >= 2.5:
             comment.append("Answer content was adequate, but could be improved for deeper material understanding.")
         else:
             comment.append("Answer content was less relevant to the questions; focus is needed on rubric alignment.")
-        
+            
+        # Non-Verbal Comment
         if avg_tempo > 150:
             comment.append("The overall speaking tempo tends to be too fast; practice slowing down for clarity.")
         elif avg_tempo < 125:
             comment.append("The overall speaking tempo is too slow, potentially losing interviewer attention.")
         else:
             comment.append("The overall speaking tempo is within the optimal range (125-150 BPM).")
+            
         return " ".join(comment)
 
-    # --- 2. Average Metrics Display (Minimalist Grid Cards - Horizontal Look) ---
-    st.subheader("📊 Performance Summary")
+    # --- 2. Average Metrics Display (Using Custom CSS Cards) ---
+    st.subheader("📊 Accumulated Metrics Summary")
+    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
     
-    # Menggunakan CSS Grid Container
-    st.markdown('<div class="metric-grid-container">', unsafe_allow_html=True)
-    
-    # Card 1: Average Content Score
-    st.markdown(f"""
-    <div class="modern-metric-card">
-        <div class="card-content-wrapper">
-            <div class="card-value-line">
-                <span class="card-icon score-color">🎯</span>
-                <span class="card-value score-color">{avg_score:.2f} / 4</span>
-            </div>
-            <span class="card-label">Average Content Score</span>
+    with col_m1:
+        st.markdown(f"""
+        <div class="report-metric-card" style="border-left: 5px solid #27ae60;">
+            <p class="metric-value">🎯 {avg_score:.2f} / 4</p>
+            <p class="metric-label">Average Content Score</p>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Card 2: Average Transcript Accuracy
-    st.markdown(f"""
-    <div class="modern-metric-card">
-        <div class="card-content-wrapper">
-            <div class="card-value-line">
-                <span class="card-icon accuracy-color">🤖</span>
-                <span class="card-value accuracy-color">{avg_confidence:.2f}%</span>
-            </div>
-            <span class="card-label">Avg. Transcript Accuracy</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Card 3: Average Tempo
-    st.markdown(f"""
-    <div class="modern-metric-card">
-        <div class="card-content-wrapper">
-            <div class="card-value-line">
-                <span class="card-icon tempo-color">⏱️</span>
-                <span class="card-value tempo-color">{avg_tempo:.2f}</span>
-            </div>
-            <span class="card-label">Average Tempo (BPM)</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Card 4: Total Pause Time
-    st.markdown(f"""
-    <div class="modern-metric-card">
-        <div class="card-content-wrapper">
-            <div class="card-value-line">
-                <span class="card-icon pause-color">⏸️</span>
-                <span class="card-value pause-color">{total_pause:.2f}</span>
-            </div>
-            <span class="card-label">Total Pause Time (sec)</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown("---") 
-
-    # --- 3. Objective Evaluation and Recommendations (Grouped Container) ---
-    st.subheader("💡 Objective Evaluation & Action Plan")
-    
-    col_eval, col_recom = st.columns(2)
-    
-    # Evaluation Box
-    with col_eval:
-        st.markdown('<div class="summary-box">', unsafe_allow_html=True)
-        st.markdown("### Performance Conclusion")
-        st.info(get_overall_comment(avg_score, avg_tempo))
-        st.caption("This conclusion is automatically generated based on data metrics.")
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Recommendation Box
-    with col_recom:
-        st.markdown('<div class="summary-box">', unsafe_allow_html=True)
-        st.markdown("### Key Development Areas")
+        """, unsafe_allow_html=True)
         
-        # Recommendations
-        if avg_score < 3.0:
-            st.warning("* **Content Development:** Focus on deepening answers according to the rubric. Use the *STAR method* for structure.")
-        if avg_tempo > 150 or avg_tempo < 125:
-            st.warning("* **Tempo Control:** Practice speaking within the 125-150 BPM range. Practice breathing exercises.")
-        if total_pause > 120: 
-            st.warning("* **Pause Management:** Reduce excessively long pauses. Consider using short pauses (2-3 seconds) for emphasis only.")
-        if avg_confidence < 90:
-            st.warning("* **Vocal Clarity Improvement:** Speak louder and clearer. The recording environment should be minimally noisy.")
+    with col_m2:
+        st.markdown(f"""
+        <div class="report-metric-card" style="border-left: 5px solid #f39c12;">
+            <p class="metric-value">🤖 {avg_confidence:.2f}%</p>
+            <p class="metric-label">Average Transcript Accuracy</p>
+        </div>
+        """, unsafe_allow_html=True)
         
-        if avg_score >= 3.5 and 125 <= avg_tempo <= 150 and avg_confidence >= 90:
-             st.success("**Excellent Performance:** Your scores are consistently high across all metrics.")
+    with col_m3:
+        st.markdown(f"""
+        <div class="report-metric-card" style="border-left: 5px solid #3498db;">
+            <p class="metric-value">⏱️ {avg_tempo:.2f}</p>
+            <p class="metric-label">Average Tempo (BPM)</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-        st.markdown('</div>', unsafe_allow_html=True)
+    with col_m4:
+        st.markdown(f"""
+        <div class="report-metric-card" style="border-left: 5px solid #e74c3c;">
+            <p class="metric-value">⏸️ {total_pause:.2f}</p>
+            <p class="metric-label">Total Pause Time (sec)</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True) 
+
+    # --- 3. Qualitative Evaluation and Recommendations ---
+    st.subheader("💡 Objective Evaluation and Recommendations")
+    
+    # Evaluation (Data-Driven)
+    with st.container(border=True):
+        st.markdown("### Performance Conclusion:")
+        st.success(get_overall_comment(avg_score, avg_tempo))
+        st.caption("This conclusion is automatically generated based on your average semantic score and speaking tempo, minimizing interviewer bias.")
+    
+    # Recommendations
+    st.markdown("### Key Development Areas:")
+    if avg_score < 3.0:
+        st.warning("* **Content Development:** Focus on deepening answers according to the rubric. Use the *STAR method* for structure.")
+    if avg_tempo > 150 or avg_tempo < 125:
+        st.warning("* **Tempo Control:** Practice speaking within the 125-150 BPM range. Practice breathing exercises.")
+    if total_pause > 120: 
+        st.warning("* **Pause Management:** Reduce excessively long pauses. Consider using short pauses (2-3 seconds) for emphasis only.")
+    if avg_confidence < 90:
+        st.warning("* **Vocal Clarity Improvement:** Speak louder and clearer. The recording environment should be minimally noisy.")
 
     st.markdown("---")
 
-    # --- 4. Action Buttons ---
-    
-    # Option to view detailed results (tetap tersembunyi)
-    with st.expander("View Detailed Report Per Question"):
-        render_detailed_results_per_question() 
+    # --- 4. Tombol Aksi ---
+    # Tambahkan opsi untuk melihat detail per pertanyaan (opsional, jika Anda ingin menyembunyikannya)
+    with st.expander("View Detailed Report Per Question", expanded=False):
+        render_detailed_results_per_question() # Memanggil fungsi detail yang disembunyikan
 
     if st.button("Start New Interview 🔄", use_container_width=True, type="primary"):
         st.session_state.clear() 
@@ -817,6 +749,6 @@ elif st.session_state.page == 'interview':
 elif st.session_state.page == 'processing':
     render_processing_page()
 elif st.session_state.page == 'results':
-    render_results_page() 
+    render_results_page() # Fungsi ini sekarang hanya pengalih
 elif st.session_state.page == 'final_summary':
-    render_final_summary_page()
+    render_final_summary_page() # Halaman Laporan Akumulasi Utama
