@@ -124,376 +124,335 @@ def load_rubric_data():
 QUESTIONS = load_questions()
 RUBRIC_DATA = load_rubric_data()
 
-# --- Page Render Functions ---
-
-def inject_custom_css():
-    """Menyuntikkan CSS kustom untuk meniru desain Landing Page & Laporan."""
+# --- CSS Custom untuk Semua Halaman ---
+def inject_global_css():
+    """Menyuntikkan CSS kustom untuk semua halaman."""
     st.markdown("""
     <style>
-    /* 1. Reset Global dan Kontrol Padding (DIPERKUAT) */
+    /* 1. RESET GLOBAL STREAMLIT */
     .stApp {
         padding-top: 0 !important;
         padding-bottom: 0 !important;
         padding-left: 0 !important;
         padding-right: 0 !important;
         margin: 0 !important;
+        overflow-x: hidden !important;
     }
-    /* Sembunyikan Header dan Footer Streamlit Default */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-
-    /* 2. Styling untuk Elemen Kustom */
+    
+    /* Sembunyikan elemen Streamlit default */
+    #MainMenu {visibility: hidden !important;}
+    footer {visibility: hidden !important;}
+    header {visibility: hidden !important;}
+    
+    /* 2. NAVBAR CUSTOM */
     .custom-header {
         background-color: white;
         padding: 0 50px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        height: 100px; /* Tinggi Navbar */
+        height: 80px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         position: sticky;
         top: 0;
         z-index: 1000;
+        width: 100%;
     }
     
-    /* Perbaikan Navbar: Memastikan elemen Navigasi sejajar */
-    .header-nav {
+    .navbar-content {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        justify-content: flex-end;
         width: 100%;
-        gap: 10px; 
     }
-    .header-nav button {
-        margin-top: 0px !important;
-        padding: 8px 15px !important;
-        font-size: 14px !important;
-        border-radius: 6px !important;
-        height: 40px; 
+    
+    .navbar-brand {
+        font-size: 24px;
+        font-weight: 700;
+        color: #000;
+        text-decoration: none;
     }
-    /* Mengatasi Streamlit elements inside the column block */
-    .header-nav > div[data-testid="stHorizontalBlock"] {
+    
+    .nav-links {
+        display: flex;
+        gap: 20px;
         align-items: center;
     }
-    .header-nav p {
-        margin: 0; 
-        padding-top: 10px; /* Menyelaraskan teks 'Home' */
+    
+    .nav-button {
+        background: transparent !important;
+        color: #000 !important;
+        border: 2px solid #000 !important;
+        border-radius: 20px !important;
+        padding: 8px 20px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        transition: all 0.3s ease !important;
     }
-
-
-    /* HERO SECTION */
+    
+    .nav-button:hover {
+        background: #000 !important;
+        color: white !important;
+        transform: translateY(-2px);
+    }
+    
+    /* 3. LANDING PAGE SPECIFIC */
     .hero-section {
-        background-color: white;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         padding: 100px 50px;
         text-align: center;
+        border-radius: 0 0 30px 30px;
+        margin-bottom: 50px;
     }
+    
     .hero-title {
         font-size: 48px;
-        font-weight: 700;
+        font-weight: 800;
         margin-bottom: 20px;
+        color: #000;
+        line-height: 1.2;
     }
+    
     .hero-subtitle {
         font-size: 18px;
         color: #5d5988;
         max-width: 600px;
         margin: 0 auto 40px auto;
+        line-height: 1.6;
     }
-
-    /* Styling How To Use Steps */
+    
+    .primary-btn {
+        background: #000 !important;
+        color: white !important;
+        border-radius: 30px !important;
+        padding: 15px 40px !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        border: none !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .primary-btn:hover {
+        background: #333 !important;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    /* 4. HOW IT WORKS SECTION */
+    .section-title {
+        font-size: 36px;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 50px;
+        color: #000;
+    }
+    
     .steps-container {
         display: flex;
-        flex-wrap: wrap;
-        gap: 30px;
         justify-content: center;
-        padding: 50px 0;
+        gap: 30px;
+        flex-wrap: wrap;
+        padding: 0 20px;
     }
+    
     .step-card {
-        background-color: #f9f9ff; 
-        border-radius: 6px;
-        padding: 40px 20px 20px 20px;
+        background: white;
+        border-radius: 15px;
+        padding: 40px 25px 25px 25px;
         text-align: center;
+        width: 250px;
+        min-height: 280px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
         position: relative;
-        flex-grow: 1;
-        max-width: 300px;
-        min-height: 250px; 
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); 
-        transition: all 0.3s;
+        transition: transform 0.3s ease;
     }
+    
     .step-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
     }
+    
     .step-number {
         position: absolute;
-        top: -30px; 
+        top: -25px;
         left: 50%;
         transform: translateX(-50%);
-        width: 60px;
-        height: 60px;
-        background-color: black;
-        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        background: #000;
         color: white;
-        font-size: 20px;
-        font-weight: bold;
+        border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        font-size: 20px;
+        font-weight: bold;
     }
+    
     .step-title {
-        font-size: 18px;
+        font-size: 20px;
         font-weight: 600;
-        margin-top: 20px;
-        margin-bottom: 10px;
+        margin: 20px 0 15px 0;
+        color: #000;
     }
+    
     .step-description {
+        color: #666;
         font-size: 14px;
-        color: #5d5988;
+        line-height: 1.6;
     }
-
-    /* Styling Footer */
+    
+    /* 5. FOOTER */
     .custom-footer {
-        background-color: black;
-        color: #9795b4; 
-        padding: 20px 50px;
+        background: #000;
+        color: white;
+        padding: 30px 50px;
+        margin-top: 80px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 13px;
-        margin-top: 50px;
-    }
-
-    /* Tombol Utama */
-    .stButton>button {
-        border-radius: 40px !important;
-        padding: 15px 40px !important;
-        font-size: 16px !important;
-        font-weight: 500 !important;
-    }
-    .primary-btn-container button {
-        background-color: black !important;
-        color: white !important;
-        border: none !important;
-        transition: all 0.3s;
-    }
-    .primary-btn-container button:hover {
-        background-color: #333333 !important;
-        transform: translateY(-2px);
     }
     
-    /* === CARD METRIK HORIZONTAL (PERBAIKAN FONT DAN SPACING) === */
+    .footer-brand {
+        font-size: 20px;
+        font-weight: 700;
+    }
+    
+    .footer-copyright {
+        font-size: 14px;
+        opacity: 0.8;
+    }
+    
+    /* 6. METRIC CARDS */
     .metric-grid-container {
         display: grid;
-        grid-template-columns: repeat(4, 1fr) !important; 
-        gap: 10px !important; 
-        margin-bottom: 30px;
-        width: 100%; 
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin: 20px 0 40px 0;
     }
     
     .modern-metric-card {
-        background-color: white;
+        background: white;
         border-radius: 12px;
-        padding: 15px !important; 
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        text-align: left;
-        transition: transform 0.2s;
-        height: auto; 
-        min-width: 0; 
-    }
-    
-    .card-value-line {
-        display: flex;
-        flex-direction: row; 
-        align-items: center;
-        gap: 5px !important; 
-        margin-bottom: 3px !important;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border: 1px solid #eee;
     }
     
     .card-value {
-        font-size: 26px !important; 
+        font-size: 28px;
         font-weight: 700;
-        line-height: 1.1; 
+        line-height: 1.2;
     }
+    
     .card-label {
-        font-size: 12px !important; 
-        color: #7f8c8d;
-        font-weight: 500;
-        margin-top: 3px; 
-    }
-    /* Warna untuk Skor dan Tempo */
-    .score-color { color: #2ecc71; } 
-    .accuracy-color { color: #3498db; } 
-    .tempo-color { color: #f39c12; } 
-    .pause-color { color: #e74c3c; } 
-    
-    }
-    
-    </style>
-    """, unsafe_allow_html=True)
-def inject_landing_css():
-    st.markdown("""
-    <style>
-    .landing {
-        padding: 40px 0;
-    }
-
-    .landing h1 {
-        font-size: 42px;
-        font-weight: 700;
-        margin-bottom: 12px;
-    }
-
-    .landing p.lead {
-        font-size: 18px;
-        color: #555;
-        max-width: 520px;
-        line-height: 1.6;
-    }
-
-    .landing .card {
-        background: #ffffff;
-        border-radius: 12px;
-        padding: 24px;
-        border: 1px solid #eee;
-        height: 100%;
-    }
-
-    .landing .step {
-        font-weight: 600;
-        margin-bottom: 6px;
-    }
-
-    .landing .desc {
+        font-size: 13px;
         color: #666;
-        font-size: 14px;
-        line-height: 1.5;
+        margin-top: 5px;
     }
-
-    .landing button {
-        border-radius: 8px !important;
-        padding: 10px 24px !important;
-        font-weight: 600 !important;
+    
+    .score-color { color: #2ecc71; }
+    .accuracy-color { color: #3498db; }
+    .tempo-color { color: #f39c12; }
+    .pause-color { color: #e74c3c; }
+    
+    /* 7. RESPONSIVE */
+    @media (max-width: 1200px) {
+        .metric-grid-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 36px;
+        }
+        
+        .hero-section {
+            padding: 60px 20px;
+        }
+        
+        .custom-header {
+            padding: 0 20px;
+        }
+        
+        .steps-container {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .step-card {
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .metric-grid-container {
+            grid-template-columns: 1fr;
+        }
     }
     </style>
     """, unsafe_allow_html=True)
 
+# --- Page Render Functions ---
+
+def render_navbar():
+    """Render navbar untuk semua halaman."""
+    st.markdown("""
+    <div class="custom-header">
+        <div class="navbar-content">
+            <div class="navbar-brand">SEI-AI</div>
+            <div class="nav-links">
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        if st.button("🏠 Home", key="nav_home"):
+            next_page('home')
+    with col2:
+        if st.button("ℹ️ Info", key="nav_info"):
+            next_page('info')
+    
+    st.markdown("""
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 def render_home_page():
-    inject_landing_css()
-
-    st.markdown('<div class="landing">', unsafe_allow_html=True)
-
-    # === HERO SECTION ===
-    col_left, col_right = st.columns([1.2, 1])
-
-    with col_left:
-        st.markdown("<h1>AI Interview Assessment</h1>", unsafe_allow_html=True)
-        st.markdown(
-            "<p class='lead'>"
-            "Latih kemampuan interview Anda menggunakan AI. "
-            "Dapatkan evaluasi objektif, analisis jawaban, dan rekomendasi perbaikan."
-            "</p>",
-            unsafe_allow_html=True
-        )
-
-        if st.button("Mulai Interview"):
-            st.session_state.answers = {}
-            st.session_state.results = None
-            st.session_state.current_q = 1
-            next_page("interview")
-
-    with col_right:
-        st.markdown("""
-        <div class="card">
-            <b>Fitur Utama</b>
-            <ul style="margin-top:10px; color:#555;">
-                <li>Speech-to-Text otomatis</li>
-                <li>Analisis semantic jawaban</li>
-                <li>Evaluasi non-verbal</li>
-                <li>Skor & feedback instan</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("<br><br>", unsafe_allow_html=True)
-
-    # === HOW IT WORKS ===
-    st.subheader("Cara Kerja")
-
-    c1, c2, c3 = st.columns(3)
-
-    with c1:
-        st.markdown("""
-        <div class="card">
-            <div class="step">1. Rekam Jawaban</div>
-            <div class="desc">
-                Upload video jawaban interview sesuai pertanyaan yang diberikan.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with c2:
-        st.markdown("""
-        <div class="card">
-            <div class="step">2. Analisis AI</div>
-            <div class="desc">
-                Sistem menganalisis isi jawaban, suara, dan aspek non-verbal.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with c3:
-        st.markdown("""
-        <div class="card">
-            <div class="step">3. Hasil & Feedback</div>
-            <div class="desc">
-                Dapatkan skor performa dan saran peningkatan secara langsung.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-    # --- 2. Hero Section ---
-    st.markdown('<section class="hero-section">', unsafe_allow_html=True)
+    """Render landing page yang sudah diperbaiki."""
+    inject_global_css()
+    render_navbar()
     
-    st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job.</p>', unsafe_allow_html=True)
+    # HERO SECTION
+    st.markdown('<div class="hero-section">', unsafe_allow_html=True)
     
-    # Tombol Aksi Hero Section
-    st.markdown('<div class="primary-btn-container" style="display: flex; justify-content: center;">', unsafe_allow_html=True)
-    if st.button("▶️ Start Interview", key="hero_start"):
+    st.markdown('<h1 class="hero-title">AI Interview Assessment Platform</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="hero-subtitle">Latih kemampuan interview Anda dengan AI. Dapatkan evaluasi objektif, analisis jawaban, dan rekomendasi perbaikan instan.</p>', unsafe_allow_html=True)
+    
+    if st.button("🚀 Mulai Interview Sekarang", key="hero_start", type="primary"):
         st.session_state.answers = {}
         st.session_state.results = None
         st.session_state.current_q = 1
-        next_page('interview')
+        next_page("interview")
+    
     st.markdown('</div>', unsafe_allow_html=True)
     
-    st.markdown('</section>', unsafe_allow_html=True)
-
-
-    # --- 3. How To Use Section (Langkah-Langkah) ---
-    st.markdown('<section style="padding: 50px; background-color: white;">', unsafe_allow_html=True)
-    st.markdown('<h2 style="font-size: 40px; text-align: center; margin-bottom: 70px;">How To Use</h2>', unsafe_allow_html=True)
+    # HOW IT WORKS SECTION
+    st.markdown('<h2 class="section-title">Cara Kerja</h2>', unsafe_allow_html=True)
     
     st.markdown('<div class="steps-container">', unsafe_allow_html=True)
     
-    # Grid Langkah-Langkah: Menggunakan kolom Streamlit untuk 5 card
-    cols = st.columns(5)
-    
-    steps_data = [
-        ("1", "Upload Answer Video", "Upload your video answer for each question given by the AI."),
-        ("2", "AI Processes Data", "The AI will process the video into a transcript and analyze non-verbal aspects."),
-        ("3", "Semantic Scoring", "Your answer is compared to an ideal rubric for semantic scoring (Content Relevance)."),
-        ("4", "Get Instant Feedback", "Receive final score, rationale, and instant communication analysis."),
-        ("5", "Improve Skills", "Use the recommendations to practice and improve until you are confident.")
+    steps = [
+        ("1", "Unggah Video", "Upload video jawaban interview sesuai pertanyaan yang diberikan"),
+        ("2", "Analisis AI", "Sistem menganalisis konten, suara, dan aspek non-verbal"),
+        ("3", "Evaluasi Semantik", "Jawaban dinilai berdasarkan relevansi dengan rubrik ideal"),
+        ("4", "Dapatkan Feedback", "Terima skor performa dan saran peningkatan"),
+        ("5", "Tingkatkan Skill", "Gunakan rekomendasi untuk berlatih lebih baik")
     ]
     
-    for i, (num, title, desc) in enumerate(steps_data):
+    cols = st.columns(5)
+    for i, (num, title, desc) in enumerate(steps):
         with cols[i]:
-            # Struktur Card Kustom
             st.markdown(f"""
             <div class="step-card">
                 <div class="step-number">{num}</div>
@@ -501,61 +460,112 @@ def render_home_page():
                 <p class="step-description">{desc}</p>
             </div>
             """, unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('</section>', unsafe_allow_html=True)
-
-
-    # --- 4. Footer Kustom ---
-    st.markdown('<div class="custom-footer">', unsafe_allow_html=True)
-    col_footer_left, col_footer_right = st.columns(2)
     
-    with col_footer_left:
-        st.markdown('<p style="font-weight: bold; color: white; font-size: 16px;">SEI-AI Interviewer</p>', unsafe_allow_html=True)
-    
-    with col_footer_right:
-        st.markdown('<p style="text-align: right;">Copyright © 2024 SEI-AI Interviewer. All Rights Reserved.</p>', unsafe_allow_html=True)
-
     st.markdown('</div>', unsafe_allow_html=True)
-
+    
+    # FEATURES SECTION
+    st.markdown('<h2 class="section-title" style="margin-top: 80px;">Fitur Unggulan</h2>', unsafe_allow_html=True)
+    
+    features_cols = st.columns(3)
+    with features_cols[0]:
+        st.markdown("""
+        <div style="text-align: center; padding: 30px; background: #f8f9fa; border-radius: 15px;">
+            <h3>🎤 Speech-to-Text</h3>
+            <p>Konversi suara ke teks dengan akurasi tinggi menggunakan AI</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with features_cols[1]:
+        st.markdown("""
+        <div style="text-align: center; padding: 30px; background: #f8f9fa; border-radius: 15px;">
+            <h3>📊 Analisis Lengkap</h3>
+            <p>Evaluasi konten, struktur, dan aspek non-verbal sekaligus</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with features_cols[2]:
+        st.markdown("""
+        <div style="text-align: center; padding: 30px; background: #f8f9fa; border-radius: 15px;">
+            <h3>⚡ Feedback Instan</h3>
+            <p>Hasil evaluasi dan rekomendasi tersedia dalam hitungan menit</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # FOOTER
+    st.markdown("""
+    <div class="custom-footer">
+        <div class="footer-brand">SEI-AI Interviewer</div>
+        <div class="footer-copyright">© 2024 SEI-AI Interviewer. All Rights Reserved.</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 def render_info_page():
-    st.title("SEI-AI Application Information")
+    """Render halaman informasi."""
+    inject_global_css()
+    render_navbar()
+    
+    st.title("📚 Tentang SEI-AI")
+    
     st.markdown("""
-    This application uses Machine Learning and Natural Language Processing (NLP) technologies to analyze video interview answers.
+    ### Teknologi yang Digunakan
     
-    ### Analysis Process
-    1. **Speech-to-Text (STT):** Your answer transcript is generated using the *Whisper* model.
-    2. **Text Cleaning:** The transcribed text is corrected for spelling errors (spell check) and ambiguities.
-    3. **Non-Verbal Analysis:** Audio is analyzed for Speaking Tempo (BPM) and total Pause time.
-    4. **Semantic Scoring:** Answers are scored based on semantic comparison with ideal rubric points using the *Sentence-Transformer* model.
+    Aplikasi ini menggunakan teknologi Machine Learning dan Natural Language Processing (NLP) mutakhir 
+    untuk menganalisis jawaban video interview.
     
-    ### Video Upload Requirements
-    * **Duration:** Recommended 30-60 seconds per answer.
-    * **Format:** MP4, MOV, or WebM.
-    * **Maximum Size:** 50MB.
+    #### Proses Analisis
+    1. **Speech-to-Text (STT)**: Mengkonversi suara menjadi teks menggunakan model Whisper
+    2. **Pembersihan Teks**: Koreksi ejaan dan ambiguitas pada transkrip
+    3. **Analisis Non-Verbal**: Analisis tempo bicara, jeda, dan karakteristik suara
+    4. **Penilaian Semantik**: Perbandingan jawaban dengan rubrik ideal menggunakan model Sentence-Transformer
+    
+    #### Persyaratan Video
+    * **Durasi**: Disarankan 30-90 detik per jawaban
+    * **Format**: MP4, MOV, atau WebM
+    * **Ukuran Maksimum**: 50MB
+    * **Kualitas Audio**: Pastikan suara jelas dan minim noise
+    
+    #### Kompatibilitas
+    * **Browser**: Chrome, Firefox, Safari terbaru
+    * **Device**: Desktop, Tablet, Smartphone
+    * **Sistem Operasi**: Windows, macOS, Linux, Android, iOS
+    
+    ### Keamanan Data
+    * Semua video diproses secara real-time
+    * Tidak ada data yang disimpan permanen
+    * Proses analisis dilakukan secara lokal (jika memungkinkan)
+    
+    ### Dukungan
+    Untuk bantuan teknis atau pertanyaan:
+    * Email: support@sei-ai.com
+    * Telepon: +62 21 1234 5678
+    * Jam Operasional: Senin-Jumat, 09:00-17:00 WIB
     """)
-    if st.button("🏠 Back to Home"):
+    
+    if st.button("🏠 Kembali ke Home", type="primary"):
         next_page('home')
 
 def render_interview_page():
-    st.title(f"Interview Question {st.session_state.current_q} of {TOTAL_QUESTIONS}")
+    """Render halaman interview."""
+    inject_global_css()
+    render_navbar()
+    
+    st.title(f"🎯 Pertanyaan Interview {st.session_state.current_q} dari {TOTAL_QUESTIONS}")
     
     q_num = st.session_state.current_q
     q_id_str = str(q_num) 
     
     question_data = QUESTIONS.get(q_id_str, {})
-    question_text = question_data.get('question', 'Question not found.')
+    question_text = question_data.get('question', 'Pertanyaan tidak ditemukan.')
     
-    if question_text == 'Question not found.':
-        st.error("An error occurred while loading the question.")
-        if st.button("🏠 Back to Home"):
+    if question_text == 'Pertanyaan tidak ditemukan.':
+        st.error("Terjadi kesalahan saat memuat pertanyaan.")
+        if st.button("🏠 Kembali ke Home"):
             st.session_state.clear() 
             next_page('home')
         return
 
-    st.header("Question:")
-    st.info(question_text)
+    st.markdown("### 📝 Pertanyaan:")
+    st.info(f"**{question_text}**")
     
     st.markdown("---")
     
@@ -564,141 +574,113 @@ def render_interview_page():
     current_uploaded_file_data = st.session_state.answers.get(q_id_str)
     
     # --- Logic untuk Mengelola File Upload ---
-    
     with col_upload:
-        
         uploaded_file = None
         
-        # Cek apakah file sudah ada di session_state. Jika tidak, tampilkan uploader.
         if current_uploaded_file_data is None:
-            # Jika belum ada, tampilkan uploader
             uploaded_file = st.file_uploader(
-                f"Upload Video Answer for Question {q_num} (Max {VIDEO_MAX_SIZE_MB}MB)",
+                f"📤 Unggah Video Jawaban untuk Pertanyaan {q_num} (Maks {VIDEO_MAX_SIZE_MB}MB)",
                 type=['mp4', 'mov', 'webm'],
                 key=f"uploader_{q_id_str}"
             )
             
-            # 1. Logic Save File Baru
             if uploaded_file:
                 if uploaded_file.size > VIDEO_MAX_SIZE_MB * 1024 * 1024:
-                    st.error(f"File size exceeds the {VIDEO_MAX_SIZE_MB}MB limit. The file will not be processed.")
-                    uploaded_file = None
+                    st.error(f"Ukuran file melebihi batas {VIDEO_MAX_SIZE_MB}MB.")
                 else:
-                    # Simpan objek file yang diunggah ke session state.
                     st.session_state.answers[q_id_str] = uploaded_file
-                    current_uploaded_file_data = uploaded_file 
-                    st.success("File successfully uploaded.")
-                    # Rerun agar uploader menghilang dan hanya video yang muncul
-                    st.rerun() 
+                    current_uploaded_file_data = uploaded_file
+                    st.success("✅ File berhasil diunggah!")
+                    st.rerun()
         
-        # 2. Logic Display/View File Lama (atau yang baru saja di-upload)
         if current_uploaded_file_data:
             st.video(current_uploaded_file_data, format=current_uploaded_file_data.type)
-            st.info(f"Answer video for Q{q_num} loaded: **{current_uploaded_file_data.name}**")
+            st.info(f"Video jawaban Q{q_num}: **{current_uploaded_file_data.name}**")
             
-            # Tombol untuk menghapus/mengunggah ulang file yang sudah ada
-            if st.button("Delete/Re-upload Video", key=f"delete_q{q_num}", type="secondary"):
-                # Hapus dari session state
+            if st.button("🗑️ Hapus Video", key=f"delete_q{q_num}", type="secondary"):
                 if q_id_str in st.session_state.answers:
                     del st.session_state.answers[q_id_str]
-                # Hapus item dari key Streamlit uploader (Jika ada)
                 if f"uploader_{q_id_str}" in st.session_state:
-                     del st.session_state[f"uploader_{q_id_str}"]
+                    del st.session_state[f"uploader_{q_id_str}"]
                 st.rerun()
-                
         else:
-            # Jika tidak ada file dan uploader tidak menghasilkan apa-apa
-            st.warning("Please upload your answer file to continue.")
-
-    # --- Logic Kontrol (Next/Previous) ---
-
+            st.warning("Silakan unggah video jawaban untuk melanjutkan.")
+    
+    # --- Kontrol Navigasi ---
     with col_control:
-        
-        
-        # Kondisi 'ready' sekarang hanya bergantung pada session_state.answers
         is_ready = st.session_state.answers.get(q_id_str) is not None
         
         if q_num < TOTAL_QUESTIONS:
-            if st.button("Next Question ⏩", use_container_width=True, disabled=(not is_ready)):
+            if st.button("⏭️ Pertanyaan Selanjutnya", use_container_width=True, disabled=(not is_ready)):
                 st.session_state.current_q += 1
                 st.rerun()
         elif q_num == TOTAL_QUESTIONS:
-            if st.button("Finish & Process ▶️", use_container_width=True, disabled=(not is_ready)):
+            if st.button("🏁 Selesai & Proses", use_container_width=True, disabled=(not is_ready)):
                 next_page('processing')
-
+        
         if q_num > 1:
-            if st.button("⏪ Previous Question", use_container_width=True):
+            if st.button("⏮️ Sebelumnya", use_container_width=True):
                 st.session_state.current_q -= 1
                 st.rerun()
 
-
 def render_processing_page():
-    st.title("⚙️ Answer Analysis Process")
-    st.info("Please wait, this process may take a few minutes depending on the video duration.")
-
+    """Render halaman processing."""
+    inject_global_css()
+    render_navbar()
+    
+    st.title("⚙️ Proses Analisis")
+    st.info("Harap tunggu, proses ini membutuhkan beberapa menit tergantung durasi video.")
+    
     if st.session_state.results is not None and st.session_state.results != {}:
-        # Redirect to the final summary page after processing
         next_page('final_summary') 
         return
-
+    
     if st.session_state.results is None:
-        
         results = {}
-        progress_bar = st.progress(0, text="Starting Process...")
+        progress_bar = st.progress(0, text="Memulai proses...")
         
         if not all([STT_MODEL, EMBEDDER_MODEL]):
-            st.error("Core models failed to load. Cannot proceed with processing.")
+            st.error("Model utama gagal dimuat. Tidak dapat melanjutkan proses.")
             progress_bar.empty()
-            if st.button("🏠 Back to Home"):
+            if st.button("🏠 Kembali ke Home"):
                 st.session_state.clear()
                 next_page('home')
             return
-
+        
         try:
             with tempfile.TemporaryDirectory() as temp_dir:
-                
                 for i in range(1, TOTAL_QUESTIONS + 1):
                     q_id_str = str(i) 
                     q_key_rubric = f'q{i}' 
-
+                    
                     video_file = st.session_state.answers.get(q_id_str)
                     q_text = QUESTIONS.get(q_id_str, {}).get('question') 
-
+                    
                     if video_file and q_key_rubric in RUBRIC_DATA and q_text:
+                        st.markdown(f"### Memproses Q{i}: {q_text[:50]}...")
                         
-                        st.markdown(f"### Processing Q{i}: {q_text[:50]}...")
-                        
-                        # --- 1. Save Video 
-                        progress_bar.progress((i-1)*10 + 1, text=f"Q{i}: Saving video...")
+                        progress_bar.progress((i-1)*10 + 1, text=f"Q{i}: Menyimpan video...")
                         temp_video_path = os.path.join(temp_dir, f'video_{q_key_rubric}.mp4')
-                        # Penambahan Path Audio Temporer
-                        temp_audio_path = os.path.join(temp_dir, f'audio_{q_key_rubric}.wav') 
+                        temp_audio_path = os.path.join(temp_dir, f'audio_{q_key_rubric}.wav')
                         
                         with open(temp_video_path, 'wb') as f:
                             f.write(video_file.getbuffer())
-
-                        # --- 2. Audio Extraction & Noise Reduction
-                        progress_bar.progress((i-1)*10 + 3, text=f"Q{i}: Extracting audio and Noise Reduction...")
                         
-                        # Pastikan video_to_wav dipanggil dengan 2 argumen:
+                        progress_bar.progress((i-1)*10 + 3, text=f"Q{i}: Ekstraksi audio...")
                         video_to_wav(temp_video_path, temp_audio_path)
+                        noise_reduction(temp_audio_path, temp_audio_path)
                         
-                        noise_reduction(temp_audio_path, temp_audio_path) 
-                        
-                        # --- 3. Speech-to-Text (STT) & Cleaning
-                        progress_bar.progress((i-1)*10 + 5, text=f"Q{i}: Transcription and Text Cleaning...")
+                        progress_bar.progress((i-1)*10 + 5, text=f"Q{i}: Transkripsi...")
                         transcript, log_prob_raw = transcribe_and_clean(
                             temp_audio_path, STT_MODEL, SPELL_CHECKER, EMBEDDER_MODEL, ENGLISH_WORDS
                         )
                         
-                        final_confidence_score_0_1 = compute_confidence_score(transcript, log_prob_raw)
+                        final_confidence_score = compute_confidence_score(transcript, log_prob_raw)
                         
-                        # --- 4. Non-Verbal Analysis
-                        progress_bar.progress((i-1)*10 + 7, text=f"Q{i}: Non-Verbal Analysis...")
+                        progress_bar.progress((i-1)*10 + 7, text=f"Q{i}: Analisis non-verbal...")
                         non_verbal_res = analyze_non_verbal(temp_audio_path)
-
-                        # --- 5. Answer Scoring (Semantic)
-                        progress_bar.progress((i-1)*10 + 9, text=f"Q{i}: Semantic Scoring...")
+                        
+                        progress_bar.progress((i-1)*10 + 9, text=f"Q{i}: Penilaian semantik...")
                         score, reason = score_with_rubric(
                             q_key_rubric, q_text, transcript, RUBRIC_DATA, EMBEDDER_MODEL
                         )
@@ -707,244 +689,202 @@ def render_processing_page():
                             final_score_value = int(score) if score is not None else 0
                         except (ValueError, TypeError):
                             final_score_value = 0
-                            reason = f"[ERROR: Score failed to calculate/Wrong data type. Default score 0 used.] {reason}"
+                            reason = f"[ERROR: Gagal menghitung skor] {reason}"
                         
-                        # --- 6. Save Results
                         results[q_key_rubric] = {
                             "question": q_text,
                             "transcript": transcript,
                             "final_score": final_score_value,
                             "rubric_reason": reason,
-                            "confidence_score": f"{final_confidence_score_0_1*100:.2f}",
+                            "confidence_score": f"{final_confidence_score*100:.2f}",
                             "non_verbal": non_verbal_res
                         }
-
-                        progress_bar.progress(i*10, text=f"Q{i} Complete.")
+                        
+                        progress_bar.progress(i*10, text=f"Q{i} Selesai.")
                     else:
-                        st.warning(f"Skipping Q{i} (ID: {q_id_str}): Answer file not uploaded or rubric data missing.")
-                    
+                        st.warning(f"Melewati Q{i}: File tidak ditemukan atau data rubrik tidak ada.")
+                
                 st.session_state.results = results
-                progress_bar.progress(100, text="Process Complete! Redirecting to Final Report.")
-                # Pindah ke laporan akumulasi
+                progress_bar.progress(100, text="Proses selesai! Mengarahkan ke laporan...")
                 next_page('final_summary')
-
+        
         except Exception as e:
-            st.error(f"Fatal error during processing: {e}")
-            st.warning("Processing cancelled. Please try returning to the start.")
+            st.error(f"Kesalahan fatal selama proses: {e}")
+            st.warning("Proses dibatalkan. Silakan coba kembali.")
             progress_bar.empty()
-            st.session_state.results = None 
-            if st.button("🏠 Back to Home"):
-                 st.session_state.clear() 
-                 next_page('home')
+            st.session_state.results = None
+            if st.button("🏠 Kembali ke Home"):
+                st.session_state.clear()
+                next_page('home')
             return
 
-def render_results_page():
-    # Fungsi ini sekarang hanya pengalih/redirector
+def render_final_summary_page():
+    """Render halaman hasil akhir."""
+    inject_global_css()
+    render_navbar()
+    
+    st.title("🏆 Laporan Evaluasi Final")
+    st.markdown("---")
     
     if not st.session_state.results:
-        st.error("Results not found. Please try processing again.")
-        if st.button("🏠 Back to Home"):
-            st.session_state.clear()
+        st.error("Data hasil tidak ditemukan.")
+        if st.button("Kembali"):
             next_page('home')
         return
-        
-    # REDIRECT DIRECTLY TO THE FINAL ACCUMULATED REPORT
-    next_page('final_summary')
-
-
-def render_final_summary_page():
-    # Suntikkan CSS lagi untuk memastikan styling card berfungsi
-    inject_custom_css() 
     
-    st.title("🏆 Final Evaluation Report")
-    st.markdown("---") # Pemisah tipis untuk judul
-
-    if not st.session_state.results:
-        st.error("Result data not found.")
-        if st.button("Back"):
-            next_page('home') 
-        return
-
-    # --- 1. Combined Metrics Calculation ---
+    # Hitung metrik
     try:
         all_scores = [int(res['final_score']) for res in st.session_state.results.values()]
-        # Extract and clean data, handling potential non-numeric strings
-        all_confidence = [float(res['confidence_score'].split(' ')[0].replace('%', '')) for res in st.session_state.results.values()]
+        all_confidence = [float(res['confidence_score'].split(' ')[0].replace('%', '')) 
+                         for res in st.session_state.results.values()]
         
         all_tempo = []
         all_pause = []
         for res in st.session_state.results.values():
-             tempo_str = res['non_verbal'].get('tempo_bpm', '0').split(' ')[0]
-             pause_str = res['non_verbal'].get('total_pause_seconds', '0').split(' ')[0]
-             try:
-                 all_tempo.append(float(tempo_str))
-             except ValueError:
-                 all_tempo.append(0)
-             try:
-                 all_pause.append(float(pause_str))
-             except ValueError:
-                 all_pause.append(0)
-
-        # Calculate averages
+            tempo_str = res['non_verbal'].get('tempo_bpm', '0').split(' ')[0]
+            pause_str = res['non_verbal'].get('total_pause_seconds', '0').split(' ')[0]
+            try:
+                all_tempo.append(float(tempo_str))
+            except ValueError:
+                all_tempo.append(0)
+            try:
+                all_pause.append(float(pause_str))
+            except ValueError:
+                all_pause.append(0)
+        
         avg_score = np.mean(all_scores) if all_scores else 0
         avg_confidence = np.mean(all_confidence) if all_confidence else 0
         avg_tempo = np.mean(all_tempo) if all_tempo else 0
-        total_pause = np.sum(all_pause) 
+        total_pause = np.sum(all_pause)
     
     except Exception as e:
-        st.error(f"Failed to calculate accumulated metrics. Error: {e}")
+        st.error(f"Gagal menghitung metrik: {e}")
         return
-
-    # Qualitative logic (in English)
-    def get_overall_comment(avg_score, avg_tempo):
-        comment = []
-        if avg_score >= 3.5:
-            comment.append("The content and relevance of the answers were strong and well-structured.")
-        elif avg_score >= 2.5:
-            comment.append("Answer content was adequate, but could be improved for deeper material understanding.")
-        else:
-            comment.append("Answer content was less relevant to the questions; focus is needed on rubric alignment.")
-        
-        if avg_tempo > 150:
-            comment.append("The overall speaking tempo tends to be too fast; practice slowing down for clarity.")
-        elif avg_tempo < 125:
-            comment.append("The overall speaking tempo is too slow, potentially losing interviewer attention.")
-        else:
-            comment.append("The overall speaking tempo is within the optimal range (125-150 BPM).")
-        return " ".join(comment)
-
-    # --- 2. Average Metrics Display (Minimalist Grid Cards - Horizontal Look) ---
-    st.subheader("📊 Performance Summary")
     
-    # Kunci: Gunakan div kustom dengan display: grid yang kuat.
+    # Tampilkan metrik
+    st.subheader("📊 Ringkasan Performa")
+    
     st.markdown('<div class="metric-grid-container">', unsafe_allow_html=True)
     
-    # Card 1: Average Content Score (LABEL DIPENDEKKAN)
     st.markdown(f"""
     <div class="modern-metric-card">
-        <div class="card-content-wrapper">
-            <div class="card-value-line">
-                <span class="card-icon score-color">🎯</span>
-                <span class="card-value score-color">{avg_score:.2f} / 4</span>
-            </div>
-            <span class="card-label">Avg. Content Score</span>
-        </div>
+        <div class="card-value score-color">{avg_score:.2f}/4</div>
+        <div class="card-label">Skor Konten Rata-rata</div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Card 2: Average Transcript Accuracy (LABEL DIPENDEKKAN)
     st.markdown(f"""
     <div class="modern-metric-card">
-        <div class="card-content-wrapper">
-            <div class="card-value-line">
-                <span class="card-icon accuracy-color">🤖</span>
-                <span class="card-value accuracy-color">{avg_confidence:.2f}%</span>
-            </div>
-            <span class="card-label">Avg. Accuracy (%)</span>
-        </div>
+        <div class="card-value accuracy-color">{avg_confidence:.2f}%</div>
+        <div class="card-label">Akurasi Transkripsi</div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Card 3: Average Tempo (LABEL DIPENDEKKAN)
     st.markdown(f"""
     <div class="modern-metric-card">
-        <div class="card-content-wrapper">
-            <div class="card-value-line">
-                <span class="card-icon tempo-color">⏱️</span>
-                <span class="card-value tempo-color">{avg_tempo:.2f}</span>
-            </div>
-            <span class="card-label">Avg. Tempo (BPM)</span>
-        </div>
+        <div class="card-value tempo-color">{avg_tempo:.1f}</div>
+        <div class="card-label">Tempo Bicara (BPM)</div>
     </div>
     """, unsafe_allow_html=True)
-
-    # Card 4: Total Pause Time (LABEL DIPENDEKKAN)
+    
     st.markdown(f"""
     <div class="modern-metric-card">
-        <div class="card-content-wrapper">
-            <div class="card-value-line">
-                <span class="card-icon pause-color">⏸️</span>
-                <span class="card-value pause-color">{total_pause:.2f}</span>
-            </div>
-            <span class="card-label">Total Pause (sec)</span>
-        </div>
+        <div class="card-value pause-color">{total_pause:.1f}s</div>
+        <div class="card-label">Total Jeda</div>
     </div>
     """, unsafe_allow_html=True)
-
+    
     st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown("---") 
-
-    # --- 3. Objective Evaluation and Recommendations ---
-    st.subheader("💡 Objective Evaluation & Action Plan")
     
-    col_eval, col_recom = st.columns(2)
-    
-    # Evaluation Box
-    with col_eval:
-        st.markdown('<div class="summary-box">', unsafe_allow_html=True)
-        st.markdown("### Performance Conclusion")
-        st.info(get_overall_comment(avg_score, avg_tempo))
-        st.caption("This conclusion is automatically generated based on data metrics.")
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Recommendation Box
-    with col_recom:
-        st.markdown('<div class="summary-box">', unsafe_allow_html=True)
-        st.markdown("### Key Development Areas")
-        
-        # Recommendations
-        if avg_score < 3.0:
-            st.warning("* **Content Development:** Focus on deepening answers according to the rubric. Use the *STAR method* for structure.")
-        if avg_tempo > 150 or avg_tempo < 125:
-            st.warning("* **Tempo Control:** Practice speaking within the 125-150 BPM range. Practice breathing exercises.")
-        if total_pause > 120: 
-            st.warning("* **Pause Management:** Reduce excessively long pauses. Consider using short pauses (2-3 seconds) for emphasis only.")
-        if avg_confidence < 90:
-            st.warning("* **Vocal Clarity Improvement:** Speak louder and clearer. The recording environment should be minimally noisy.")
-        
-        if avg_score >= 3.5 and 125 <= avg_tempo <= 150 and avg_confidence >= 90:
-             st.success("**Excellent Performance:** Your scores are consistently high across all metrics.")
-
-        st.markdown('</div>', unsafe_allow_html=True)
-
+    # Evaluasi dan Rekomendasi
     st.markdown("---")
-
-    # --- 4. Action Buttons ---
+    st.subheader("💡 Evaluasi & Rekomendasi")
     
-    with st.expander("View Detailed Report Per Question"):
-        render_detailed_results_per_question() 
-
-    if st.button("Start New Interview 🔄", use_container_width=True, type="primary"):
-        st.session_state.clear() 
-        next_page('home')
-
-def render_detailed_results_per_question():
-    """Function to display results per question, nested within the expander (in English)."""
-    for q_key, res in st.session_state.results.items():
-        q_num = q_key.replace('q', '')
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("### Kesimpulan Performa")
+        if avg_score >= 3.5:
+            st.success("**Excellent!** Konten jawaban sangat relevan dan terstruktur dengan baik.")
+        elif avg_score >= 2.5:
+            st.warning("**Good.** Konten cukup baik namun bisa ditingkatkan dengan struktur yang lebih jelas.")
+        else:
+            st.error("**Needs Improvement.** Perlu peningkatan pada relevansi jawaban dengan pertanyaan.")
         
-        st.markdown(f"### ❓ Question {q_num} Detail: {res['question']}")
+        if 125 <= avg_tempo <= 150:
+            st.success("**Tempo bicara optimal** untuk komunikasi efektif.")
+        elif avg_tempo > 150:
+            st.warning("**Tempo terlalu cepat.** Cobalah berbicara lebih pelan untuk kejelasan.")
+        else:
+            st.warning("**Tempo terlalu lambat.** Tingkatkan kecepatan bicara untuk menjaga perhatian.")
+    
+    with col2:
+        st.markdown("### Area Pengembangan")
+        if avg_score < 3.0:
+            st.info("""
+            **🎯 Fokus Konten:**
+            - Gunakan metode STAR (Situation, Task, Action, Result)
+            - Sertakan contoh spesifik dan data pendukung
+            - Sesuaikan dengan rubrik penilaian
+            """)
         
-        col_res1, col_res2, col_res3 = st.columns(3)
-        with col_res1:
-            st.metric("Content Score", f"{res['final_score']} / 4")
-        with col_res2:
-            st.metric("Transcript Accuracy", res['confidence_score'])
-        with col_res3:
-            st.metric("Analysis Non-Verbal", res['non_verbal'].get('qualitative_summary', 'N/A').capitalize())
+        if total_pause > 120:
+            st.info("""
+            **⏸️ Manajemen Jeda:**
+            - Kurangi jeda yang terlalu panjang
+            - Gunakan jeda 2-3 detik untuk penekanan
+            - Latih ritme bicara yang konsisten
+            """)
         
-        st.markdown("**Reason:**")
-        st.caption(res['rubric_reason'])
-
-        st.markdown("**Detailed Audio Analysis:**")
-        st.markdown(f"* **Tempo:** {res['non_verbal'].get('tempo_bpm', 'N/A')}")
-        st.markdown(f"* **Total Pause :** {res['non_verbal'].get('total_pause_seconds', 'N/A')}")
-
-        with st.expander("View Clean Transcript"):
-            st.code(res['transcript'], language='text')
-        
-        st.markdown("---")
-
+        if avg_confidence < 90:
+            st.info("""
+            **🎤 Kejelasan Suara:**
+            - Tingkatkan volume dan artikulasi
+            - Pilih lingkungan rekaman yang tenang
+            - Gunakan mikrofon eksternal jika memungkinkan
+            """)
+    
+    # Detail per pertanyaan
+    st.markdown("---")
+    with st.expander("📋 Lihat Detail per Pertanyaan"):
+        for q_key, res in st.session_state.results.items():
+            q_num = q_key.replace('q', '')
+            
+            st.markdown(f"### Pertanyaan {q_num}")
+            st.write(f"**Pertanyaan:** {res['question']}")
+            
+            col_a, col_b, col_c = st.columns(3)
+            with col_a:
+                st.metric("Skor Konten", f"{res['final_score']}/4")
+            with col_b:
+                st.metric("Akurasi", f"{res['confidence_score']}%")
+            with col_c:
+                st.metric("Analisis Suara", res['non_verbal'].get('qualitative_summary', 'N/A'))
+            
+            st.markdown("**Penilaian:**")
+            st.info(res['rubric_reason'])
+            
+            with st.expander("Lihat Transkrip"):
+                st.code(res['transcript'], language='text')
+            
+            st.markdown("---")
+    
+    # Tombol aksi
+    st.markdown("---")
+    col_btn1, col_btn2, col_btn3 = st.columns(3)
+    
+    with col_btn1:
+        if st.button("🔄 Interview Baru", use_container_width=True):
+            st.session_state.clear()
+            next_page('home')
+    
+    with col_btn2:
+        if st.button("📥 Download Laporan", use_container_width=True):
+            st.info("Fitur download akan segera tersedia!")
+    
+    with col_btn3:
+        if st.button("🏠 Kembali ke Home", use_container_width=True):
+            next_page('home')
 
 # Main App Execution Flow
 if st.session_state.page == 'home':
@@ -955,7 +895,5 @@ elif st.session_state.page == 'interview':
     render_interview_page()
 elif st.session_state.page == 'processing':
     render_processing_page()
-elif st.session_state.page == 'results':
-    render_results_page() 
 elif st.session_state.page == 'final_summary':
     render_final_summary_page()
