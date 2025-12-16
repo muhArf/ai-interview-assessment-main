@@ -380,7 +380,7 @@ def inject_landing_css():
 
 
 def render_home_page():
-   inject_landing_css()
+    inject_landing_css()
 
     st.markdown('<div class="landing">', unsafe_allow_html=True)
 
@@ -454,6 +454,7 @@ def render_home_page():
         """, unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
+
 
     # --- 2. Hero Section ---
     st.markdown('<section class="hero-section">', unsafe_allow_html=True)
