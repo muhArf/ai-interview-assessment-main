@@ -331,53 +331,157 @@ def inject_custom_css():
     
     </style>
     """, unsafe_allow_html=True)
+    
+# --- Page Tambahan ---
+def inject_landing_css():
+    st.markdown("""
+    <style>
+    /* === LANDING PAGE ONLY (AMAN) === */
+    .landing-page #MainMenu,
+    .landing-page footer,
+    .landing-page header {
+        visibility: hidden;
+    }
+
+    .landing-page .lp-navbar {
+        padding: 20px 50px;
+        border-bottom: 1px solid #eee;
+        background: white;
+        position: sticky;
+        top: 0;
+        z-index: 999;
+    }
+
+    .landing-page .lp-hero {
+        padding: 120px 40px;
+        text-align: center;
+    }
+
+    .landing-page .lp-hero h1 {
+        font-size: 48px;
+        font-weight: 700;
+    }
+
+    .landing-page .lp-hero p {
+        max-width: 600px;
+        margin: 20px auto 40px;
+        color: #5d5988;
+        font-size: 18px;
+    }
+
+    .landing-page .lp-primary button {
+        background: black !important;
+        color: white !important;
+        border-radius: 40px !important;
+        padding: 14px 40px !important;
+        font-size: 16px !important;
+        border: none !important;
+    }
+
+    .landing-page .lp-steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 30px;
+        padding: 80px 50px;
+    }
+
+    .landing-page .lp-step {
+        background: #f9f9ff;
+        border-radius: 12px;
+        padding: 40px 20px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,.05);
+    }
+
+    .landing-page .lp-num {
+        width: 55px;
+        height: 55px;
+        margin: 0 auto 20px;
+        background: black;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .landing-page .lp-footer {
+        background: black;
+        color: #aaa;
+        padding: 30px 50px;
+        display: flex;
+        justify-content: space-between;
+        margin-top: 80px;
+        font-size: 13px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 
 def render_home_page():
-    # 1. Suntikkan CSS kustom
-    inject_custom_css()
+    inject_landing_css()
 
-    # --- 1. Header (Navbar Kustom) ---
-    with st.container():
-        st.markdown('<div class="custom-header">', unsafe_allow_html=True)
-        
-        # Menggunakan dua kolom utama: Logo dan Navigasi
-        col_logo, col_nav = st.columns([1, 4])
-        
-        with col_logo:
-            # Logo/Nama Aplikasi
-            try:
-                st.image('assets/seiai.png', width=80, output_format='PNG') 
-            except FileNotFoundError:
-                st.markdown('<p style="font-weight: bold; font-size: 20px; margin-top: 10px;">SEI-AI</p>', unsafe_allow_html=True) 
+    st.markdown('<div class="landing-page">', unsafe_allow_html=True)
 
-        with col_nav:
-            # Kontainer Navigasi dengan class 'header-nav' untuk styling khusus
-            st.markdown('<div class="header-nav">', unsafe_allow_html=True)
-            
-            # Menggunakan 3 kolom di dalam col_nav: Home, Info, Start
-            col_home, col_info, col_start = st.columns([0.5, 1, 1])
-            
-            with col_home:
-                # Teks Home yang sejajar dengan tombol
-                st.markdown('<p style="font-size: 14px; font-weight: 500; margin-top: 10px;">Home</p>', unsafe_allow_html=True)
-            
-            with col_info:
-                # Tombol Info Aplikasi
-                if st.button("App Info", key="nav_info", type="secondary"):
-                    next_page('info')
-            
-            with col_start:
-                # Tombol Mulai Wawancara di Navbar
-                if st.button("Start Interview", key="nav_start", type="primary"):
-                    st.session_state.answers = {}
-                    st.session_state.results = None
-                    st.session_state.current_q = 1
-                    next_page('interview')
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+    # === NAVBAR ===
+    st.markdown('<div class="lp-navbar">', unsafe_allow_html=True)
+    col_logo, col_nav = st.columns([1, 3])
+    with col_logo:
+        st.markdown("### SEI-AI")
+    with col_nav:
+        if st.button("App Info"):
+            next_page('info')
+        if st.button("Start Interview"):
+            st.session_state.answers = {}
+            st.session_state.results = None
+            st.session_state.current_q = 1
+            next_page('interview')
+    st.markdown('</div>', unsafe_allow_html=True)
 
-        st.markdown('</div>', unsafe_allow_html=True)
+    # === HERO ===
+    st.markdown('<div class="lp-hero">', unsafe_allow_html=True)
+    st.markdown("<h1>AI-Powered Interview Practice</h1>", unsafe_allow_html=True)
+    st.markdown(
+        "<p>Practice interviews, get semantic scoring, non-verbal analysis, and actionable feedback.</p>",
+        unsafe_allow_html=True
+    )
+    st.markdown('<div class="lp-primary">', unsafe_allow_html=True)
+    if st.button("▶ Start Interview"):
+        st.session_state.answers = {}
+        st.session_state.results = None
+        st.session_state.current_q = 1
+        next_page('interview')
+    st.markdown('</div></div>', unsafe_allow_html=True)
+
+    # === HOW TO USE ===
+    st.markdown('<div class="lp-steps">', unsafe_allow_html=True)
+    steps = [
+        ("1", "Upload Video", "Upload your interview answer video."),
+        ("2", "AI Analysis", "Speech-to-text & non-verbal analysis."),
+        ("3", "Semantic Scoring", "Answer matched with ideal rubric."),
+        ("4", "Instant Feedback", "Scores, insights, and suggestions."),
+        ("5", "Improve Skills", "Practice again with guidance.")
+    ]
+    for n, t, d in steps:
+        st.markdown(f"""
+        <div class="lp-step">
+            <div class="lp-num">{n}</div>
+            <h4>{t}</h4>
+            <p>{d}</p>
+        </div>
+        """, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # === FOOTER ===
+    st.markdown('<div class="lp-footer">', unsafe_allow_html=True)
+    st.markdown("**SEI-AI Interviewer**")
+    st.markdown("© 2024 SEI-AI")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
 
     # --- 2. Hero Section ---
