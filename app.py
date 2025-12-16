@@ -951,7 +951,7 @@ def render_final_summary_page():
         <div class="metric-value pause-color">{total_pause:.1f}s</div>
         <div class="metric-label">Total Pause Time</div>
     </div>
-    ""', unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
     
@@ -980,29 +980,30 @@ def render_final_summary_page():
     with col2:
         st.markdown("### Key Development Areas")
         
+        # FIXED: Using separate strings with emojis instead of multiline with emojis
         if avg_score < 3.0:
-            st.info("""
-            **🎯 Content Development:**
-            - Utilize STAR method (Situation, Task, Action, Result)
-            - Include specific examples and supporting data
-            - Align responses with scoring rubrics
-            """)
+            st.info(
+                "🎯 **Content Development:**\n"
+                "- Utilize STAR method (Situation, Task, Action, Result)\n"
+                "- Include specific examples and supporting data\n"
+                "- Align responses with scoring rubrics"
+            )
         
         if total_pause > 120:
-            st.info("""
-            **⏸️ Pause Management:**
-            - Reduce excessively long pauses
-            - Use 2-3 second pauses for emphasis only
-            - Practice consistent speaking rhythm
-            """)
+            st.info(
+                "⏸️ **Pause Management:**\n"
+                "- Reduce excessively long pauses\n"
+                "- Use 2-3 second pauses for emphasis only\n"
+                "- Practice consistent speaking rhythm"
+            )
         
         if avg_confidence < 90:
-            st.info("""
-            **🎤 Vocal Clarity:**
-            - Increase volume and articulation
-            - Choose quiet recording environments
-            - Consider using external microphone
-            """)
+            st.info(
+                "🎤 **Vocal Clarity:**\n"
+                "- Increase volume and articulation\n"
+                "- Choose quiet recording environments\n"
+                "- Consider using external microphone"
+            )
     
     # Detailed question breakdown
     st.markdown("---")
