@@ -137,7 +137,7 @@ def inject_global_css():
         padding-right: 0 !important;
         margin: 0 !important;
         overflow-x: hidden !important;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
     
     /* Hide default Streamlit elements */
@@ -146,21 +146,31 @@ def inject_global_css():
     header {visibility: hidden !important;}
     .stDeployButton {display: none !important;}
     
-    /* 2. CUSTOM NAVBAR */
-    .custom-navbar {
-        background-color: white;
-        padding: 0 50px;
+    /* 2. FIXED NAVBAR CONTAINER */
+    .navbar-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        background: white;
         box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
-        height: 80px;
+        height: 70px;
         display: flex;
         align-items: center;
+    }
+    
+    .navbar-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 40px;
+        display: flex;
         justify-content: space-between;
-        position: sticky;
-        top: 0;
-        z-index: 1000;
+        align-items: center;
         width: 100%;
     }
     
+    /* Brand/Logo */
     .navbar-brand {
         font-size: 28px;
         font-weight: 800;
@@ -169,38 +179,46 @@ def inject_global_css():
         letter-spacing: -0.5px;
     }
     
-    .navbar-nav {
+    /* Navigation buttons container */
+    .nav-buttons-container {
         display: flex;
         gap: 15px;
         align-items: center;
     }
     
-    .nav-btn {
+    /* Custom button styling */
+    .stButton > button {
+        border-radius: 25px !important;
+        border: 2px solid #000000 !important;
         background: transparent !important;
         color: #000000 !important;
-        border: 2px solid #000000 !important;
-        border-radius: 25px !important;
         padding: 8px 24px !important;
         font-size: 14px !important;
         font-weight: 600 !important;
         transition: all 0.3s ease !important;
         height: 40px !important;
+        min-width: 100px;
     }
     
-    .nav-btn:hover {
+    .stButton > button:hover {
         background: #000000 !important;
         color: white !important;
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        border-color: #000000 !important;
     }
     
-    /* 3. LANDING PAGE SPECIFIC */
+    /* 3. MAIN CONTENT PADDING (to account for fixed navbar) */
+    .main-content {
+        padding-top: 90px;
+    }
+    
+    /* 4. LANDING PAGE HERO SECTION */
     .hero-section {
         background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFF 100%);
-        padding: 120px 50px 100px 50px;
+        padding: 60px 0 100px 0;
         text-align: center;
         position: relative;
-        overflow: hidden;
     }
     
     .hero-section::before {
@@ -249,7 +267,7 @@ def inject_global_css():
         box-shadow: 0 12px 35px rgba(0,0,0,0.15);
     }
     
-    /* 4. HOW IT WORKS SECTION */
+    /* 5. HOW IT WORKS SECTION */
     .section-title {
         font-size: 42px;
         font-weight: 800;
@@ -318,7 +336,7 @@ def inject_global_css():
         font-weight: 400;
     }
     
-    /* 5. FEATURES SECTION */
+    /* 6. FEATURES SECTION */
     .features-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -359,7 +377,7 @@ def inject_global_css():
         line-height: 1.5;
     }
     
-    /* 6. FOOTER */
+    /* 7. FOOTER */
     .custom-footer {
         background: #000000;
         color: white;
@@ -382,7 +400,7 @@ def inject_global_css():
         font-weight: 400;
     }
     
-    /* 7. METRIC CARDS FOR RESULTS */
+    /* 8. METRIC CARDS FOR RESULTS */
     .metric-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -416,7 +434,7 @@ def inject_global_css():
     .tempo-color { color: #f39c12; }
     .pause-color { color: #e74c3c; }
     
-    /* 8. INTERVIEW PAGE STYLING */
+    /* 9. INTERVIEW PAGE STYLING */
     .question-container {
         background: white;
         border-radius: 20px;
@@ -426,7 +444,7 @@ def inject_global_css():
         border: 1px solid #f0f0f0;
     }
     
-    /* 9. RESPONSIVE DESIGN */
+    /* 10. RESPONSIVE DESIGN */
     @media (max-width: 1200px) {
         .metric-grid {
             grid-template-columns: repeat(2, 1fr);
@@ -438,6 +456,14 @@ def inject_global_css():
     }
     
     @media (max-width: 768px) {
+        .navbar-content {
+            padding: 0 20px;
+        }
+        
+        .navbar-brand {
+            font-size: 24px;
+        }
+        
         .hero-title {
             font-size: 42px;
         }
@@ -447,11 +473,7 @@ def inject_global_css():
         }
         
         .hero-section {
-            padding: 80px 20px 60px 20px;
-        }
-        
-        .custom-navbar {
-            padding: 0 20px;
+            padding: 40px 0 60px 0;
         }
         
         .section-title {
@@ -482,28 +504,49 @@ def inject_global_css():
             text-align: center;
             padding: 30px 20px;
         }
+        
+        .nav-buttons-container {
+            gap: 10px;
+        }
+        
+        .stButton > button {
+            min-width: 80px;
+            padding: 6px 16px !important;
+            font-size: 13px !important;
+        }
     }
     
-    /* 10. UTILITY CLASSES */
-    .text-center { text-align: center; }
-    .mb-20 { margin-bottom: 20px; }
-    .mb-30 { margin-bottom: 30px; }
-    .mb-40 { margin-bottom: 40px; }
-    .mt-40 { margin-top: 40px; }
-    .mt-60 { margin-top: 60px; }
+    @media (max-width: 480px) {
+        .navbar-brand {
+            font-size: 20px;
+        }
+        
+        .nav-buttons-container {
+            gap: 5px;
+        }
+        
+        .stButton > button {
+            min-width: 70px;
+            padding: 5px 12px !important;
+            font-size: 12px !important;
+        }
+    }
     </style>
     """, unsafe_allow_html=True)
 
 # --- Page Render Functions ---
 
 def render_navbar():
-    """Render navbar for all pages."""
+    """Render fixed navbar for all pages."""
+    # Inject navbar HTML with fixed positioning
     st.markdown("""
-    <div class="custom-navbar">
-        <div class="navbar-brand">SEI-AI</div>
-        <div class="navbar-nav">
+    <div class="navbar-container">
+        <div class="navbar-content">
+            <div class="navbar-brand">SEI-AI</div>
+            <div class="nav-buttons-container">
     """, unsafe_allow_html=True)
     
+    # Create buttons using Streamlit columns (no HTML mixing)
     col1, col2 = st.columns([1, 1])
     with col1:
         if st.button("🏠 Home", key="nav_home", help="Return to homepage"):
@@ -512,7 +555,11 @@ def render_navbar():
         if st.button("ℹ️ Info", key="nav_info", help="Learn more about the application"):
             next_page('info')
     
-    st.markdown("</div></div>", unsafe_allow_html=True)
+    st.markdown("</div></div></div><div class='main-content'>", unsafe_allow_html=True)
+
+def close_navbar():
+    """Close the navbar HTML structure."""
+    st.markdown("</div>", unsafe_allow_html=True)
 
 def render_home_page():
     """Render the fixed landing page."""
@@ -525,7 +572,7 @@ def render_home_page():
     st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
     st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job with comprehensive evaluation and actionable insights.</p>', unsafe_allow_html=True)
     
-    if st.button("▶️ Start Interview Now", key="hero_start", type="primary", use_container_width=False):
+    if st.button("▶️ Start Interview Now", key="hero_start", type="primary"):
         st.session_state.answers = {}
         st.session_state.results = None
         st.session_state.current_q = 1
@@ -534,7 +581,7 @@ def render_home_page():
     st.markdown('</section>', unsafe_allow_html=True)
     
     # HOW IT WORKS SECTION
-    st.markdown('<div class="text-center mb-40">', unsafe_allow_html=True)
+    st.markdown('<div class="text-center" style="margin-bottom: 40px;">', unsafe_allow_html=True)
     st.markdown('<h2 class="section-title">How To Use</h2>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
@@ -599,6 +646,8 @@ def render_home_page():
         <div class="footer-copyright">Copyright © 2024 SEI-AI Interviewer. All Rights Reserved.</div>
     </div>
     """, unsafe_allow_html=True)
+    
+    close_navbar()
 
 def render_info_page():
     """Render the information page."""
@@ -644,6 +693,8 @@ def render_info_page():
     
     if st.button("🏠 Back to Home", type="primary"):
         next_page('home')
+    
+    close_navbar()
 
 def render_interview_page():
     """Render the interview page."""
@@ -726,6 +777,8 @@ def render_interview_page():
             if st.button("⏮️ Previous", use_container_width=True):
                 st.session_state.current_q -= 1
                 st.rerun()
+    
+    close_navbar()
 
 def render_processing_page():
     """Render the processing page."""
@@ -821,6 +874,8 @@ def render_processing_page():
                 st.session_state.clear()
                 next_page('home')
             return
+    
+    close_navbar()
 
 def render_final_summary_page():
     """Render the final results page."""
@@ -896,7 +951,7 @@ def render_final_summary_page():
         <div class="metric-value pause-color">{total_pause:.1f}s</div>
         <div class="metric-label">Total Pause Time</div>
     </div>
-    """, unsafe_allow_html=True)
+    ""', unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
     
@@ -990,6 +1045,8 @@ def render_final_summary_page():
     with col_btn3:
         if st.button("🏠 Back to Home", use_container_width=True):
             next_page('home')
+    
+    close_navbar()
 
 # Main App Execution Flow
 if st.session_state.page == 'home':
