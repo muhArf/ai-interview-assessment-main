@@ -331,158 +331,129 @@ def inject_custom_css():
     
     </style>
     """, unsafe_allow_html=True)
-    
-# --- Page Tambahan ---
 def inject_landing_css():
     st.markdown("""
     <style>
-    /* === LANDING PAGE ONLY (AMAN) === */
-    .landing-page #MainMenu,
-    .landing-page footer,
-    .landing-page header {
-        visibility: hidden;
+    .landing {
+        padding: 40px 0;
     }
 
-    .landing-page .lp-navbar {
-        padding: 20px 50px;
-        border-bottom: 1px solid #eee;
-        background: white;
-        position: sticky;
-        top: 0;
-        z-index: 999;
-    }
-
-    .landing-page .lp-hero {
-        padding: 120px 40px;
-        text-align: center;
-    }
-
-    .landing-page .lp-hero h1 {
-        font-size: 48px;
+    .landing h1 {
+        font-size: 42px;
         font-weight: 700;
+        margin-bottom: 12px;
     }
 
-    .landing-page .lp-hero p {
-        max-width: 600px;
-        margin: 20px auto 40px;
-        color: #5d5988;
+    .landing p.lead {
         font-size: 18px;
+        color: #555;
+        max-width: 520px;
+        line-height: 1.6;
     }
 
-    .landing-page .lp-primary button {
-        background: black !important;
-        color: white !important;
-        border-radius: 40px !important;
-        padding: 14px 40px !important;
-        font-size: 16px !important;
-        border: none !important;
-    }
-
-    .landing-page .lp-steps {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 30px;
-        padding: 80px 50px;
-    }
-
-    .landing-page .lp-step {
-        background: #f9f9ff;
+    .landing .card {
+        background: #ffffff;
         border-radius: 12px;
-        padding: 40px 20px;
-        text-align: center;
-        box-shadow: 0 4px 15px rgba(0,0,0,.05);
+        padding: 24px;
+        border: 1px solid #eee;
+        height: 100%;
     }
 
-    .landing-page .lp-num {
-        width: 55px;
-        height: 55px;
-        margin: 0 auto 20px;
-        background: black;
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 18px;
+    .landing .step {
+        font-weight: 600;
+        margin-bottom: 6px;
     }
 
-    .landing-page .lp-footer {
-        background: black;
-        color: #aaa;
-        padding: 30px 50px;
-        display: flex;
-        justify-content: space-between;
-        margin-top: 80px;
-        font-size: 13px;
+    .landing .desc {
+        color: #666;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .landing button {
+        border-radius: 8px !important;
+        padding: 10px 24px !important;
+        font-weight: 600 !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
 
 def render_home_page():
-    inject_landing_css()
+   inject_landing_css()
 
-    st.markdown('<div class="landing-page">', unsafe_allow_html=True)
+    st.markdown('<div class="landing">', unsafe_allow_html=True)
 
-    # === NAVBAR ===
-    st.markdown('<div class="lp-navbar">', unsafe_allow_html=True)
-    col_logo, col_nav = st.columns([1, 3])
-    with col_logo:
-        st.markdown("### SEI-AI")
-    with col_nav:
-        if st.button("App Info"):
-            next_page('info')
-        if st.button("Start Interview"):
+    # === HERO SECTION ===
+    col_left, col_right = st.columns([1.2, 1])
+
+    with col_left:
+        st.markdown("<h1>AI Interview Assessment</h1>", unsafe_allow_html=True)
+        st.markdown(
+            "<p class='lead'>"
+            "Latih kemampuan interview Anda menggunakan AI. "
+            "Dapatkan evaluasi objektif, analisis jawaban, dan rekomendasi perbaikan."
+            "</p>",
+            unsafe_allow_html=True
+        )
+
+        if st.button("Mulai Interview"):
             st.session_state.answers = {}
             st.session_state.results = None
             st.session_state.current_q = 1
-            next_page('interview')
-    st.markdown('</div>', unsafe_allow_html=True)
+            next_page("interview")
 
-    # === HERO ===
-    st.markdown('<div class="lp-hero">', unsafe_allow_html=True)
-    st.markdown("<h1>AI-Powered Interview Practice</h1>", unsafe_allow_html=True)
-    st.markdown(
-        "<p>Practice interviews, get semantic scoring, non-verbal analysis, and actionable feedback.</p>",
-        unsafe_allow_html=True
-    )
-    st.markdown('<div class="lp-primary">', unsafe_allow_html=True)
-    if st.button("▶ Start Interview"):
-        st.session_state.answers = {}
-        st.session_state.results = None
-        st.session_state.current_q = 1
-        next_page('interview')
-    st.markdown('</div></div>', unsafe_allow_html=True)
-
-    # === HOW TO USE ===
-    st.markdown('<div class="lp-steps">', unsafe_allow_html=True)
-    steps = [
-        ("1", "Upload Video", "Upload your interview answer video."),
-        ("2", "AI Analysis", "Speech-to-text & non-verbal analysis."),
-        ("3", "Semantic Scoring", "Answer matched with ideal rubric."),
-        ("4", "Instant Feedback", "Scores, insights, and suggestions."),
-        ("5", "Improve Skills", "Practice again with guidance.")
-    ]
-    for n, t, d in steps:
-        st.markdown(f"""
-        <div class="lp-step">
-            <div class="lp-num">{n}</div>
-            <h4>{t}</h4>
-            <p>{d}</p>
+    with col_right:
+        st.markdown("""
+        <div class="card">
+            <b>Fitur Utama</b>
+            <ul style="margin-top:10px; color:#555;">
+                <li>Speech-to-Text otomatis</li>
+                <li>Analisis semantic jawaban</li>
+                <li>Evaluasi non-verbal</li>
+                <li>Skor & feedback instan</li>
+            </ul>
         </div>
         """, unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
-    # === FOOTER ===
-    st.markdown('<div class="lp-footer">', unsafe_allow_html=True)
-    st.markdown("**SEI-AI Interviewer**")
-    st.markdown("© 2024 SEI-AI")
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("<br><br>", unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    # === HOW IT WORKS ===
+    st.subheader("Cara Kerja")
 
+    c1, c2, c3 = st.columns(3)
 
+    with c1:
+        st.markdown("""
+        <div class="card">
+            <div class="step">1. Rekam Jawaban</div>
+            <div class="desc">
+                Upload video jawaban interview sesuai pertanyaan yang diberikan.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c2:
+        st.markdown("""
+        <div class="card">
+            <div class="step">2. Analisis AI</div>
+            <div class="desc">
+                Sistem menganalisis isi jawaban, suara, dan aspek non-verbal.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c3:
+        st.markdown("""
+        <div class="card">
+            <div class="step">3. Hasil & Feedback</div>
+            <div class="desc">
+                Dapatkan skor performa dan saran peningkatan secara langsung.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
     # --- 2. Hero Section ---
     st.markdown('<section class="hero-section">', unsafe_allow_html=True)
