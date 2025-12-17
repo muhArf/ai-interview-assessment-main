@@ -235,10 +235,7 @@ def inject_global_css():
     }
     
     /* 3. MAIN CONTENT PADDING (to account for fixed navbar) */
-    .main-content {
-        padding-top: 45px;
-    }
-    
+   
     /* 4. LANDING PAGE HERO SECTION */
     .hero-section {
         background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFF 100%);
