@@ -461,6 +461,14 @@ def inject_global_css():
     .pause-color { color: #e74c3c; }
     
     /* 9. INTERVIEW PAGE STYLING */
+    .question-container {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin: 30px 0;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+        border: 1px solid #f0f0f0;
+    }
     
     /* 10. RESPONSIVE DESIGN */
     @media (max-width: 1200px) {
@@ -595,18 +603,9 @@ def create_navbar_html(current_page='home'):
     
     return '\n'.join(html_parts)
 
-# --- Page Render Functions ---
-
-def render_navbar(current_page='home'):
-    """Render fixed navbar dengan logo dan tombol sepenuhnya dalam HTML."""
-    
-    # Buat HTML navbar
-    navbar_html = create_navbar_html(current_page)
-    
-    # Tambahkan JavaScript untuk menangani klik
-    navbar_html += """
-    <div class="main-content">
-    
+def inject_navbar_js():
+    """Inject JavaScript untuk navbar secara terpisah."""
+    st.markdown("""
     <script>
     // Setup navbar buttons
     function setupNavbar() {
@@ -641,18 +640,34 @@ def render_navbar(current_page='home'):
     // Juga jalankan setelah timeout untuk memastikan
     setTimeout(setupNavbar, 100);
     </script>
-    """
+    """, unsafe_allow_html=True)
+
+# --- Page Render Functions ---
+
+def render_navbar(current_page='home'):
+    """Render fixed navbar dengan logo dan tombol sepenuhnya dalam HTML."""
     
+    # Buat HTML navbar
+    navbar_html = create_navbar_html(current_page)
+    
+    # Render navbar HTML
     st.markdown(navbar_html, unsafe_allow_html=True)
+    
+    # Inject JavaScript secara terpisah
+    inject_navbar_js()
+    
+    # Buka main content
+    st.markdown('<div class="main-content">', unsafe_allow_html=True)
     
     # Cek session storage untuk navigasi
     try:
         # Gunakan JavaScript untuk membaca session storage
-        nav_to = st.session_state.get('nav_to')
-        if nav_to and nav_to in ['home', 'info']:
-            next_page(nav_to)
-            # Clear setelah digunakan
-            del st.session_state.nav_to
+        if 'nav_to' in st.session_state:
+            nav_to = st.session_state.nav_to
+            if nav_to and nav_to in ['home', 'info']:
+                next_page(nav_to)
+                # Clear setelah digunakan
+                del st.session_state.nav_to
     except:
         pass
 
