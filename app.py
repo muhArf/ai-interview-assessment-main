@@ -538,24 +538,33 @@ def inject_global_css():
 
 def render_navbar():
     """Render fixed navbar for all pages."""
-    # Inject navbar HTML with fixed positioning
+    # Buat navbar dengan Streamlit columns
     st.markdown("""
     <div class="navbar-container">
         <div class="navbar-content">
-            <div class="navbar-brand">SEI-AI</div>
-            <div class="nav-buttons-container">
     """, unsafe_allow_html=True)
     
-    # Create buttons using Streamlit columns (no HTML mixing)
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        if st.button("🏠 Home", key="nav_home", help="Return to homepage"):
+    # Gunakan Streamlit columns untuk layout - INI SAJA YANG DIUBAH!
+    col_logo, col_space, col_btn1, col_btn2 = st.columns([2, 4, 1, 1])
+    
+    with col_logo:
+        # Tampilkan logo dari assets folder
+        try:
+            logo_path = "assets/seiai.png"  # Path ke logo Anda
+            st.image(logo_path, width=120)  # Atur width sesuai kebutuhan
+        except:
+            # Jika logo tidak ditemukan, tampilkan teks sebagai fallback
+            st.markdown("### SEI-AI")
+    
+    with col_btn1:
+        if st.button("🏠 Home", key="nav_home"):
             next_page('home')
-    with col2:
-        if st.button("ℹ️ Info", key="nav_info", help="Learn more about the application"):
+    
+    with col_btn2:
+        if st.button("ℹ️ Info", key="nav_info"):
             next_page('info')
     
-    st.markdown("</div></div></div><div class='main-content'>", unsafe_allow_html=True)
+    st.markdown("</div></div><div class='main-content'>", unsafe_allow_html=True)
 
 def close_navbar():
     """Close the navbar HTML structure."""
