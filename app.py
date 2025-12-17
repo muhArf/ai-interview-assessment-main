@@ -170,59 +170,21 @@ def inject_global_css():
         align-items: center;
     }
     
-    /* Brand/Logo */
-    .navbar-brand {
+    /* Brand/Logo - Custom container for Streamlit elements */
+    .navbar-brand-container {
         display: flex;
         align-items: center;
         height: 50px;
+        min-width: 200px;
     }
     
-    .navbar-logo-img {
-        height: 40px;
-        width: auto;
-        object-fit: contain;
-    }
-    
-    .navbar-logo-text {
-        font-size: 28px;
-        font-weight: 800;
-        color: #000000;
-        margin: 0;
-    }
-    
-    /* Navigation buttons container */
+    /* Navigation buttons container - Custom container */
     .nav-buttons-container {
         display: flex;
         gap: 15px;
         align-items: center;
-    }
-    
-    /* Custom navbar button styling */
-    .navbar-btn {
-        border-radius: 25px !important;
-        border: 2px solid #000000 !important;
-        background: transparent !important;
-        color: #000000 !important;
-        padding: 8px 24px !important;
-        font-size: 14px !important;
-        font-weight: 600 !important;
-        transition: all 0.3s ease !important;
-        height: 40px !important;
-        min-width: 100px;
-        cursor: pointer;
-        text-align: center;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-    }
-    
-    .navbar-btn:hover {
-        background: #000000 !important;
-        color: white !important;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        border-color: #000000 !important;
+        min-width: 250px;
+        justify-content: flex-end;
     }
     
     /* Override Streamlit button styling in navbar */
@@ -246,6 +208,14 @@ def inject_global_css():
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         border-color: #000000 !important;
+    }
+    
+    /* Custom styling for image in navbar */
+    .navbar-img {
+        height: 40px !important;
+        width: auto !important;
+        max-width: 120px !important;
+        object-fit: contain !important;
     }
     
     /* 3. MAIN CONTENT PADDING (to account for fixed navbar) */
@@ -500,10 +470,6 @@ def inject_global_css():
             padding: 0 20px;
         }
         
-        .navbar-logo-text {
-            font-size: 24px;
-        }
-        
         .hero-title {
             font-size: 42px;
         }
@@ -549,23 +515,24 @@ def inject_global_css():
             gap: 10px;
         }
         
-        .stButton > button {
+        .navbar-container .stButton > button {
             min-width: 80px;
             padding: 6px 16px !important;
             font-size: 13px !important;
         }
+        
+        .navbar-brand-container,
+        .nav-buttons-container {
+            min-width: auto;
+        }
     }
     
     @media (max-width: 480px) {
-        .navbar-logo-text {
-            font-size: 20px;
-        }
-        
         .nav-buttons-container {
             gap: 5px;
         }
         
-        .stButton > button {
+        .navbar-container .stButton > button {
             min-width: 70px;
             padding: 5px 12px !important;
             font-size: 12px !important;
@@ -578,133 +545,110 @@ def inject_global_css():
 
 def render_landing_navbar():
     """Render fixed navbar khusus untuk landing page."""
-    # Buat navbar lengkap dalam satu markdown
+    # Buat navbar lengkap dengan HTML
     st.markdown("""
     <div class="navbar-container">
         <div class="navbar-content">
-            <div class="navbar-brand">
-    """, unsafe_allow_html=True)
-    
-    # Kosongkan bagian ini karena akan diisi dengan JavaScript
-    st.empty()
-    
-    st.markdown("""
+            <div class="navbar-brand-container" id="navbar-brand">
+                <!-- Logo akan ditempatkan di sini -->
             </div>
-            <div class="nav-buttons-container">
-    """, unsafe_allow_html=True)
-    
-    # Kosongkan bagian tombol
-    st.empty()
-    
-    st.markdown("""
+            <div class="nav-buttons-container" id="nav-buttons">
+                <!-- Tombol akan ditempatkan di sini -->
             </div>
         </div>
     </div>
     <div class="main-content">
     """, unsafe_allow_html=True)
     
-    # Sekarang tambahkan logo dan tombol menggunakan Streamlit columns
-    # Kita perlu menggunakan JavaScript untuk menempatkannya di posisi yang benar
+    # Sekarang gunakan columns untuk menempatkan logo dan tombol
+    # Kita akan menggunakan container dengan absolute positioning
     st.markdown("""
-    <script>
-    // Tunggu sampai DOM siap
-    document.addEventListener('DOMContentLoaded', function() {
-        // Temukan elemen navbar-brand
-        const navbarBrand = document.querySelector('.navbar-brand');
-        if (navbarBrand) {
-            // Kosongkan dulu
-            navbarBrand.innerHTML = '';
-            
-            // Buat elemen logo
-            const logoDiv = document.createElement('div');
-            logoDiv.className = 'navbar-brand';
-            
-            // Cek apakah logo ada
-            const logoExists = true; // Ganti dengan pengecekan sebenarnya
-            
-            if (logoExists) {
-                const logoImg = document.createElement('img');
-                logoImg.src = 'assets/seiai.png';
-                logoImg.alt = 'SEI-AI Logo';
-                logoImg.style.height = '40px';
-                logoImg.style.width = 'auto';
-                logoDiv.appendChild(logoImg);
-            } else {
-                const logoText = document.createElement('div');
-                logoText.className = 'navbar-logo-text';
-                logoText.textContent = 'SEI-AI';
-                logoDiv.appendChild(logoText);
-            }
-            
-            // Ganti isi navbar-brand
-            navbarBrand.parentNode.replaceChild(logoDiv, navbarBrand);
-        }
-        
-        // Temukan elemen nav-buttons-container
-        const navButtonsContainer = document.querySelector('.nav-buttons-container');
-        if (navButtonsContainer) {
-            // Kosongkan dulu
-            navButtonsContainer.innerHTML = '';
-            
-            // Buat container baru
-            const newContainer = document.createElement('div');
-            newContainer.className = 'nav-buttons-container';
-            newContainer.style.display = 'flex';
-            newContainer.style.gap = '15px';
-            newContainer.style.alignItems = 'center';
-            
-            // Buat tombol Home
-            const homeButton = document.createElement('button');
-            homeButton.className = 'navbar-btn';
-            homeButton.innerHTML = '🏠 Home';
-            homeButton.onclick = function() {
-                window.location.href = '?nav_home_landing=true';
-            };
-            newContainer.appendChild(homeButton);
-            
-            // Buat tombol Info
-            const infoButton = document.createElement('button');
-            infoButton.className = 'navbar-btn';
-            infoButton.innerHTML = 'ℹ️ Info';
-            infoButton.onclick = function() {
-                window.location.href = '?nav_info_landing=true';
-            };
-            newContainer.appendChild(infoButton);
-            
-            // Ganti isi nav-buttons-container
-            navButtonsContainer.parentNode.replaceChild(newContainer, navButtonsContainer);
-        }
-    });
-    </script>
+    <div style="position: fixed; top: 0; left: 0; right: 0; z-index: 1001; pointer-events: none;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 40px; height: 70px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="pointer-events: auto;">
+    """, unsafe_allow_html=True)
+    
+    # Logo - bagian kiri
+    try:
+        if os.path.exists("assets/seiai.png"):
+            st.image("assets/seiai.png", width=120)
+        else:
+            st.markdown('<div style="font-size: 28px; font-weight: 800; color: #000000;">SEI-AI</div>', unsafe_allow_html=True)
+    except:
+        st.markdown('<div style="font-size: 28px; font-weight: 800; color: #000000;">SEI-AI</div>', unsafe_allow_html=True)
+    
+    st.markdown("""
+            </div>
+            <div style="display: flex; gap: 15px; align-items: center; pointer-events: auto;">
+    """, unsafe_allow_html=True)
+    
+    # Tombol - bagian kanan
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🏠 Home", key="nav_home_landing"):
+            next_page('home')
+    with col2:
+        if st.button("ℹ️ Info", key="nav_info_landing"):
+            next_page('info')
+    
+    st.markdown("""
+            </div>
+        </div>
+    </div>
     """, unsafe_allow_html=True)
 
 def render_navbar():
     """Render fixed navbar untuk halaman lain."""
-    # Gunakan pendekatan yang berbeda untuk halaman lain
+    # Untuk halaman lain, gunakan pendekatan yang sama
     st.markdown("""
     <div class="navbar-container">
         <div class="navbar-content">
-            <div class="navbar-brand">
-                <div class="navbar-logo-text">SEI-AI</div>
+            <div class="navbar-brand-container">
+                <!-- Logo -->
             </div>
-            <div class="nav-buttons-container" id="nav-buttons">
-                <!-- Tombol akan diisi oleh Streamlit -->
+            <div class="nav-buttons-container">
+                <!-- Tombol -->
             </div>
         </div>
     </div>
     <div class="main-content">
     """, unsafe_allow_html=True)
     
-    # Gunakan container untuk menempatkan tombol di posisi yang benar
-    with st.container():
-        # Buat columns untuk tombol
-        cols = st.columns([6, 1, 1])
-        with cols[1]:
-            if st.button("🏠 Home", key="nav_home_other"):
-                next_page('home')
-        with cols[2]:
-            if st.button("ℹ️ Info", key="nav_info_other"):
-                next_page('info')
+    # Overlay untuk logo dan tombol
+    st.markdown("""
+    <div style="position: fixed; top: 0; left: 0; right: 0; z-index: 1001; pointer-events: none;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 40px; height: 70px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="pointer-events: auto;">
+    """, unsafe_allow_html=True)
+    
+    # Logo
+    try:
+        if os.path.exists("assets/seiai.png"):
+            st.image("assets/seiai.png", width=120)
+        else:
+            st.markdown('<div style="font-size: 28px; font-weight: 800; color: #000000;">SEI-AI</div>', unsafe_allow_html=True)
+    except:
+        st.markdown('<div style="font-size: 28px; font-weight: 800; color: #000000;">SEI-AI</div>', unsafe_allow_html=True)
+    
+    st.markdown("""
+            </div>
+            <div style="display: flex; gap: 15px; align-items: center; pointer-events: auto;">
+    """, unsafe_allow_html=True)
+    
+    # Tombol
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🏠 Home", key="nav_home_other"):
+            next_page('home')
+    with col2:
+        if st.button("ℹ️ Info", key="nav_info_other"):
+            next_page('info')
+    
+    st.markdown("""
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 def close_navbar():
     """Close the navbar HTML structure."""
