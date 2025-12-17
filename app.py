@@ -191,7 +191,7 @@ def inject_global_css():
     }
     
     /* Custom button styling */
-    .stButton > button {
+    .nav-button {
         border-radius: 25px !important;
         border: 2px solid #000000 !important;
         background: transparent !important;
@@ -202,9 +202,37 @@ def inject_global_css():
         transition: all 0.3s ease !important;
         height: 40px !important;
         min-width: 100px;
+        cursor: pointer;
+        text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
     
-    .stButton > button:hover {
+    .nav-button:hover {
+        background: #000000 !important;
+        color: white !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        border-color: #000000 !important;
+    }
+    
+    /* Override Streamlit button styling in navbar */
+    .navbar-container .stButton > button {
+        border-radius: 25px !important;
+        border: 2px solid #000000 !important;
+        background: transparent !important;
+        color: #000000 !important;
+        padding: 8px 24px !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+        height: 40px !important;
+        min-width: 100px;
+        margin: 0 !important;
+    }
+    
+    .navbar-container .stButton > button:hover {
         background: #000000 !important;
         color: white !important;
         transform: translateY(-2px);
@@ -579,7 +607,35 @@ def close_navbar():
 def render_home_page():
     """Render the fixed landing page."""
     inject_global_css()
-    render_navbar()
+    
+    # Custom navbar hanya untuk landing page
+    st.markdown("""
+    <div class="navbar-container">
+        <div class="navbar-content">
+            <div class="navbar-brand">
+    """, unsafe_allow_html=True)
+    
+    # Display logo
+    try:
+        if os.path.exists("assets/seiai.png"):
+            st.image("assets/seiai.png", width=120)
+        else:
+            st.markdown('<div style="font-size: 28px; font-weight: 800; color: #000000;">SEI-AI</div>', unsafe_allow_html=True)
+    except:
+        st.markdown('<div style="font-size: 28px; font-weight: 800; color: #000000;">SEI-AI</div>', unsafe_allow_html=True)
+    
+    st.markdown("</div><div class='nav-buttons-container'>", unsafe_allow_html=True)
+    
+    # Navigation buttons dengan styling khusus
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🏠 Home", key="nav_home_landing"):
+            next_page('home')
+    with col2:
+        if st.button("ℹ️ Info", key="nav_info_landing"):
+            next_page('info')
+    
+    st.markdown("</div></div></div><div class='main-content'>", unsafe_allow_html=True)
     
     # HERO SECTION
     st.markdown('<section class="hero-section">', unsafe_allow_html=True)
@@ -662,11 +718,12 @@ def render_home_page():
     </div>
     """, unsafe_allow_html=True)
     
-    close_navbar()
+    st.markdown("</div>", unsafe_allow_html=True)  # Close main-content
 
 def render_info_page():
     """Render the information page."""
     inject_global_css()
+    # Gunakan render_navbar biasa untuk halaman info
     render_navbar()
     
     st.title("📚 Application Information")
@@ -714,6 +771,7 @@ def render_info_page():
 def render_interview_page():
     """Render the interview page."""
     inject_global_css()
+    # Gunakan render_navbar biasa untuk halaman interview
     render_navbar()
     
     st.title(f"🎯 Interview Question {st.session_state.current_q} of {TOTAL_QUESTIONS}")
@@ -798,6 +856,7 @@ def render_interview_page():
 def render_processing_page():
     """Render the processing page."""
     inject_global_css()
+    # Gunakan render_navbar biasa untuk halaman processing
     render_navbar()
     
     st.title("⚙️ Analysis Process")
@@ -895,6 +954,7 @@ def render_processing_page():
 def render_final_summary_page():
     """Render the final results page."""
     inject_global_css()
+    # Gunakan render_navbar biasa untuk halaman final summary
     render_navbar()
     
     st.title("🏆 Final Evaluation Report")
