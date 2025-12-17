@@ -581,11 +581,11 @@ def create_navbar_html(current_page='home'):
     
     # Home button
     home_active = "active" if current_page == 'home' else ""
-    html_parts.append(f'      <a href="#" class="navbar-btn {home_active}" id="nav-home">🏠 Home</a>')
+    html_parts.append(f'      <a href="#" class="navbar-btn {home_active}" id="nav-home"> Home</a>')
     
     # Info button
     info_active = "active" if current_page == 'info' else ""
-    html_parts.append(f'      <a href="#" class="navbar-btn {info_active}" id="nav-info">ℹ️ Info</a>')
+    html_parts.append(f'      <a href="#" class="navbar-btn {info_active}" id="nav-info"> Info</a>')
     
     html_parts.append('    </div>')
     html_parts.append('  </div>')
