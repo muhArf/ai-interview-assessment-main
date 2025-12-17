@@ -6,6 +6,7 @@ import os
 import tempfile
 import sys
 import numpy as np
+import base64
 
 # Add current directory and 'models' to PATH
 sys.path.append(os.path.dirname(__file__))
@@ -146,7 +147,7 @@ def inject_global_css():
     header {visibility: hidden !important;}
     .stDeployButton {display: none !important;}
     
-    /* 2. FIXED NAVBAR CONTAINER */
+    /* 2. FIXED NAVBAR CONTAINER - FULLY IN HTML */
     .navbar-container {
         position: fixed;
         top: 0;
@@ -170,52 +171,67 @@ def inject_global_css():
         align-items: center;
     }
     
-    /* Brand/Logo - Custom container for Streamlit elements */
-    .navbar-brand-container {
+    /* Brand/Logo - Pure HTML */
+    .navbar-brand {
         display: flex;
         align-items: center;
         height: 50px;
-        min-width: 200px;
     }
     
-    /* Navigation buttons container - Custom container */
+    .logo-img {
+        height: 40px;
+        width: auto;
+        object-fit: contain;
+    }
+    
+    .logo-text {
+        font-size: 28px;
+        font-weight: 800;
+        color: #000000;
+        margin: 0;
+        text-decoration: none;
+    }
+    
+    /* Navigation buttons container - Pure HTML */
     .nav-buttons-container {
         display: flex;
         gap: 15px;
         align-items: center;
-        min-width: 250px;
-        justify-content: flex-end;
     }
     
-    /* Override Streamlit button styling in navbar */
-    .navbar-container .stButton > button {
-        border-radius: 25px !important;
-        border: 2px solid #000000 !important;
-        background: transparent !important;
-        color: #000000 !important;
-        padding: 8px 24px !important;
-        font-size: 14px !important;
-        font-weight: 600 !important;
-        transition: all 0.3s ease !important;
-        height: 40px !important;
+    /* Custom navbar button styling - Pure HTML */
+    .navbar-btn {
+        border-radius: 25px;
+        border: 2px solid #000000;
+        background: transparent;
+        color: #000000;
+        padding: 8px 24px;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        height: 40px;
         min-width: 100px;
-        margin: 0 !important;
+        cursor: pointer;
+        text-align: center;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-family: inherit;
     }
     
-    .navbar-container .stButton > button:hover {
-        background: #000000 !important;
-        color: white !important;
+    .navbar-btn:hover {
+        background: #000000;
+        color: white;
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        border-color: #000000 !important;
+        border-color: #000000;
     }
     
-    /* Custom styling for image in navbar */
-    .navbar-img {
-        height: 40px !important;
-        width: auto !important;
-        max-width: 120px !important;
-        object-fit: contain !important;
+    /* Active button state */
+    .navbar-btn.active {
+        background: #000000;
+        color: white;
     }
     
     /* 3. MAIN CONTENT PADDING (to account for fixed navbar) */
@@ -470,6 +486,10 @@ def inject_global_css():
             padding: 0 20px;
         }
         
+        .logo-text {
+            font-size: 24px;
+        }
+        
         .hero-title {
             font-size: 42px;
         }
@@ -515,27 +535,26 @@ def inject_global_css():
             gap: 10px;
         }
         
-        .navbar-container .stButton > button {
+        .navbar-btn {
             min-width: 80px;
-            padding: 6px 16px !important;
-            font-size: 13px !important;
-        }
-        
-        .navbar-brand-container,
-        .nav-buttons-container {
-            min-width: auto;
+            padding: 6px 16px;
+            font-size: 13px;
         }
     }
     
     @media (max-width: 480px) {
+        .logo-text {
+            font-size: 20px;
+        }
+        
         .nav-buttons-container {
             gap: 5px;
         }
         
-        .navbar-container .stButton > button {
+        .navbar-btn {
             min-width: 70px;
-            padding: 5px 12px !important;
-            font-size: 12px !important;
+            padding: 5px 12px;
+            font-size: 12px;
         }
     }
     </style>
@@ -543,112 +562,59 @@ def inject_global_css():
 
 # --- Page Render Functions ---
 
-def render_landing_navbar():
-    """Render fixed navbar khusus untuk landing page."""
-    # Buat navbar lengkap dengan HTML
-    st.markdown("""
+def render_navbar(current_page='home'):
+    """Render fixed navbar dengan logo dan tombol sepenuhnya dalam HTML."""
+    
+    # Cek apakah logo file ada
+    logo_exists = os.path.exists("assets/seiai.png")
+    
+    # Buat navbar lengkap dalam satu markdown dengan semua elemen HTML
+    navbar_html = f"""
     <div class="navbar-container">
         <div class="navbar-content">
-            <div class="navbar-brand-container" id="navbar-brand">
-                <!-- Logo akan ditempatkan di sini -->
-            </div>
-            <div class="nav-buttons-container" id="nav-buttons">
-                <!-- Tombol akan ditempatkan di sini -->
-            </div>
-        </div>
-    </div>
-    <div class="main-content">
-    """, unsafe_allow_html=True)
+            <div class="navbar-brand">
+    """
     
-    # Sekarang gunakan columns untuk menempatkan logo dan tombol
-    # Kita akan menggunakan container dengan absolute positioning
-    st.markdown("""
-    <div style="position: fixed; top: 0; left: 0; right: 0; z-index: 1001; pointer-events: none;">
-        <div style="max-width: 1200px; margin: 0 auto; padding: 0 40px; height: 70px; display: flex; justify-content: space-between; align-items: center;">
-            <div style="pointer-events: auto;">
-    """, unsafe_allow_html=True)
+    if logo_exists:
+        # Baca file logo dan encode ke base64 untuk embed langsung
+        try:
+            with open("assets/seiai.png", "rb") as f:
+                logo_data = base64.b64encode(f.read()).decode()
+                navbar_html += f'<img src="data:image/png;base64,{logo_data}" alt="SEI-AI Logo" class="logo-img">'
+        except:
+            navbar_html += '<div class="logo-text">SEI-AI</div>'
+    else:
+        navbar_html += '<div class="logo-text">SEI-AI</div>'
     
-    # Logo - bagian kiri
-    try:
-        if os.path.exists("assets/seiai.png"):
-            st.image("assets/seiai.png", width=120)
-        else:
-            st.markdown('<div style="font-size: 28px; font-weight: 800; color: #000000;">SEI-AI</div>', unsafe_allow_html=True)
-    except:
-        st.markdown('<div style="font-size: 28px; font-weight: 800; color: #000000;">SEI-AI</div>', unsafe_allow_html=True)
-    
-    st.markdown("""
-            </div>
-            <div style="display: flex; gap: 15px; align-items: center; pointer-events: auto;">
-    """, unsafe_allow_html=True)
-    
-    # Tombol - bagian kanan
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("🏠 Home", key="nav_home_landing"):
-            next_page('home')
-    with col2:
-        if st.button("ℹ️ Info", key="nav_info_landing"):
-            next_page('info')
-    
-    st.markdown("""
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-def render_navbar():
-    """Render fixed navbar untuk halaman lain."""
-    # Untuk halaman lain, gunakan pendekatan yang sama
-    st.markdown("""
-    <div class="navbar-container">
-        <div class="navbar-content">
-            <div class="navbar-brand-container">
-                <!-- Logo -->
+    navbar_html += """
             </div>
             <div class="nav-buttons-container">
-                <!-- Tombol -->
+    """
+    
+    # Tambahkan tombol Home
+    home_active = "active" if current_page == 'home' else ""
+    navbar_html += f"""
+                <button class="navbar-btn {home_active}" onclick="window.location.href='?page=home'">
+                    <span>🏠</span> Home
+                </button>
+    """
+    
+    # Tambahkan tombol Info
+    info_active = "active" if current_page == 'info' else ""
+    navbar_html += f"""
+                <button class="navbar-btn {info_active}" onclick="window.location.href='?page=info'">
+                    <span>ℹ️</span> Info
+                </button>
+    """
+    
+    navbar_html += """
             </div>
         </div>
     </div>
     <div class="main-content">
-    """, unsafe_allow_html=True)
+    """
     
-    # Overlay untuk logo dan tombol
-    st.markdown("""
-    <div style="position: fixed; top: 0; left: 0; right: 0; z-index: 1001; pointer-events: none;">
-        <div style="max-width: 1200px; margin: 0 auto; padding: 0 40px; height: 70px; display: flex; justify-content: space-between; align-items: center;">
-            <div style="pointer-events: auto;">
-    """, unsafe_allow_html=True)
-    
-    # Logo
-    try:
-        if os.path.exists("assets/seiai.png"):
-            st.image("assets/seiai.png", width=120)
-        else:
-            st.markdown('<div style="font-size: 28px; font-weight: 800; color: #000000;">SEI-AI</div>', unsafe_allow_html=True)
-    except:
-        st.markdown('<div style="font-size: 28px; font-weight: 800; color: #000000;">SEI-AI</div>', unsafe_allow_html=True)
-    
-    st.markdown("""
-            </div>
-            <div style="display: flex; gap: 15px; align-items: center; pointer-events: auto;">
-    """, unsafe_allow_html=True)
-    
-    # Tombol
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("🏠 Home", key="nav_home_other"):
-            next_page('home')
-    with col2:
-        if st.button("ℹ️ Info", key="nav_info_other"):
-            next_page('info')
-    
-    st.markdown("""
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(navbar_html, unsafe_allow_html=True)
 
 def close_navbar():
     """Close the navbar HTML structure."""
@@ -658,8 +624,8 @@ def render_home_page():
     """Render the fixed landing page."""
     inject_global_css()
     
-    # Render navbar khusus untuk landing page
-    render_landing_navbar()
+    # Render navbar dengan semua elemen dalam HTML
+    render_navbar('home')
     
     # HERO SECTION
     st.markdown('<section class="hero-section">', unsafe_allow_html=True)
@@ -748,7 +714,7 @@ def render_info_page():
     """Render the information page."""
     inject_global_css()
     # Gunakan render_navbar biasa untuk halaman info
-    render_navbar()
+    render_navbar('info')
     
     st.title("📚 Application Information")
     
@@ -787,6 +753,7 @@ def render_info_page():
     * Hours: Monday-Friday, 9:00 AM - 5:00 PM EST
     """)
     
+    # Tombol Back to Home menggunakan Streamlit
     if st.button("🏠 Back to Home", type="primary"):
         next_page('home')
     
@@ -796,7 +763,7 @@ def render_interview_page():
     """Render the interview page."""
     inject_global_css()
     # Gunakan render_navbar biasa untuk halaman interview
-    render_navbar()
+    render_navbar('interview')
     
     st.title(f"🎯 Interview Question {st.session_state.current_q} of {TOTAL_QUESTIONS}")
     
@@ -881,7 +848,7 @@ def render_processing_page():
     """Render the processing page."""
     inject_global_css()
     # Gunakan render_navbar biasa untuk halaman processing
-    render_navbar()
+    render_navbar('processing')
     
     st.title("⚙️ Analysis Process")
     st.info("Please wait, this process may take a few minutes depending on video duration.")
@@ -979,7 +946,7 @@ def render_final_summary_page():
     """Render the final results page."""
     inject_global_css()
     # Gunakan render_navbar biasa untuk halaman final summary
-    render_navbar()
+    render_navbar('final_summary')
     
     st.title("🏆 Final Evaluation Report")
     st.markdown("---")
