@@ -236,7 +236,7 @@ def inject_global_css():
     
     /* 3. MAIN CONTENT PADDING (to account for fixed navbar) */
     .main-content {
-        padding-top: 90px;
+        padding-top: 45px;
     }
     
     /* 4. LANDING PAGE HERO SECTION */
