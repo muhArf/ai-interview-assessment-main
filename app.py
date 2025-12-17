@@ -537,34 +537,90 @@ def inject_global_css():
 # --- Page Render Functions ---
 
 def render_navbar():
-    """Render fixed navbar for all pages."""
-    # Buat navbar dengan Streamlit columns
-    st.markdown("""
-    <div class="navbar-container">
-        <div class="navbar-content">
-    """, unsafe_allow_html=True)
+    """Easiest fixed navbar implementation."""
     
-    # Gunakan Streamlit columns untuk layout - INI SAJA YANG DIUBAH!
-    col_logo, col_space, col_btn1, col_btn2 = st.columns([2, 4, 1, 1])
+    # Load logo as base64
+    import base64
     
-    with col_logo:
-        # Tampilkan logo dari assets folder
-        try:
-            logo_path = "assets/seiai.png"  # Path ke logo Anda
-            st.image(logo_path, width=120)  # Atur width sesuai kebutuhan
-        except:
-            # Jika logo tidak ditemukan, tampilkan teks sebagai fallback
-            st.markdown("### SEI-AI")
+    logo_src = "data:image/svg+xml;base64," + base64.b64encode(b"""
+    <svg width="120" height="40" xmlns="http://www.w3.org/2000/svg">
+        <text x="10" y="28" font-family="Arial" font-size="24" font-weight="bold" fill="#000">SEI-AI</text>
+    </svg>
+    """).decode()
     
-    with col_btn1:
-        if st.button("🏠 Home", key="nav_home"):
-            next_page('home')
+    # Try to load actual logo
+    try:
+        with open("assets/seiai.png", "rb") as f:
+            logo_b64 = base64.b64encode(f.read()).decode()
+            logo_src = f"data:image/png;base64,{logo_b64}"
+    except:
+        pass
     
-    with col_btn2:
-        if st.button("ℹ️ Info", key="nav_info"):
-            next_page('info')
+    # Fixed navbar HTML
+    navbar = f"""
+    <div id="fixed-navbar" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        height: 70px;
+        z-index: 1000;
+    ">
+        <div style="
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        ">
+            <!-- Logo -->
+            <div>
+                <img src="{logo_src}" style="height: 40px; width: auto;">
+            </div>
+            
+            <!-- Buttons -->
+            <div style="display: flex; gap: 10px;">
+                <a href="?page=home" style="
+                    display: inline-block;
+                    background: transparent;
+                    border: 2px solid #000;
+                    color: #000;
+                    padding: 8px 16px;
+                    border-radius: 20px;
+                    text-decoration: none;
+                    font-weight: 600;
+                    cursor: pointer;
+                ">🏠 Home</a>
+                
+                <a href="?page=info" style="
+                    display: inline-block;
+                    background: transparent;
+                    border: 2px solid #000;
+                    color: #000;
+                    padding: 8px 16px;
+                    border-radius: 20px;
+                    text-decoration: none;
+                    font-weight: 600;
+                    cursor: pointer;
+                ">ℹ️ Info</a>
+            </div>
+        </div>
+    </div>
+    <div style="height: 70px;"></div>
+    """
     
-    st.markdown("</div></div><div class='main-content'>", unsafe_allow_html=True)
+    st.markdown(navbar, unsafe_allow_html=True)
+    
+    # Handle navigation
+    if "page" in st.query_params:
+        page = st.query_params["page"]
+        st.query_params.clear()
+        next_page(page)
+        st.rerun()
 
 def close_navbar():
     """Close the navbar HTML structure."""
