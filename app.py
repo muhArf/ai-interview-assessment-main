@@ -191,7 +191,7 @@ def inject_global_css():
     }
     
     /* Custom button styling */
-    .stButton > button {
+    .nav-button {
         border-radius: 25px !important;
         border: 2px solid #000000 !important;
         background: transparent !important;
@@ -202,9 +202,37 @@ def inject_global_css():
         transition: all 0.3s ease !important;
         height: 40px !important;
         min-width: 100px;
+        cursor: pointer;
+        text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
     
-    .stButton > button:hover {
+    .nav-button:hover {
+        background: #000000 !important;
+        color: white !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        border-color: #000000 !important;
+    }
+    
+    /* Override Streamlit button styling in navbar */
+    .navbar-container .stButton > button {
+        border-radius: 25px !important;
+        border: 2px solid #000000 !important;
+        background: transparent !important;
+        color: #000000 !important;
+        padding: 8px 24px !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+        height: 40px !important;
+        min-width: 100px;
+        margin: 0 !important;
+    }
+    
+    .navbar-container .stButton > button:hover {
         background: #000000 !important;
         color: white !important;
         transform: translateY(-2px);
@@ -549,7 +577,7 @@ def render_navbar():
             <div class="navbar-brand">
     """, unsafe_allow_html=True)
     
-    # Display logo using Streamlit
+    # Display logo using Streamlit - INI DIPINDAH KE DALAM NAVBAR
     try:
         # Check if logo exists
         if os.path.exists("assets/seiai.png"):
@@ -561,7 +589,7 @@ def render_navbar():
     
     st.markdown("</div><div class='nav-buttons-container'>", unsafe_allow_html=True)
     
-    # Create navigation buttons
+    # Create navigation buttons - INI DIPINDAH KE DALAM NAVBAR
     col1, col2 = st.columns(2)
     with col1:
         if st.button("🏠 Home", key="nav_home"):
