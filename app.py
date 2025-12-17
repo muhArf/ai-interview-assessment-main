@@ -264,7 +264,7 @@ def inject_global_css():
     }
     
     .hero-subtitle {
-        font-size: 20px;
+        font-size: 30px;
         color: #5d5988;
         max-width: 680px;
         margin: 0 auto 48px auto;
