@@ -1,130 +1,6 @@
-# app.py
-import streamlit as st
-import pandas as pd
-import json
-import os
-import tempfile
-import sys
-import numpy as np
+# Bagian yang dimodifikasi dari app.py
+# Ganti fungsi inject_global_css() dengan versi ini:
 
-# Add current directory and 'models' to PATH
-sys.path.append(os.path.dirname(__file__))
-sys.path.append(os.path.join(os.path.dirname(__file__), 'models'))
-
-# Import logic from models folder
-try:
-    # IMPORTANT: Ensure files in models/ folder are correctly implemented
-    # Dummy imports if modules in models/ folder are not fully implemented
-    def load_stt_model(): return "STT_Model_Loaded"
-    def load_text_models(): return None, None, None
-    def load_embedder_model(): return "Embedder_Model_Loaded"
-    def video_to_wav(video_path, audio_path): pass
-    def noise_reduction(audio_path_in, audio_path_out): pass
-    def transcribe_and_clean(audio_path, stt_model, spell_checker, embedder_model, english_words): return "This is a dummy transcript for testing.", 0.95
-    def compute_confidence_score(transcript, log_prob_raw): return 0.95
-    def analyze_non_verbal(audio_path): return {'tempo_bpm': '135 BPM', 'total_pause_seconds': '5.2', 'qualitative_summary': 'Normal pace'}
-    def score_with_rubric(q_key_rubric, q_text, transcript, RUBRIC_DATA, embedder_model): return 4, "Excellent relevance and structural clarity."
-    
-    # Replace with actual imports if modules exist
-    from models.stt_processor import load_stt_model, load_text_models, video_to_wav, noise_reduction, transcribe_and_clean
-    from models.scoring_logic import load_embedder_model, compute_confidence_score, score_with_rubric
-    from models.nonverbal_analysis import analyze_non_verbal
-except ImportError as e:
-    st.error(f"Failed to load modules from the 'models' folder. Ensure the folder structure and files are correct. Error: {e}")
-    st.stop() 
-
-# Page Configuration & Data Load
-st.set_page_config(
-    page_title="SEI-AI",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
-
-# Initialize Session State
-if 'page' not in st.session_state:
-    st.session_state.page = 'home'
-if 'current_q' not in st.session_state:
-    st.session_state.current_q = 1
-if 'answers' not in st.session_state:
-    st.session_state.answers = {}
-if 'results' not in st.session_state:
-    st.session_state.results = None
-
-# Constants
-TOTAL_QUESTIONS = 5
-VIDEO_MAX_SIZE_MB = 50
-
-# --- Utility Functions ---
-def next_page(page_name):
-    st.session_state.page = page_name
-    st.rerun()
-
-@st.cache_resource
-def get_models():
-    """Load all heavy models (only once)."""
-    try:
-        # IMPORTANT: Replace model paths according to your actual implementation
-        stt_model = load_stt_model()
-        embedder_model = load_embedder_model()
-        
-        try:
-            spell, _, english_words = load_text_models()
-        except Exception:
-            spell, english_words = None, None
-            st.warning("Failed to load spell checker/word models. Text cleaning will be limited.")
-            
-        return stt_model, embedder_model, spell, english_words
-    except Exception as e:
-        st.error(f"Failed to load one of the core models. Ensure all dependencies are installed. Error: {e}")
-        return None, None, None, None
-
-# Load models early
-STT_MODEL, EMBEDDER_MODEL, SPELL_CHECKER, ENGLISH_WORDS = get_models()
-
-@st.cache_data
-def load_questions():
-    """Load questions from questions.json."""
-    try:
-        # Dummy data if questions.json doesn't exist
-        if not os.path.exists('questions.json'):
-             return {
-                 "1": {"question": "Tell me about a time you handled a conflict in a team."},
-                 "2": {"question": "What are your greatest strengths and weaknesses?"},
-                 "3": {"question": "Where do you see yourself in five years?"},
-                 "4": {"question": "Why do you want to work for this company?"},
-                 "5": {"question": "Describe a difficult technical challenge you overcame."}
-             }
-        
-        with open('questions.json', 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        st.error("questions.json file not found! Please ensure the file exists.")
-        return {}
-
-@st.cache_data
-def load_rubric_data():
-    """Load rubric data from rubric_data.json."""
-    try:
-        # Dummy data if rubric_data.json doesn't exist
-        if not os.path.exists('rubric_data.json'):
-             return {
-                 "q1": {"rubric": "STAR method used, clear resolution.", "keywords": ["conflict", "resolution", "STAR"]},
-                 "q2": {"rubric": "Self-awareness, actionable improvements.", "keywords": ["strengths", "weaknesses", "improvement"]},
-                 "q3": {"rubric": "Ambitious and company-aligned goals.", "keywords": ["goals", "future", "career"]},
-                 "q4": {"rubric": "Specific reasons, knowledge of company values.", "keywords": ["company", "values", "motivation"]},
-                 "q5": {"rubric": "Clear context, technical detail, result achieved.", "keywords": ["challenge", "technical", "solution"]}
-             }
-        
-        with open('rubric_data.json', 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        st.error("rubric_data.json file not found! Please ensure the file exists.")
-        return {}
-
-QUESTIONS = load_questions()
-RUBRIC_DATA = load_rubric_data()
-
-# --- Global CSS Injection ---
 def inject_global_css():
     """Inject custom CSS for all pages."""
     st.markdown("""
@@ -138,6 +14,7 @@ def inject_global_css():
         margin: 0 !important;
         overflow-x: hidden !important;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f8f9fa;
     }
     
     /* Hide default Streamlit elements */
@@ -153,8 +30,9 @@ def inject_global_css():
         left: 0;
         right: 0;
         z-index: 1000;
-        background: white;
-        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         height: 70px;
         display: flex;
         align-items: center;
@@ -193,9 +71,9 @@ def inject_global_css():
     /* Custom button styling */
     .stButton > button {
         border-radius: 25px !important;
-        border: 2px solid #000000 !important;
+        border: 2px solid #667eea !important;
         background: transparent !important;
-        color: #000000 !important;
+        color: #667eea !important;
         padding: 8px 24px !important;
         font-size: 14px !important;
         font-weight: 600 !important;
@@ -205,24 +83,26 @@ def inject_global_css():
     }
     
     .stButton > button:hover {
-        background: #000000 !important;
+        background: #667eea !important;
         color: white !important;
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        border-color: #000000 !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        border-color: #667eea !important;
     }
     
-    /* 3. MAIN CONTENT PADDING (to account for fixed navbar) */
+    /* 3. MAIN CONTENT PADDING */
     .main-content {
-        padding-top: 90px;
+        padding-top: 70px;
     }
     
     /* 4. LANDING PAGE HERO SECTION */
     .hero-section {
-        background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFF 100%);
-        padding: 60px 0 100px 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 100px 40px;
         text-align: center;
         position: relative;
+        color: white;
+        margin-bottom: 80px;
     }
     
     .hero-section::before {
@@ -231,180 +111,350 @@ def inject_global_css():
         top: 0;
         left: 0;
         right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/></svg>');
+        opacity: 0.3;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 1;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .hero-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 8px 20px;
+        border-radius: 50px;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
     }
     
     .hero-title {
         font-size: 56px;
         font-weight: 800;
         margin-bottom: 24px;
-        color: #000000;
-        line-height: 1.1;
+        line-height: 1.2;
         letter-spacing: -1px;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
     }
     
     .hero-subtitle {
         font-size: 20px;
-        color: #5d5988;
-        max-width: 680px;
+        max-width: 700px;
         margin: 0 auto 48px auto;
         line-height: 1.6;
         font-weight: 400;
+        opacity: 0.95;
+    }
+    
+    .hero-buttons {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
     }
     
     .primary-btn {
-        background: #000000 !important;
-        color: white !important;
+        background: white !important;
+        color: #667eea !important;
         border-radius: 30px !important;
         padding: 16px 48px !important;
         font-size: 18px !important;
-        font-weight: 600 !important;
+        font-weight: 700 !important;
         border: none !important;
         transition: all 0.3s ease !important;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     }
     
     .primary-btn:hover {
-        background: #333333 !important;
+        background: #f8f9fa !important;
         transform: translateY(-3px);
-        box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+        box-shadow: 0 12px 35px rgba(0,0,0,0.2);
     }
     
-    /* 5. HOW IT WORKS SECTION */
+    .secondary-btn {
+        background: transparent !important;
+        color: white !important;
+        border: 2px solid white !important;
+        border-radius: 30px !important;
+        padding: 16px 48px !important;
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .secondary-btn:hover {
+        background: white !important;
+        color: #667eea !important;
+        transform: translateY(-3px);
+    }
+    
+    /* 5. STATS SECTION */
+    .stats-section {
+        max-width: 1200px;
+        margin: -60px auto 80px auto;
+        padding: 0 40px;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 25px;
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .stat-number {
+        font-size: 42px;
+        font-weight: 800;
+        color: #667eea;
+        margin-bottom: 8px;
+        line-height: 1;
+    }
+    
+    .stat-label {
+        font-size: 14px;
+        color: #666;
+        font-weight: 500;
+    }
+    
+    /* 6. HOW IT WORKS SECTION */
+    .section-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 60px 40px;
+    }
+    
     .section-title {
         font-size: 42px;
         font-weight: 800;
         text-align: center;
-        margin-bottom: 60px;
-        color: #000000;
+        margin-bottom: 16px;
+        color: #1a1a1a;
         letter-spacing: -0.5px;
     }
     
+    .section-subtitle {
+        text-align: center;
+        font-size: 18px;
+        color: #666;
+        margin-bottom: 60px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
     .steps-container {
-        display: flex;
-        justify-content: center;
-        gap: 30px;
-        flex-wrap: wrap;
-        padding: 0 20px;
-        margin-bottom: 80px;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 25px;
+        margin-bottom: 40px;
     }
     
     .step-card {
         background: white;
         border-radius: 20px;
-        padding: 45px 30px 30px 30px;
+        padding: 35px 25px;
         text-align: center;
-        width: 260px;
-        min-height: 300px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        min-height: 280px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
         position: relative;
         transition: all 0.4s ease;
-        border: 1px solid #f0f0f0;
+        border: 2px solid transparent;
     }
     
     .step-card:hover {
-        transform: translateY(-12px);
-        box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+        transform: translateY(-8px);
+        box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15);
+        border-color: #667eea;
     }
     
-    .step-number {
-        position: absolute;
-        top: -30px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 60px;
-        height: 60px;
+    .step-icon {
+        width: 70px;
+        height: 70px;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
+        font-size: 28px;
         font-weight: 700;
-        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        margin: 0 auto 20px auto;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.25);
     }
     
     .step-title {
-        font-size: 22px;
+        font-size: 18px;
         font-weight: 700;
-        margin: 25px 0 15px 0;
-        color: #000000;
+        margin-bottom: 12px;
+        color: #1a1a1a;
     }
     
     .step-description {
-        color: #666666;
-        font-size: 15px;
+        color: #666;
+        font-size: 14px;
         line-height: 1.6;
-        font-weight: 400;
     }
     
-    /* 6. FEATURES SECTION */
+    /* 7. FEATURES SECTION */
+    .features-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        padding: 80px 0;
+        margin-top: 60px;
+    }
+    
     .features-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 30px;
-        margin: 60px 0;
-        padding: 0 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 40px;
     }
     
     .feature-card {
         background: white;
-        border-radius: 16px;
-        padding: 35px 25px;
-        text-align: center;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.06);
-        border: 1px solid #f0f0f0;
-        transition: transform 0.3s ease;
+        border-radius: 20px;
+        padding: 40px 30px;
+        text-align: left;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
     }
     
     .feature-card:hover {
         transform: translateY(-5px);
+        border-color: #667eea;
+        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.12);
     }
     
     .feature-icon {
-        font-size: 40px;
+        font-size: 48px;
         margin-bottom: 20px;
+        display: block;
     }
     
     .feature-title {
         font-size: 20px;
         font-weight: 700;
         margin-bottom: 12px;
-        color: #000000;
+        color: #1a1a1a;
     }
     
     .feature-desc {
-        color: #666666;
+        color: #666;
         font-size: 15px;
-        line-height: 1.5;
+        line-height: 1.6;
     }
     
-    /* 7. FOOTER */
-    .custom-footer {
-        background: #000000;
+    /* 8. CTA SECTION */
+    .cta-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 40px 50px;
-        margin-top: 100px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        padding: 80px 40px;
+        text-align: center;
+        margin-top: 80px;
+    }
+    
+    .cta-title {
+        font-size: 42px;
+        font-weight: 800;
+        margin-bottom: 20px;
+    }
+    
+    .cta-subtitle {
+        font-size: 18px;
+        margin-bottom: 40px;
+        opacity: 0.95;
+    }
+    
+    /* 9. FOOTER */
+    .custom-footer {
+        background: #1a1a1a;
+        color: white;
+        padding: 50px 40px 30px 40px;
+    }
+    
+    .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 40px;
+        margin-bottom: 40px;
     }
     
     .footer-brand {
-        font-size: 24px;
+        font-size: 28px;
+        font-weight: 800;
+        margin-bottom: 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .footer-desc {
+        font-size: 14px;
+        opacity: 0.7;
+        line-height: 1.6;
+    }
+    
+    .footer-section-title {
+        font-size: 16px;
         font-weight: 700;
+        margin-bottom: 16px;
+    }
+    
+    .footer-links {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .footer-links li {
+        margin-bottom: 12px;
+    }
+    
+    .footer-links a {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        font-size: 14px;
+        transition: color 0.3s;
+    }
+    
+    .footer-links a:hover {
         color: white;
+    }
+    
+    .footer-bottom {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 30px;
+        text-align: center;
+        max-width: 1200px;
+        margin: 0 auto;
     }
     
     .footer-copyright {
         font-size: 14px;
-        opacity: 0.7;
-        font-weight: 400;
+        opacity: 0.6;
     }
     
-    /* 8. METRIC CARDS FOR RESULTS */
+    /* 10. METRIC CARDS FOR RESULTS */
     .metric-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -438,7 +488,7 @@ def inject_global_css():
     .tempo-color { color: #f39c12; }
     .pause-color { color: #e74c3c; }
     
-    /* 9. INTERVIEW PAGE STYLING */
+    /* 11. INTERVIEW PAGE STYLING */
     .question-container {
         background: white;
         border-radius: 20px;
@@ -448,14 +498,22 @@ def inject_global_css():
         border: 1px solid #f0f0f0;
     }
     
-    /* 10. RESPONSIVE DESIGN */
+    /* 12. RESPONSIVE DESIGN */
     @media (max-width: 1200px) {
-        .metric-grid {
+        .stats-grid {
             grid-template-columns: repeat(2, 1fr);
         }
         
         .features-grid {
             grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .metric-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .footer-content {
+            grid-template-columns: 1fr 1fr;
         }
     }
     
@@ -464,20 +522,16 @@ def inject_global_css():
             padding: 0 20px;
         }
         
-        .navbar-brand {
-            font-size: 24px;
+        .hero-section {
+            padding: 60px 20px;
         }
         
         .hero-title {
-            font-size: 42px;
+            font-size: 36px;
         }
         
         .hero-subtitle {
-            font-size: 18px;
-        }
-        
-        .hero-section {
-            padding: 40px 0 60px 0;
+            font-size: 16px;
         }
         
         .section-title {
@@ -485,13 +539,12 @@ def inject_global_css():
         }
         
         .steps-container {
-            flex-direction: column;
-            align-items: center;
+            grid-template-columns: 1fr;
         }
         
-        .step-card {
-            width: 100%;
-            max-width: 320px;
+        .stats-grid {
+            grid-template-columns: 1fr;
+            padding: 30px 20px;
         }
         
         .features-grid {
@@ -502,575 +555,188 @@ def inject_global_css():
             grid-template-columns: 1fr;
         }
         
-        .custom-footer {
+        .footer-content {
+            grid-template-columns: 1fr;
+        }
+        
+        .hero-buttons {
             flex-direction: column;
-            gap: 20px;
-            text-align: center;
-            padding: 30px 20px;
         }
         
-        .nav-buttons-container {
-            gap: 10px;
-        }
-        
-        .stButton > button {
-            min-width: 80px;
-            padding: 6px 16px !important;
-            font-size: 13px !important;
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .navbar-brand {
-            font-size: 20px;
-        }
-        
-        .nav-buttons-container {
-            gap: 5px;
-        }
-        
-        .stButton > button {
-            min-width: 70px;
-            padding: 5px 12px !important;
-            font-size: 12px !important;
+        .primary-btn, .secondary-btn {
+            width: 100%;
         }
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- Page Render Functions ---
 
-def render_navbar():
-    """Render fixed navbar for all pages."""
-    # Inject navbar HTML with fixed positioning
-    st.markdown("""
-    <div class="navbar-container">
-        <div class="navbar-content">
-            <div class="navbar-brand">
-    """, unsafe_allow_html=True)
-    
-    # Display logo using Streamlit
-    try:
-        # Check if logo exists
-        if os.path.exists("assets/seiai.png"):
-            st.image("assets/seiai.png", width=120)
-        else:
-            st.markdown('<div style="font-size: 28px; font-weight: 800; color: #000000;">SEI-AI</div>', unsafe_allow_html=True)
-    except:
-        st.markdown('<div style="font-size: 28px; font-weight: 800; color: #000000;">SEI-AI</div>', unsafe_allow_html=True)
-    
-    st.markdown("</div><div class='nav-buttons-container'>", unsafe_allow_html=True)
-    
-    # Create navigation buttons
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("🏠 Home", key="nav_home"):
-            next_page('home')
-    with col2:
-        if st.button("ℹ️ Info", key="nav_info"):
-            next_page('info')
-    
-    st.markdown("</div></div></div><div class='main-content'>", unsafe_allow_html=True)
-
-def close_navbar():
-    """Close the navbar HTML structure."""
-    st.markdown("</div>", unsafe_allow_html=True)
+# Ganti fungsi render_home_page() dengan versi ini:
 
 def render_home_page():
-    """Render the fixed landing page."""
+    """Render the improved landing page."""
     inject_global_css()
     render_navbar()
     
     # HERO SECTION
-    st.markdown('<section class="hero-section">', unsafe_allow_html=True)
+    st.markdown("""
+    <section class="hero-section">
+        <div class="hero-content">
+            <div class="hero-badge">🎯 AI-Powered Interview Practice</div>
+            <h1 class="hero-title">Master Your Interview Skills with SEI-AI</h1>
+            <p class="hero-subtitle">Get comprehensive AI-powered feedback on your interview performance. Improve your content, delivery, and confidence with personalized insights and actionable recommendations.</p>
+        </div>
+    </section>
+    """, unsafe_allow_html=True)
     
-    st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job with comprehensive evaluation and actionable insights.</p>', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1,1,1])
+    with col2:
+        if st.button("▶️ Start Your Practice Now", key="hero_start", use_container_width=True):
+            st.session_state.answers = {}
+            st.session_state.results = None
+            st.session_state.current_q = 1
+            next_page("interview")
     
-    if st.button("▶️ Start Interview Now", key="hero_start", type="primary"):
-        st.session_state.answers = {}
-        st.session_state.results = None
-        st.session_state.current_q = 1
-        next_page("interview")
-    
-    st.markdown('</section>', unsafe_allow_html=True)
+    # STATS SECTION
+    st.markdown("""
+    <div class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">95%</div>
+                <div class="stat-label">Accuracy Rate</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">5+</div>
+                <div class="stat-label">Question Types</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">3</div>
+                <div class="stat-label">Analysis Metrics</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">< 5min</div>
+                <div class="stat-label">Processing Time</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
     # HOW IT WORKS SECTION
-    st.markdown('<div class="text-center" style="margin-bottom: 40px;">', unsafe_allow_html=True)
-    st.markdown('<h2 class="section-title">How To Use</h2>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="section-wrapper">
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle">Follow these simple steps to get comprehensive feedback on your interview performance</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    st.markdown('<div class="steps-container">', unsafe_allow_html=True)
+    st.markdown('<div class="section-wrapper"><div class="steps-container">', unsafe_allow_html=True)
     
     steps = [
-        ("1", "Upload Answer Video", "Upload your video answer for each interview question provided by the system."),
-        ("2", "AI Processing", "The AI processes video into transcript and analyzes non-verbal communication aspects."),
-        ("3", "Semantic Scoring", "Your answer is compared to ideal rubric criteria for content relevance scoring."),
-        ("4", "Get Instant Feedback", "Receive final score, detailed rationale, and communication analysis immediately."),
-        ("5", "Improve Your Skills", "Use personalized recommendations to practice and enhance your interview performance.")
+        ("1", "📤", "Upload Video", "Record and upload your video answer for each interview question"),
+        ("2", "🤖", "AI Processing", "Advanced AI converts speech to text and analyzes your delivery"),
+        ("3", "📊", "Semantic Scoring", "Content is evaluated against industry-standard rubrics"),
+        ("4", "💡", "Get Feedback", "Receive detailed scores, insights, and improvement tips"),
+        ("5", "🚀", "Practice & Improve", "Apply recommendations and track your progress")
     ]
     
     cols = st.columns(5)
-    for i, (num, title, desc) in enumerate(steps):
+    for i, (num, icon, title, desc) in enumerate(steps):
         with cols[i]:
             st.markdown(f"""
             <div class="step-card">
-                <div class="step-number">{num}</div>
+                <div class="step-icon">{num}</div>
                 <h3 class="step-title">{title}</h3>
                 <p class="step-description">{desc}</p>
             </div>
             """, unsafe_allow_html=True)
     
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div></div>', unsafe_allow_html=True)
     
     # KEY FEATURES SECTION
-    st.markdown('<h2 class="section-title">Key Features</h2>', unsafe_allow_html=True)
+    st.markdown("""
+    <section class="features-section">
+        <div class="section-wrapper">
+            <h2 class="section-title">Powerful Features</h2>
+            <p class="section-subtitle">Everything you need to ace your next interview</p>
+        </div>
+    """, unsafe_allow_html=True)
     
     st.markdown('<div class="features-grid">', unsafe_allow_html=True)
     
     features = [
-        ("🎤", "Advanced Speech-to-Text", "High-accuracy audio transcription using Whisper AI model"),
-        ("📊", "Comprehensive Analysis", "Evaluate content, structure, and non-verbal aspects simultaneously"),
-        ("⚡", "Real-time Feedback", "Instant evaluation results and personalized recommendations"),
-        ("🎯", "Rubric-based Scoring", "Objective assessment against industry-standard interview rubrics"),
-        ("📈", "Progress Tracking", "Monitor improvement across multiple practice sessions"),
-        ("🔒", "Privacy Focused", "Your data is processed securely and not stored permanently")
+        ("🎤", "Advanced Speech Recognition", "Industry-leading Whisper AI ensures accurate transcription of your responses"),
+        ("📊", "Multi-Dimensional Analysis", "Evaluate content quality, delivery speed, and vocal characteristics simultaneously"),
+        ("⚡", "Instant Results", "Get comprehensive feedback within minutes, not days"),
+        ("🎯", "Rubric-Based Scoring", "Objective evaluation using proven interview assessment frameworks"),
+        ("📈", "Progress Tracking", "Monitor your improvement over multiple practice sessions"),
+        ("🔒", "Privacy First", "Your videos are processed securely and never permanently stored")
     ]
     
-    # Create two rows of features
-    for i in range(0, len(features), 3):
-        cols = st.columns(3)
-        for j in range(3):
-            if i + j < len(features):
-                icon, title, desc = features[i + j]
-                with cols[j]:
-                    st.markdown(f"""
-                    <div class="feature-card">
-                        <div class="feature-icon">{icon}</div>
-                        <h3 class="feature-title">{title}</h3>
-                        <p class="feature-desc">{desc}</p>
-                    </div>
-                    """, unsafe_allow_html=True)
+    cols = st.columns(3)
+    for i, (icon, title, desc) in enumerate(features):
+        with cols[i % 3]:
+            st.markdown(f"""
+            <div class="feature-card">
+                <span class="feature-icon">{icon}</span>
+                <h3 class="feature-title">{title}</h3>
+                <p class="feature-desc">{desc}</p>
+            </div>
+            """, unsafe_allow_html=True)
     
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div></section>', unsafe_allow_html=True)
+    
+    # CTA SECTION
+    st.markdown("""
+    <section class="cta-section">
+        <h2 class="cta-title">Ready to Elevate Your Interview Game?</h2>
+        <p class="cta-subtitle">Join thousands of professionals who have improved their interview skills with SEI-AI</p>
+    </section>
+    """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1,1,1])
+    with col2:
+        if st.button("🎯 Get Started Free", key="cta_start", use_container_width=True):
+            st.session_state.answers = {}
+            st.session_state.results = None
+            st.session_state.current_q = 1
+            next_page("interview")
     
     # FOOTER
     st.markdown("""
-    <div class="custom-footer">
-        <div class="footer-brand">SEI-AI Interviewer</div>
-        <div class="footer-copyright">Copyright © 2024 SEI-AI Interviewer. All Rights Reserved.</div>
-    </div>
+    <footer class="custom-footer">
+        <div class="footer-content">
+            <div>
+                <div class="footer-brand">SEI-AI</div>
+                <p class="footer-desc">Empowering professionals with AI-driven interview preparation and feedback. Practice with confidence.</p>
+            </div>
+            <div>
+                <h4 class="footer-section-title">Product</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Features</a></li>
+                    <li><a href="#">How it Works</a></li>
+                    <li><a href="#">Pricing</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="footer-section-title">Resources</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="footer-section-title">Legal</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="footer-copyright">© 2024 SEI-AI Interviewer. All rights reserved.</p>
+        </div>
+    </footer>
     """, unsafe_allow_html=True)
     
     close_navbar()
-
-def render_info_page():
-    """Render the information page."""
-    inject_global_css()
-    render_navbar()
-    
-    st.title("📚 Application Information")
-    
-    st.markdown("""
-    ### Technology Overview
-    
-    This application utilizes cutting-edge Machine Learning and Natural Language Processing (NLP) technologies 
-    to analyze video interview answers and provide comprehensive feedback.
-    
-    #### Analysis Process
-    1. **Speech-to-Text (STT)**: Converts spoken responses to text using the Whisper model
-    2. **Text Cleaning**: Corrects spelling errors and ambiguities in the transcript
-    3. **Non-Verbal Analysis**: Analyzes speaking tempo, pauses, and vocal characteristics
-    4. **Semantic Scoring**: Compares answers against ideal rubric criteria using Sentence-Transformer models
-    
-    #### Video Requirements
-    * **Duration**: Recommended 30-90 seconds per answer
-    * **Format**: MP4, MOV, or WebM
-    * **Maximum Size**: 50MB
-    * **Audio Quality**: Ensure clear speech with minimal background noise
-    
-    #### Compatibility
-    * **Browser**: Latest versions of Chrome, Firefox, Safari
-    * **Device**: Desktop, Tablet, Smartphone
-    * **Operating Systems**: Windows, macOS, Linux, Android, iOS
-    
-    ### Data Security
-    * All videos are processed in real-time
-    * No permanent data storage
-    * Local processing where possible
-    
-    ### Support
-    For technical assistance or questions:
-    * Email: support@sei-ai.com
-    * Phone: +1 (555) 123-4567
-    * Hours: Monday-Friday, 9:00 AM - 5:00 PM EST
-    """)
-    
-    if st.button("🏠 Back to Home", type="primary"):
-        next_page('home')
-    
-    close_navbar()
-
-def render_interview_page():
-    """Render the interview page."""
-    inject_global_css()
-    render_navbar()
-    
-    st.title(f"🎯 Interview Question {st.session_state.current_q} of {TOTAL_QUESTIONS}")
-    
-    q_num = st.session_state.current_q
-    q_id_str = str(q_num) 
-    
-    question_data = QUESTIONS.get(q_id_str, {})
-    question_text = question_data.get('question', 'Question not found.')
-    
-    if question_text == 'Question not found.':
-        st.error("An error occurred while loading the question.")
-        if st.button("🏠 Back to Home"):
-            st.session_state.clear() 
-            next_page('home')
-        return
-
-    st.markdown('<div class="question-container">', unsafe_allow_html=True)
-    st.markdown("### 📝 Question:")
-    st.info(f"**{question_text}**")
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
-    col_upload, col_control = st.columns([3, 1])
-    
-    current_uploaded_file_data = st.session_state.answers.get(q_id_str)
-    
-    # --- File Upload Logic ---
-    with col_upload:
-        uploaded_file = None
-        
-        if current_uploaded_file_data is None:
-            uploaded_file = st.file_uploader(
-                f"📤 Upload Video Answer for Question {q_num} (Max {VIDEO_MAX_SIZE_MB}MB)",
-                type=['mp4', 'mov', 'webm'],
-                key=f"uploader_{q_id_str}",
-                help=f"Upload a video file up to {VIDEO_MAX_SIZE_MB}MB"
-            )
-            
-            if uploaded_file:
-                if uploaded_file.size > VIDEO_MAX_SIZE_MB * 1024 * 1024:
-                    st.error(f"File size exceeds the {VIDEO_MAX_SIZE_MB}MB limit.")
-                else:
-                    st.session_state.answers[q_id_str] = uploaded_file
-                    current_uploaded_file_data = uploaded_file
-                    st.success("✅ File successfully uploaded!")
-                    st.rerun()
-        
-        if current_uploaded_file_data:
-            st.video(current_uploaded_file_data, format=current_uploaded_file_data.type)
-            st.info(f"Video for Q{q_num}: **{current_uploaded_file_data.name}**")
-            
-            if st.button("🗑️ Delete Video", key=f"delete_q{q_num}", type="secondary"):
-                if q_id_str in st.session_state.answers:
-                    del st.session_state.answers[q_id_str]
-                if f"uploader_{q_id_str}" in st.session_state:
-                    del st.session_state[f"uploader_{q_id_str}"]
-                st.rerun()
-        else:
-            st.warning("Please upload your answer video to continue.")
-    
-    # --- Navigation Controls ---
-    with col_control:
-        is_ready = st.session_state.answers.get(q_id_str) is not None
-        
-        if q_num < TOTAL_QUESTIONS:
-            if st.button("⏭️ Next Question", use_container_width=True, disabled=(not is_ready)):
-                st.session_state.current_q += 1
-                st.rerun()
-        elif q_num == TOTAL_QUESTIONS:
-            if st.button("🏁 Finish & Process", use_container_width=True, disabled=(not is_ready)):
-                next_page('processing')
-        
-        if q_num > 1:
-            if st.button("⏮️ Previous", use_container_width=True):
-                st.session_state.current_q -= 1
-                st.rerun()
-    
-    close_navbar()
-
-def render_processing_page():
-    """Render the processing page."""
-    inject_global_css()
-    render_navbar()
-    
-    st.title("⚙️ Analysis Process")
-    st.info("Please wait, this process may take a few minutes depending on video duration.")
-    
-    if st.session_state.results is not None and st.session_state.results != {}:
-        next_page('final_summary') 
-        return
-    
-    if st.session_state.results is None:
-        results = {}
-        progress_bar = st.progress(0, text="Starting process...")
-        
-        if not all([STT_MODEL, EMBEDDER_MODEL]):
-            st.error("Core models failed to load. Cannot proceed with processing.")
-            progress_bar.empty()
-            if st.button("🏠 Back to Home"):
-                st.session_state.clear()
-                next_page('home')
-            return
-        
-        try:
-            with tempfile.TemporaryDirectory() as temp_dir:
-                for i in range(1, TOTAL_QUESTIONS + 1):
-                    q_id_str = str(i) 
-                    q_key_rubric = f'q{i}' 
-                    
-                    video_file = st.session_state.answers.get(q_id_str)
-                    q_text = QUESTIONS.get(q_id_str, {}).get('question') 
-                    
-                    if video_file and q_key_rubric in RUBRIC_DATA and q_text:
-                        st.markdown(f"### Processing Q{i}: {q_text[:50]}...")
-                        
-                        progress_bar.progress((i-1)*10 + 1, text=f"Q{i}: Saving video...")
-                        temp_video_path = os.path.join(temp_dir, f'video_{q_key_rubric}.mp4')
-                        temp_audio_path = os.path.join(temp_dir, f'audio_{q_key_rubric}.wav')
-                        
-                        with open(temp_video_path, 'wb') as f:
-                            f.write(video_file.getbuffer())
-                        
-                        progress_bar.progress((i-1)*10 + 3, text=f"Q{i}: Extracting audio...")
-                        video_to_wav(temp_video_path, temp_audio_path)
-                        noise_reduction(temp_audio_path, temp_audio_path)
-                        
-                        progress_bar.progress((i-1)*10 + 5, text=f"Q{i}: Transcription...")
-                        transcript, log_prob_raw = transcribe_and_clean(
-                            temp_audio_path, STT_MODEL, SPELL_CHECKER, EMBEDDER_MODEL, ENGLISH_WORDS
-                        )
-                        
-                        final_confidence_score = compute_confidence_score(transcript, log_prob_raw)
-                        
-                        progress_bar.progress((i-1)*10 + 7, text=f"Q{i}: Non-verbal analysis...")
-                        non_verbal_res = analyze_non_verbal(temp_audio_path)
-                        
-                        progress_bar.progress((i-1)*10 + 9, text=f"Q{i}: Semantic scoring...")
-                        score, reason = score_with_rubric(
-                            q_key_rubric, q_text, transcript, RUBRIC_DATA, EMBEDDER_MODEL
-                        )
-                        
-                        try:
-                            final_score_value = int(score) if score is not None else 0
-                        except (ValueError, TypeError):
-                            final_score_value = 0
-                            reason = f"[ERROR: Failed to calculate score] {reason}"
-                        
-                        results[q_key_rubric] = {
-                            "question": q_text,
-                            "transcript": transcript,
-                            "final_score": final_score_value,
-                            "rubric_reason": reason,
-                            "confidence_score": f"{final_confidence_score*100:.2f}",
-                            "non_verbal": non_verbal_res
-                        }
-                        
-                        progress_bar.progress(i*10, text=f"Q{i} Complete.")
-                    else:
-                        st.warning(f"Skipping Q{i}: Answer file not uploaded or rubric data missing.")
-                
-                st.session_state.results = results
-                progress_bar.progress(100, text="Process complete! Redirecting to final report...")
-                next_page('final_summary')
-        
-        except Exception as e:
-            st.error(f"Fatal error during processing: {e}")
-            st.warning("Processing cancelled. Please try returning to the start.")
-            progress_bar.empty()
-            st.session_state.results = None
-            if st.button("🏠 Back to Home"):
-                st.session_state.clear()
-                next_page('home')
-            return
-    
-    close_navbar()
-
-def render_final_summary_page():
-    """Render the final results page."""
-    inject_global_css()
-    render_navbar()
-    
-    st.title("🏆 Final Evaluation Report")
-    st.markdown("---")
-    
-    if not st.session_state.results:
-        st.error("Result data not found.")
-        if st.button("Back to Home"):
-            next_page('home')
-        return
-    
-    # Calculate metrics
-    try:
-        all_scores = [int(res['final_score']) for res in st.session_state.results.values()]
-        all_confidence = [float(res['confidence_score'].split(' ')[0].replace('%', '')) 
-                         for res in st.session_state.results.values()]
-        
-        all_tempo = []
-        all_pause = []
-        for res in st.session_state.results.values():
-            tempo_str = res['non_verbal'].get('tempo_bpm', '0').split(' ')[0]
-            pause_str = res['non_verbal'].get('total_pause_seconds', '0').split(' ')[0]
-            try:
-                all_tempo.append(float(tempo_str))
-            except ValueError:
-                all_tempo.append(0)
-            try:
-                all_pause.append(float(pause_str))
-            except ValueError:
-                all_pause.append(0)
-        
-        avg_score = np.mean(all_scores) if all_scores else 0
-        avg_confidence = np.mean(all_confidence) if all_confidence else 0
-        avg_tempo = np.mean(all_tempo) if all_tempo else 0
-        total_pause = np.sum(all_pause)
-    
-    except Exception as e:
-        st.error(f"Failed to calculate metrics: {e}")
-        return
-    
-    # Display metrics
-    st.subheader("📊 Performance Summary")
-    
-    st.markdown('<div class="metric-grid">', unsafe_allow_html=True)
-    
-    st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-value score-color">{avg_score:.2f}/4</div>
-        <div class="metric-label">Average Content Score</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-value accuracy-color">{avg_confidence:.2f}%</div>
-        <div class="metric-label">Transcript Accuracy</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-value tempo-color">{avg_tempo:.1f}</div>
-        <div class="metric-label">Average Tempo (BPM)</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-value pause-color">{total_pause:.1f}s</div>
-        <div class="metric-label">Total Pause Time</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Evaluation and Recommendations
-    st.markdown("---")
-    st.subheader("💡 Objective Evaluation & Action Plan")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("### Performance Conclusion")
-        if avg_score >= 3.5:
-            st.success("**Excellent Performance!** Content and relevance of answers were strong and well-structured.")
-        elif avg_score >= 2.5:
-            st.warning("**Good Performance.** Answer content was adequate but could be improved for deeper understanding.")
-        else:
-            st.error("**Needs Improvement.** Focus is needed on aligning answers with rubric criteria.")
-        
-        if 125 <= avg_tempo <= 150:
-            st.success("**Optimal speaking tempo** for effective communication.")
-        elif avg_tempo > 150:
-            st.warning("**Speaking tempo too fast.** Practice slowing down for clarity.")
-        else:
-            st.warning("**Speaking tempo too slow.** Increase pace to maintain engagement.")
-    
-    with col2:
-        st.markdown("### Key Development Areas")
-        
-        if avg_score < 3.0:
-            st.info(
-                "🎯 **Content Development:**\n"
-                "- Utilize STAR method (Situation, Task, Action, Result)\n"
-                "- Include specific examples and supporting data\n"
-                "- Align responses with scoring rubrics"
-            )
-        
-        if total_pause > 120:
-            st.info(
-                "⏸️ **Pause Management:**\n"
-                "- Reduce excessively long pauses\n"
-                "- Use 2-3 second pauses for emphasis only\n"
-                "- Practice consistent speaking rhythm"
-            )
-        
-        if avg_confidence < 90:
-            st.info(
-                "🎤 **Vocal Clarity:**\n"
-                "- Increase volume and articulation\n"
-                "- Choose quiet recording environments\n"
-                "- Consider using external microphone"
-            )
-    
-    # Detailed question breakdown
-    st.markdown("---")
-    with st.expander("📋 View Detailed Breakdown by Question"):
-        for q_key, res in st.session_state.results.items():
-            q_num = q_key.replace('q', '')
-            
-            st.markdown(f"### Question {q_num}")
-            st.write(f"**Question:** {res['question']}")
-            
-            col_a, col_b, col_c = st.columns(3)
-            with col_a:
-                st.metric("Content Score", f"{res['final_score']}/4")
-            with col_b:
-                st.metric("Accuracy", f"{res['confidence_score']}%")
-            with col_c:
-                st.metric("Audio Analysis", res['non_verbal'].get('qualitative_summary', 'N/A'))
-            
-            st.markdown("**Evaluation:**")
-            st.info(res['rubric_reason'])
-            
-            with st.expander("View Transcript"):
-                st.code(res['transcript'], language='text')
-            
-            st.markdown("---")
-    
-    # Action buttons
-    st.markdown("---")
-    col_btn1, col_btn2, col_btn3 = st.columns(3)
-    
-    with col_btn1:
-        if st.button("🔄 New Interview", use_container_width=True, type="primary"):
-            st.session_state.clear()
-            next_page('home')
-    
-    with col_btn2:
-        if st.button("📥 Download Report", use_container_width=True):
-            st.info("Download feature coming soon!")
-    
-    with col_btn3:
-        if st.button("🏠 Back to Home", use_container_width=True):
-            next_page('home')
-    
-    close_navbar()
-
-# Main App Execution Flow
-if st.session_state.page == 'home':
-    render_home_page()
-elif st.session_state.page == 'info':
-    render_info_page()
-elif st.session_state.page == 'interview':
-    render_interview_page()
-elif st.session_state.page == 'processing':
-    render_processing_page()
-elif st.session_state.page == 'final_summary':
-    render_final_summary_page()
