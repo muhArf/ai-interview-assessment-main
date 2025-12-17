@@ -234,11 +234,6 @@ def inject_global_css():
         color: white;
     }
     
-    /* Hidden elements for Streamlit navigation */
-    .nav-trigger {
-        display: none;
-    }
-    
     /* 3. MAIN CONTENT PADDING (to account for fixed navbar) */
     .main-content {
         padding-top: 90px;
@@ -565,127 +560,109 @@ def inject_global_css():
     </style>
     """, unsafe_allow_html=True)
 
+def create_navbar_html(current_page='home'):
+    """Create navbar HTML dengan logo dan tombol."""
+    
+    # Cek apakah logo file ada
+    logo_exists = os.path.exists("assets/seiai.png")
+    
+    # Generate HTML untuk navbar
+    html_parts = []
+    
+    # Navbar container
+    html_parts.append('<div class="navbar-container">')
+    html_parts.append('  <div class="navbar-content">')
+    
+    # Logo section
+    html_parts.append('    <div class="navbar-brand">')
+    if logo_exists:
+        try:
+            with open("assets/seiai.png", "rb") as f:
+                logo_data = base64.b64encode(f.read()).decode()
+                html_parts.append(f'      <img src="data:image/png;base64,{logo_data}" alt="SEI-AI Logo" class="logo-img">')
+        except:
+            html_parts.append('      <div class="logo-text">SEI-AI</div>')
+    else:
+        html_parts.append('      <div class="logo-text">SEI-AI</div>')
+    html_parts.append('    </div>')
+    
+    # Navigation buttons
+    html_parts.append('    <div class="nav-buttons-container">')
+    
+    # Home button
+    home_active = "active" if current_page == 'home' else ""
+    html_parts.append(f'      <a href="#" class="navbar-btn {home_active}" id="nav-home">🏠 Home</a>')
+    
+    # Info button
+    info_active = "active" if current_page == 'info' else ""
+    html_parts.append(f'      <a href="#" class="navbar-btn {info_active}" id="nav-info">ℹ️ Info</a>')
+    
+    html_parts.append('    </div>')
+    html_parts.append('  </div>')
+    html_parts.append('</div>')
+    
+    return '\n'.join(html_parts)
+
 # --- Page Render Functions ---
 
 def render_navbar(current_page='home'):
     """Render fixed navbar dengan logo dan tombol sepenuhnya dalam HTML."""
     
-    # Cek apakah logo file ada
-    logo_exists = os.path.exists("assets/seiai.png")
+    # Buat HTML navbar
+    navbar_html = create_navbar_html(current_page)
     
-    # Buat navbar lengkap dalam satu markdown dengan semua elemen HTML
-    navbar_html = f"""
-    <div class="navbar-container">
-        <div class="navbar-content">
-            <div class="navbar-brand">
-    """
-    
-    if logo_exists:
-        # Baca file logo dan encode ke base64 untuk embed langsung
-        try:
-            with open("assets/seiai.png", "rb") as f:
-                logo_data = base64.b64encode(f.read()).decode()
-                navbar_html += f'<img src="data:image/png;base64,{logo_data}" alt="SEI-AI Logo" class="logo-img">'
-        except:
-            navbar_html += '<div class="logo-text">SEI-AI</div>'
-    else:
-        navbar_html += '<div class="logo-text">SEI-AI</div>'
-    
+    # Tambahkan JavaScript untuk menangani klik
     navbar_html += """
-            </div>
-            <div class="nav-buttons-container">
-    """
-    
-    # Tambahkan tombol Home
-    home_active = "active" if current_page == 'home' else ""
-    navbar_html += f"""
-                <button class="navbar-btn {home_active}" id="nav-home-btn">
-                    <span>🏠</span> Home
-                </button>
-    """
-    
-    # Tambahkan tombol Info
-    info_active = "active" if current_page == 'info' else ""
-    navbar_html += f"""
-                <button class="navbar-btn {info_active}" id="nav-info-btn">
-                    <span>ℹ️</span> Info
-                </button>
-    """
-    
-    navbar_html += """
-            </div>
-        </div>
-    </div>
-    
-    <!-- Hidden buttons for Streamlit interaction -->
-    <div class="nav-trigger">
-        <button id="trigger-home" onclick="window.navToHome()" style="display:none;"></button>
-        <button id="trigger-info" onclick="window.navToInfo()" style="display:none;"></button>
-    </div>
-    
     <div class="main-content">
     
     <script>
-    // Fungsi untuk navigasi dengan Streamlit
-    function setupNavButtons() {{
-        const homeBtn = document.getElementById('nav-home-btn');
-        const infoBtn = document.getElementById('nav-info-btn');
+    // Setup navbar buttons
+    function setupNavbar() {
+        // Home button
+        const homeBtn = document.getElementById('nav-home');
+        if (homeBtn) {
+            homeBtn.onclick = function(e) {
+                e.preventDefault();
+                // Simpan ke session storage untuk Streamlit
+                sessionStorage.setItem('nav_to', 'home');
+                // Trigger page reload
+                window.location.reload();
+            };
+        }
         
-        if (homeBtn) {{
-            homeBtn.onclick = function() {{
-                // Kirim event ke Streamlit
-                const event = new CustomEvent('navClick', {{ detail: {{ page: 'home' }} }});
-                document.dispatchEvent(event);
-                
-                // Atau gunakan window.parent.postMessage untuk iframe
-                if (window.parent) {{
-                    window.parent.postMessage({{type: 'streamlit:navigate', page: 'home'}}, '*');
-                }}
-                
-                // Atau redirect dengan query parameter
-                window.location.search = '?nav_to=home';
-            }};
-        }}
-        
-        if (infoBtn) {{
-            infoBtn.onclick = function() {{
-                // Kirim event ke Streamlit
-                const event = new CustomEvent('navClick', {{ detail: {{ page: 'info' }} }});
-                document.dispatchEvent(event);
-                
-                // Atau gunakan window.parent.postMessage untuk iframe
-                if (window.parent) {{
-                    window.parent.postMessage({{type: 'streamlit:navigate', page: 'info'}}, '*');
-                }}
-                
-                // Atau redirect dengan query parameter
-                window.location.search = '?nav_to=info';
-            }};
-        }}
-    }}
+        // Info button
+        const infoBtn = document.getElementById('nav-info');
+        if (infoBtn) {
+            infoBtn.onclick = function(e) {
+                e.preventDefault();
+                // Simpan ke session storage untuk Streamlit
+                sessionStorage.setItem('nav_to', 'info');
+                // Trigger page reload
+                window.location.reload();
+            };
+        }
+    }
     
-    // Jalankan setup saat halaman dimuat
-    document.addEventListener('DOMContentLoaded', setupNavButtons);
+    // Jalankan setup saat DOM siap
+    document.addEventListener('DOMContentLoaded', setupNavbar);
     
-    // Juga jalankan setelah sedikit delay untuk memastikan
-    setTimeout(setupNavButtons, 100);
+    // Juga jalankan setelah timeout untuk memastikan
+    setTimeout(setupNavbar, 100);
     </script>
     """
     
     st.markdown(navbar_html, unsafe_allow_html=True)
     
-    # Gunakan session state untuk menangkap klik tombol
-    if 'nav_clicked' not in st.session_state:
-        st.session_state.nav_clicked = None
-    
-    # Cek query parameters untuk navigasi
-    query_params = st.query_params
-    if 'nav_to' in query_params:
-        page = query_params['nav_to']
-        if page in ['home', 'info']:
-            next_page(page)
-            # Hapus query parameter setelah digunakan
-            st.query_params.clear()
+    # Cek session storage untuk navigasi
+    try:
+        # Gunakan JavaScript untuk membaca session storage
+        nav_to = st.session_state.get('nav_to')
+        if nav_to and nav_to in ['home', 'info']:
+            next_page(nav_to)
+            # Clear setelah digunakan
+            del st.session_state.nav_to
+    except:
+        pass
 
 def close_navbar():
     """Close the navbar HTML structure."""
