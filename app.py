@@ -234,6 +234,11 @@ def inject_global_css():
         color: white;
     }
     
+    /* Hidden elements for Streamlit navigation */
+    .nav-trigger {
+        display: none;
+    }
+    
     /* 3. MAIN CONTENT PADDING (to account for fixed navbar) */
     .main-content {
         padding-top: 90px;
@@ -594,7 +599,7 @@ def render_navbar(current_page='home'):
     # Tambahkan tombol Home
     home_active = "active" if current_page == 'home' else ""
     navbar_html += f"""
-                <button class="navbar-btn {home_active}" onclick="window.location.href='?page=home'">
+                <button class="navbar-btn {home_active}" id="nav-home-btn">
                     <span>🏠</span> Home
                 </button>
     """
@@ -602,7 +607,7 @@ def render_navbar(current_page='home'):
     # Tambahkan tombol Info
     info_active = "active" if current_page == 'info' else ""
     navbar_html += f"""
-                <button class="navbar-btn {info_active}" onclick="window.location.href='?page=info'">
+                <button class="navbar-btn {info_active}" id="nav-info-btn">
                     <span>ℹ️</span> Info
                 </button>
     """
@@ -611,10 +616,76 @@ def render_navbar(current_page='home'):
             </div>
         </div>
     </div>
+    
+    <!-- Hidden buttons for Streamlit interaction -->
+    <div class="nav-trigger">
+        <button id="trigger-home" onclick="window.navToHome()" style="display:none;"></button>
+        <button id="trigger-info" onclick="window.navToInfo()" style="display:none;"></button>
+    </div>
+    
     <div class="main-content">
+    
+    <script>
+    // Fungsi untuk navigasi dengan Streamlit
+    function setupNavButtons() {{
+        const homeBtn = document.getElementById('nav-home-btn');
+        const infoBtn = document.getElementById('nav-info-btn');
+        
+        if (homeBtn) {{
+            homeBtn.onclick = function() {{
+                // Kirim event ke Streamlit
+                const event = new CustomEvent('navClick', {{ detail: {{ page: 'home' }} }});
+                document.dispatchEvent(event);
+                
+                // Atau gunakan window.parent.postMessage untuk iframe
+                if (window.parent) {{
+                    window.parent.postMessage({{type: 'streamlit:navigate', page: 'home'}}, '*');
+                }}
+                
+                // Atau redirect dengan query parameter
+                window.location.search = '?nav_to=home';
+            }};
+        }}
+        
+        if (infoBtn) {{
+            infoBtn.onclick = function() {{
+                // Kirim event ke Streamlit
+                const event = new CustomEvent('navClick', {{ detail: {{ page: 'info' }} }});
+                document.dispatchEvent(event);
+                
+                // Atau gunakan window.parent.postMessage untuk iframe
+                if (window.parent) {{
+                    window.parent.postMessage({{type: 'streamlit:navigate', page: 'info'}}, '*');
+                }}
+                
+                // Atau redirect dengan query parameter
+                window.location.search = '?nav_to=info';
+            }};
+        }}
+    }}
+    
+    // Jalankan setup saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', setupNavButtons);
+    
+    // Juga jalankan setelah sedikit delay untuk memastikan
+    setTimeout(setupNavButtons, 100);
+    </script>
     """
     
     st.markdown(navbar_html, unsafe_allow_html=True)
+    
+    # Gunakan session state untuk menangkap klik tombol
+    if 'nav_clicked' not in st.session_state:
+        st.session_state.nav_clicked = None
+    
+    # Cek query parameters untuk navigasi
+    query_params = st.query_params
+    if 'nav_to' in query_params:
+        page = query_params['nav_to']
+        if page in ['home', 'info']:
+            next_page(page)
+            # Hapus query parameter setelah digunakan
+            st.query_params.clear()
 
 def close_navbar():
     """Close the navbar HTML structure."""
