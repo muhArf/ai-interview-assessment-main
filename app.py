@@ -458,14 +458,7 @@ def inject_global_css():
     .pause-color { color: #e74c3c; }
     
     /* 9. INTERVIEW PAGE STYLING */
-    .question-container {
-        background: white;
-        border-radius: 20px;
-        padding: 30px;
-        margin: 30px 0;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.06);
-        border: 1px solid #f0f0f0;
-    }
+
     
     /* 10. RESPONSIVE DESIGN */
     @media (max-width: 1200px) {
