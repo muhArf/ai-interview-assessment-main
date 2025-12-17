@@ -678,7 +678,7 @@ def render_home_page():
     st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
     st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job with comprehensive evaluation and actionable insights.</p>', unsafe_allow_html=True)
     
-    if st.button("▶️ Start Interview Now", key="hero_start", type="primary"):
+    if st.button("Start Interview Now", key="hero_start", type="primary"):
         st.session_state.answers = {}
         st.session_state.results = None
         st.session_state.current_q = 1
