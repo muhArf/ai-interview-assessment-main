@@ -537,34 +537,101 @@ def inject_global_css():
 # --- Page Render Functions ---
 
 def render_navbar():
-    """Render fixed navbar for all pages."""
-    # Buat navbar dengan Streamlit columns
+    """Render fixed navbar with hybrid approach."""
+    
+    # Inject custom CSS
     st.markdown("""
-    <div class="navbar-container">
-        <div class="navbar-content">
+    <style>
+    .fixed-navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        height: 70px;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+    }
+    .nav-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+    .nav-spacer {
+        height: 70px;
+    }
+    </style>
     """, unsafe_allow_html=True)
     
-    # Gunakan Streamlit columns untuk layout - INI SAJA YANG DIUBAH!
-    col_logo, col_space, col_btn1, col_btn2 = st.columns([2, 4, 1, 1])
+    # Create navbar container
+    st.markdown('<div class="fixed-navbar"><div class="nav-content">', unsafe_allow_html=True)
     
-    with col_logo:
-        # Tampilkan logo dari assets folder
+    # Left side: Logo using columns
+    col1, col2, col3 = st.columns([2, 6, 2])
+    
+    with col1:
         try:
-            logo_path = "assets/seiai.png"  # Path ke logo Anda
-            st.image(logo_path, width=120)  # Atur width sesuai kebutuhan
+            st.image("assets/seiai.png", width=120)
         except:
-            # Jika logo tidak ditemukan, tampilkan teks sebagai fallback
-            st.markdown("### SEI-AI")
+            st.markdown("**SEI-AI**")
     
-    with col_btn1:
-        if st.button("🏠 Home", key="nav_home"):
+    # Right side: Buttons (these will be in navbar but not fixed properly)
+    # So we'll use HTML for buttons instead
+    
+    st.markdown('</div></div><div class="nav-spacer"></div>', unsafe_allow_html=True)
+    
+    # Now add HTML buttons that ARE fixed
+    buttons_html = """
+    <div style="
+        position: fixed;
+        top: 15px;
+        right: 30px;
+        z-index: 1001;
+        display: flex;
+        gap: 10px;
+    ">
+        <button onclick="window.location.href='?action=home'" style="
+            background: transparent;
+            border: 2px solid #000;
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+        ">🏠 Home</button>
+        
+        <button onclick="window.location.href='?action=info'" style="
+            background: transparent;
+            border: 2px solid #000;
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+        ">ℹ️ Info</button>
+    </div>
+    """
+    
+    st.markdown(buttons_html, unsafe_allow_html=True)
+    
+    # Handle button clicks
+    query_params = st.query_params
+    if "action" in query_params:
+        action = query_params["action"]
+        if action == "home":
+            st.query_params.clear()
             next_page('home')
-    
-    with col_btn2:
-        if st.button("ℹ️ Info", key="nav_info"):
+            st.rerun()
+        elif action == "info":
+            st.query_params.clear()
             next_page('info')
-    
-    st.markdown("</div></div><div class='main-content'>", unsafe_allow_html=True)
+            st.rerun()
 
 def close_navbar():
     """Close the navbar HTML structure."""
