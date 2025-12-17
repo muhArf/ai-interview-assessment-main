@@ -485,7 +485,7 @@ def inject_global_css():
         }
         
         .hero-subtitle {
-            font-size: 18px;
+            font-size: 28px;
         }
         
         .hero-section {
