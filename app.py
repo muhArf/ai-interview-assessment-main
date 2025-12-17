@@ -673,7 +673,7 @@ def render_home_page():
     render_navbar('home')
     
     # HERO SECTION
-    st.markdown('<section class="hero-section">', unsafe_allow_html=True)
+   
     
     st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
     st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job with comprehensive evaluation and actionable insights.</p>', unsafe_allow_html=True)
