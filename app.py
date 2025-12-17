@@ -179,7 +179,7 @@ def inject_global_css():
     }
     
     .logo-img {
-        height: 90px;
+        height: 100px;
         width: auto;
         object-fit: contain;
     }
