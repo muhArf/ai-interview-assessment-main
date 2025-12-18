@@ -1356,7 +1356,7 @@ def render_final_summary_page():
             with col_a:
                 st.metric("Rubric Score", f"{res['final_score']}/4")
             with col_b:
-                st.metric("Confidents", f"{res['confidence_score']}%")
+                st.metric("Confidence", f"{int(float(res['confidence_score']) * 100)}%")
             with col_c:
                 st.metric("Non-Verbal Analysis", res['non_verbal'].get('qualitative_summary', 'N/A'))
             
