@@ -360,20 +360,20 @@ def inject_global_css():
 }
 
 .step-title {
-    font-size: 18px;
-    font-weight: 700;
-    margin: 0 0 15px 0;
-    color: #000000;
-    line-height: 1.3;
-    text-align: center;
-    width: 100%;
-    min-height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 10px; /* TAMBAH INI */
-    word-break: break-word; /* TAMBAH INI */
-    box-sizing: border-box; /* TAMBAH INI */
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    margin: 0 0 15px 0 !important;
+    color: #000000 !important;
+    line-height: 1.3 !important;
+    text-align: center !important;
+    width: 100% !important;
+    min-height: 50px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 10px !important;
+    word-break: break-word !important;
+    box-sizing: border-box !important;
 }
 
 .step-description {
