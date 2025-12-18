@@ -1354,11 +1354,11 @@ def render_final_summary_page():
             
             col_a, col_b, col_c = st.columns(3)
             with col_a:
-                st.metric("Content Score", f"{res['final_score']}/4")
+                st.metric("Rubric Score", f"{res['final_score']}/4")
             with col_b:
-                st.metric("Accuracy", f"{res['confidence_score']}%")
+                st.metric("Confidents", f"{res['confidence_score']}%")
             with col_c:
-                st.metric("Audio Analysis", res['non_verbal'].get('qualitative_summary', 'N/A'))
+                st.metric("Non-Verbal Analysis", res['non_verbal'].get('qualitative_summary', 'N/A'))
             
             st.markdown("**Evaluation:**")
             st.info(res['rubric_reason'])
