@@ -372,7 +372,6 @@ def inject_global_css():
     }
     
     /* 6. HOW IT WORKS SECTION - STEP CARDS */
-    
     .section-title {
         font-size: 42px;
         font-weight: 800;
@@ -381,35 +380,30 @@ def inject_global_css():
         color: #000000;
         letter-spacing: -0.5px;
     }
-
+    
     .step-card-container {
         display: flex;
         justify-content: center;
         width: 100%;
         margin-bottom: 80px;
         padding: 0 20px;
-        overflow-x: auto; /* Tambahkan ini */
     }
-
+    
     .step-card-wrapper {
         display: flex;
         justify-content: space-between;
         width: 100%;
         max-width: 1400px;
         gap: 20px;
-        flex-wrap: nowrap;
-        padding: 10px 0; /* Tambahkan padding */
+        flex-wrap: nowrap; /* Pastikan ini nowrap */
     }
-
-    /* STEP CARD - MODIFIKASI */
+    
     .step-card {
         background: white;
         border-radius: 20px;
         padding: 60px 25px 35px 25px;
         text-align: center;
-        min-width: 200px; /* Ubah width ke min-width */
-        max-width: 250px; /* Tambahkan max-width */
-        width: 100%; /* Tambahkan width 100% */
+        width: 250px;
         height: 320px;
         box-shadow: 0 10px 40px rgba(0,0,0,0.08);
         position: relative;
@@ -419,7 +413,12 @@ def inject_global_css():
         flex-direction: column;
         align-items: center;
         justify-content: flex-start;
-        flex: 1 0 auto; /* Ubah flex property */
+        flex: 0 0 auto;
+    }
+    
+    .step-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.12);
     }
     
     .step-number {
@@ -468,7 +467,70 @@ def inject_global_css():
         padding: 0 5px;
     }
     
-         /* 12. RESPONSIVE DESIGN */
+    /* RESPONSIVE DESIGN UNTUK STEP CARDS - TAMBAHKAN DI SINI */
+    @media (max-width: 1200px) {
+        .step-card {
+            width: 220px;
+            padding: 50px 20px 30px 20px;
+            height: 300px;
+        }
+    }
+    
+    @media (max-width: 992px) {
+        .step-card {
+            width: 200px;
+            padding: 45px 18px 25px 18px;
+            height: 280px;
+        }
+        
+        .step-title {
+            font-size: 18px;
+            min-height: 50px;
+        }
+        
+        .step-description {
+            font-size: 14px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .step-card-wrapper {
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .step-card {
+            width: 180px;
+            height: 260px;
+            padding: 40px 15px 20px 15px;
+            flex: 0 0 calc(50% - 15px);
+        }
+        
+        .step-number {
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            top: -20px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .step-card-wrapper {
+            gap: 12px;
+        }
+        
+        .step-card {
+            width: 100%;
+            max-width: 280px;
+            flex: 0 0 100%;
+            height: auto;
+            min-height: 240px;
+            padding: 40px 15px 25px 15px;
+        }
+    }
+    
+    /* 12. RESPONSIVE DESIGN - MEDIA QUERY YANG SUDAH ADA */
     @media (max-width: 1200px) {
         .main-content {
             padding-left: 30px !important;
@@ -486,32 +548,6 @@ def inject_global_css():
         
         .features-grid {
             grid-template-columns: repeat(2, 1fr);
-        }
-        
-        /* RESPONSIVE STEP CARDS - TAMBAHAN */
-        .step-card-wrapper {
-            gap: 15px;
-        }
-        
-        .step-card {
-            min-width: 180px;
-            padding: 50px 20px 30px 20px;
-        }
-    }
-    
-    @media (max-width: 992px) {
-        .step-card-wrapper {
-            gap: 15px;
-            flex-wrap: wrap; /* Allow wrapping on medium screens */
-            justify-content: center;
-        }
-        
-        .step-card {
-            min-width: 170px;
-            max-width: 200px;
-            flex: 0 0 calc(33.333% - 15px); /* 3 cards per row */
-            height: auto;
-            min-height: 280px;
         }
     }
     
@@ -553,64 +589,14 @@ def inject_global_css():
             align-items: flex-start;
             gap: 10px;
         }
-        
-        /* RESPONSIVE STEP CARDS - TAMBAHAN */
-        .step-card-wrapper {
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .step-card {
-            flex: 0 0 calc(50% - 15px); /* 2 cards per row */
-            min-width: 160px;
-            max-width: 200px;
-            min-height: 260px;
-        }
-        
-        .step-number {
-            width: 45px;
-            height: 45px;
-            font-size: 20px;
-            top: -20px;
-        }
-        
-        .step-title {
-            font-size: 18px;
-            min-height: 50px;
-        }
-        
-        .step-description {
-            font-size: 14px;
-        }
     }
     
-    @media (max-width: 576px) {
+    @media (max-width: 480px) {
         .candidate-form-container {
             padding: 20px;
         }
-        
-        /* RESPONSIVE STEP CARDS - TAMBAHAN */
-        .step-card-container {
-            padding: 0 10px;
-        }
-        
-        .step-card-wrapper {
-            gap: 12px;
-        }
-        
-        .step-card {
-            flex: 0 0 100%; /* 1 card per row on very small screens */
-            max-width: 280px;
-            min-height: 240px;
-            padding: 40px 15px 25px 15px;
-        }
-        
-        .section-title {
-            font-size: 32px;
-            margin-bottom: 40px;
-        }
     }
+
     
     /* 7. FEATURES SECTION */
     .features-grid {
