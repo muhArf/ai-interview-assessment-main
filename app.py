@@ -371,7 +371,7 @@ def inject_global_css():
         margin: 20px 0;
     }
     
-    /* 6. HOW IT WORKS SECTION - STEP CARDS - FIX ZOOM ISSUE */
+    /* 6. HOW IT WORKS SECTION - STEP CARDS - FIX ZOOM & LAYOUT */
     
     .section-title {
         font-size: 42px;
@@ -388,26 +388,22 @@ def inject_global_css():
         width: 100%;
         margin-bottom: 80px;
         padding: 0 20px;
-        overflow: visible; /* Biarkan terlihat */
     }
 
     .step-card-wrapper {
-        display: flex;
-        justify-content: center; /* Center cards */
+        display: grid;
+        grid-template-columns: repeat(5, 1fr); /* 5 cards tetap */
         width: 100%;
         max-width: 1400px;
         gap: 20px;
-        flex-wrap: wrap; /* Kembali ke wrap tapi dengan kontrol */
     }
 
-    /* STEP CARD - FIXED PROPORTIONS */
+    /* STEP CARD - GRID ITEM */
     .step-card {
         background: white;
         border-radius: 20px;
         padding: 60px 25px 35px 25px;
         text-align: center;
-        width: 250px; /* Fixed width */
-        height: 320px; /* Fixed height */
         box-shadow: 0 10px 40px rgba(0,0,0,0.08);
         position: relative;
         transition: all 0.4s ease;
@@ -416,8 +412,8 @@ def inject_global_css():
         flex-direction: column;
         align-items: center;
         justify-content: flex-start;
-        flex: 0 0 auto; /* Tidak tumbuh atau menyusut */
-        margin: 0; /* Reset margin */
+        height: 320px; /* Fixed height */
+        width: 100%; /* Ambil full width dari grid cell */
     }
     
     .step-number {
@@ -450,7 +446,7 @@ def inject_global_css():
         display: flex;
         align-items: center;
         justify-content: center;
-        word-break: break-word; /* Untuk teks panjang */
+        word-break: break-word;
         overflow-wrap: break-word;
     }
     
@@ -466,11 +462,11 @@ def inject_global_css():
         align-items: center;
         justify-content: center;
         padding: 0 5px;
-        word-break: break-word; /* Untuk teks panjang */
+        word-break: break-word;
         overflow-wrap: break-word;
     }
     
-         /* 12. RESPONSIVE DESIGN - FIX FOR ZOOM */
+         /* 12. RESPONSIVE DESIGN - GRID RESPONSIVE */
     @media (max-width: 1200px) {
         .main-content {
             padding-left: 30px !important;
@@ -490,11 +486,14 @@ def inject_global_css():
             grid-template-columns: repeat(2, 1fr);
         }
         
-        /* RESPONSIVE STEP CARDS - PERTAHANKAN BENTUK */
+        /* STEP CARDS - 4 cards per row */
+        .step-card-wrapper {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        
         .step-card {
-            width: 230px; /* Sedikit lebih kecil */
-            height: 300px;
             padding: 50px 20px 30px 20px;
+            height: 300px;
         }
         
         .step-title {
@@ -505,24 +504,17 @@ def inject_global_css():
         .step-description {
             font-size: 14px;
         }
-        
-        /* Atur jumlah card per baris berdasarkan lebar */
-        .step-card-wrapper {
-            justify-content: center;
-        }
     }
     
     @media (max-width: 992px) {
-        /* Untuk layar tablet, 3 cards per baris */
+        /* STEP CARDS - 3 cards per row */
         .step-card-wrapper {
-            justify-content: center;
+            grid-template-columns: repeat(3, 1fr);
         }
         
         .step-card {
-            width: 200px;
-            height: 280px;
             padding: 45px 18px 25px 18px;
-            flex: 0 0 auto; /* Tetap auto */
+            height: 280px;
         }
         
         .step-number {
@@ -581,11 +573,15 @@ def inject_global_css():
             gap: 10px;
         }
         
-        /* STEP CARDS - 2 cards per baris di mobile */
+        /* STEP CARDS - 2 cards per row */
+        .step-card-wrapper {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
         .step-card {
-            width: 180px;
-            height: 260px;
             padding: 40px 15px 25px 15px;
+            height: 260px;
         }
         
         .step-number {
@@ -615,20 +611,18 @@ def inject_global_css():
             padding: 20px;
         }
         
-        /* STEP CARDS - 2 cards per baris dengan spacing lebih baik */
+        /* STEP CARDS - 2 cards per row dengan lebih compact */
         .step-card-container {
             padding: 0 10px;
         }
         
         .step-card-wrapper {
-            gap: 15px;
-            justify-content: center;
+            gap: 12px;
         }
         
         .step-card {
-            width: 160px;
-            height: 240px;
             padding: 35px 12px 20px 12px;
+            height: 240px;
         }
         
         .step-title {
@@ -647,17 +641,18 @@ def inject_global_css():
     }
     
     @media (max-width: 480px) {
-        /* STEP CARDS - 1 card per baris di sangat kecil */
+        /* STEP CARDS - 1 card per row di sangat kecil */
         .step-card-wrapper {
-            flex-direction: column; /* Stack vertikal */
-            align-items: center;
-            gap: 40px; /* Beri jarak lebih */
+            grid-template-columns: 1fr;
+            max-width: 300px;
+            margin: 0 auto;
         }
         
         .step-card {
-            width: 250px; /* Kembali ke ukuran normal */
-            height: 280px;
-            padding: 45px 20px 25px 20px;
+            padding: 40px 20px 25px 20px;
+            height: 250px;
+            max-width: 280px;
+            margin: 0 auto;
         }
         
         .step-number {
@@ -669,7 +664,7 @@ def inject_global_css():
         
         .step-title {
             font-size: 18px;
-            min-height: 50px;
+            min-height: 45px;
         }
         
         .step-description {
@@ -686,28 +681,46 @@ def inject_global_css():
     }
     
     /* FIX UNTUK ZOOM - TAMBAHKAN INI */
-    @media screen and (max-width: 1400px) and (min-width: 1201px) {
+    .step-card-wrapper {
+        justify-items: center; /* Center grid items */
+    }
+    
+    .step-card {
+        max-width: 280px; /* Maksimum width untuk card */
+        box-sizing: border-box; /* Include padding dalam width */
+    }
+    
+    /* Untuk layar sangat kecil tapi masih zoom */
+    @media (max-width: 400px) {
         .step-card-wrapper {
-            justify-content: center;
-            flex-wrap: wrap;
+            grid-template-columns: 1fr !important;
         }
         
         .step-card {
-            margin: 10px;
+            width: 90% !important;
+            max-width: 260px !important;
+            margin: 0 auto !important;
         }
     }
     
-    /* Mencegah transformasi saat zoom */
-    .step-card {
-        transform: none !important;
-        transform-origin: center !important;
+    /* Fix untuk metric cards */
+    .metric-wrapper {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        width: 100%;
+        max-width: 1400px;
     }
     
-    /* Untuk layar sangat lebar */
-    @media screen and (min-width: 1401px) {
-        .step-card-wrapper {
-            justify-content: space-between;
-            flex-wrap: nowrap;
+    @media (max-width: 992px) {
+        .metric-wrapper {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .metric-wrapper {
+            grid-template-columns: 1fr;
         }
     }
     
