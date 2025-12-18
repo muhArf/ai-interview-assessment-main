@@ -242,7 +242,14 @@ def inject_global_css():
         color: white;
     }
     
-    
+    /* 3. MAIN CONTENT PADDING (to account for fixed navbar) */
+    .main-content {
+        padding-top: 50px !important;
+        padding-left: 40px !important;
+        padding-right: 40px !important;
+        max-width: 1400px !important;
+        margin: 0 auto !important;
+    }
     
     /* 4. LANDING PAGE HERO SECTION */
     
