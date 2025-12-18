@@ -500,7 +500,7 @@ def inject_global_css():
         }
         
         .step-card {
-            padding: 45px 25px 30px 25px;
+            padding: 255px 25px 30px 25px;
         }
     }
     
