@@ -6,10 +6,6 @@ import tempfile
 import sys
 import numpy as np
 import base64
-from datetime import datetime
-from io import BytesIO
-import matplotlib.pyplot as plt
-
 
 # Add current directory and 'models' to PATH
 sys.path.append(os.path.dirname(__file__))
@@ -127,467 +123,6 @@ def load_rubric_data():
 
 QUESTIONS = load_questions()
 RUBRIC_DATA = load_rubric_data()
-
-# --- Report Generation Functions ---
-def generate_evaluation_report():
-    """Generate comprehensive evaluation report as HTML."""
-    if not st.session_state.results:
-        return None
-    
-    # Calculate overall metrics
-    all_scores = []
-    all_confidence = []
-    all_tempo = []
-    all_pause = []
-    
-    for res in st.session_state.results.values():
-        all_scores.append(int(res['final_score']))
-        all_confidence.append(float(res['confidence_score'].replace('%', '')))
-        
-        tempo_str = res['non_verbal'].get('tempo_bpm', '0').split(' ')[0]
-        pause_str = res['non_verbal'].get('total_pause_seconds', '0').split(' ')[0]
-        try:
-            all_tempo.append(float(tempo_str))
-        except ValueError:
-            all_tempo.append(0)
-        try:
-            all_pause.append(float(pause_str))
-        except ValueError:
-            all_pause.append(0)
-    
-    avg_score = np.mean(all_scores) if all_scores else 0
-    avg_confidence = np.mean(all_confidence) if all_confidence else 0
-    avg_tempo = np.mean(all_tempo) if all_tempo else 0
-    total_pause = np.sum(all_pause) if all_pause else 0
-    
-    # Determine overall performance level
-    if avg_score >= 3.5:
-        performance_level = "Excellent"
-        performance_color = "#2ecc71"
-    elif avg_score >= 2.5:
-        performance_level = "Good"
-        performance_color = "#f39c12"
-    else:
-        performance_level = "Needs Improvement"
-        performance_color = "#e74c3c"
-    
-    # Create HTML report
-    html_content = f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>SEI-AI Evaluation Report</title>
-        <style>
-            body {{
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                line-height: 1.6;
-                color: #333;
-                max-width: 1200px;
-                margin: 0 auto;
-                padding: 20px;
-                background-color: #f8f9fa;
-            }}
-            .header {{
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 30px;
-                border-radius: 10px;
-                margin-bottom: 30px;
-                text-align: center;
-            }}
-            .header h1 {{
-                margin: 0;
-                font-size: 32px;
-            }}
-            .header .subtitle {{
-                font-size: 18px;
-                opacity: 0.9;
-                margin-top: 10px;
-            }}
-            .summary-card {{
-                background: white;
-                border-radius: 10px;
-                padding: 25px;
-                margin-bottom: 30px;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                border-left: 5px solid {performance_color};
-            }}
-            .performance-badge {{
-                display: inline-block;
-                background-color: {performance_color};
-                color: white;
-                padding: 8px 20px;
-                border-radius: 20px;
-                font-weight: bold;
-                font-size: 18px;
-                margin: 10px 0;
-            }}
-            .metrics-grid {{
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 20px;
-                margin: 30px 0;
-            }}
-            .metric-card {{
-                background: white;
-                border-radius: 8px;
-                padding: 20px;
-                text-align: center;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            }}
-            .metric-value {{
-                font-size: 32px;
-                font-weight: bold;
-                margin: 10px 0;
-            }}
-            .metric-label {{
-                font-size: 14px;
-                color: #666;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-            }}
-            .question-section {{
-                background: white;
-                border-radius: 10px;
-                padding: 25px;
-                margin-bottom: 25px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-                border-left: 4px solid #3498db;
-            }}
-            .question-header {{
-                background: #f8f9fa;
-                padding: 15px;
-                border-radius: 6px;
-                margin-bottom: 15px;
-                border-left: 4px solid #3498db;
-            }}
-            .score-badge {{
-                display: inline-block;
-                padding: 5px 15px;
-                border-radius: 15px;
-                font-weight: bold;
-                margin-right: 10px;
-                font-size: 14px;
-            }}
-            .score-excellent {{ background-color: #2ecc71; color: white; }}
-            .score-good {{ background-color: #f39c12; color: white; }}
-            .score-fair {{ background-color: #e74c3c; color: white; }}
-            .analysis-grid {{
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                gap: 15px;
-                margin: 20px 0;
-            }}
-            .analysis-box {{
-                background: #f8f9fa;
-                padding: 15px;
-                border-radius: 6px;
-                border: 1px solid #e9ecef;
-            }}
-            .transcript-box {{
-                background: #f8f9fa;
-                padding: 15px;
-                border-radius: 6px;
-                margin-top: 15px;
-                border: 1px solid #e9ecef;
-                font-family: 'Courier New', monospace;
-                white-space: pre-wrap;
-                word-wrap: break-word;
-            }}
-            .recommendations {{
-                background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);
-                padding: 25px;
-                border-radius: 10px;
-                margin: 30px 0;
-                border-left: 5px solid #f39c12;
-            }}
-            .footer {{
-                text-align: center;
-                margin-top: 40px;
-                padding-top: 20px;
-                border-top: 1px solid #ddd;
-                color: #666;
-                font-size: 14px;
-            }}
-            @media print {{
-                body {{
-                    background-color: white;
-                }}
-                .metric-card, .question-section {{
-                    break-inside: avoid;
-                }}
-            }}
-        </style>
-    </head>
-    <body>
-        <div class="header">
-            <h1>📊 SEI-AI Interview Evaluation Report</h1>
-            <div class="subtitle">Generated on {datetime.now().strftime('%B %d, %Y at %H:%M:%S')}</div>
-        </div>
-        
-        <div class="summary-card">
-            <h2>Overall Performance Summary</h2>
-            <div class="performance-badge">{performance_level}</div>
-            <p>Based on the analysis of all {TOTAL_QUESTIONS} interview questions, here is your comprehensive performance evaluation.</p>
-            
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-value" style="color: #2ecc71;">{avg_score:.2f}/4.0</div>
-                    <div class="metric-label">Average Content Score</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value" style="color: #3498db;">{avg_confidence:.2f}%</div>
-                    <div class="metric-label">Transcript Accuracy</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value" style="color: #f39c12;">{avg_tempo:.1f} BPM</div>
-                    <div class="metric-label">Average Speaking Tempo</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value" style="color: #e74c3c;">{total_pause:.1f} sec</div>
-                    <div class="metric-label">Total Pause Time</div>
-                </div>
-            </div>
-        </div>
-    """
-    
-    # Add detailed question analysis
-    html_content += """
-        <h2>📋 Detailed Question Analysis</h2>
-    """
-    
-    for q_key, res in st.session_state.results.items():
-        q_num = q_key.replace('q', '')
-        score = res['final_score']
-        
-        # Determine score badge class
-        if score >= 3.5:
-            score_class = "score-excellent"
-            score_label = "Excellent"
-        elif score >= 2.5:
-            score_class = "score-good"
-            score_label = "Good"
-        else:
-            score_class = "score-fair"
-            score_label = "Needs Work"
-        
-        html_content += f"""
-        <div class="question-section">
-            <div class="question-header">
-                <h3>Question {q_num} <span class="score-badge {score_class}">{score}/4 - {score_label}</span></h3>
-                <p><strong>Question:</strong> {res['question']}</p>
-            </div>
-            
-            <div class="analysis-grid">
-                <div class="analysis-box">
-                    <h4>🎯 Content Analysis</h4>
-                    <p><strong>Score:</strong> {score}/4</p>
-                    <p><strong>Evaluation:</strong> {res['rubric_reason']}</p>
-                </div>
-                
-                <div class="analysis-box">
-                    <h4>🎤 Non-Verbal Analysis</h4>
-                    <p><strong>Speaking Tempo:</strong> {res['non_verbal'].get('tempo_bpm', 'N/A')}</p>
-                    <p><strong>Pause Time:</strong> {res['non_verbal'].get('total_pause_seconds', 'N/A')}</p>
-                    <p><strong>Summary:</strong> {res['non_verbal'].get('qualitative_summary', 'N/A')}</p>
-                </div>
-                
-                <div class="analysis-box">
-                    <h4>📝 Technical Analysis</h4>
-                    <p><strong>Transcript Confidence:</strong> {res['confidence_score']}</p>
-                    <p><strong>Model Assessment:</strong> AI analysis based on semantic similarity and rubric matching</p>
-                </div>
-            </div>
-            
-            <div class="transcript-box">
-                <strong>Transcript:</strong><br>
-                {res['transcript']}
-            </div>
-        </div>
-        """
-    
-    # Add recommendations section
-    recommendations = []
-    
-    if avg_score < 3.0:
-        recommendations.append("""
-        <li><strong>Improve Answer Structure:</strong> Use the STAR method (Situation, Task, Action, Result) to structure your responses more effectively.</li>
-        <li><strong>Increase Specificity:</strong> Include concrete examples with measurable outcomes and specific details.</li>
-        <li><strong>Align with Rubrics:</strong> Review the expected criteria for each question type and tailor your answers accordingly.</li>
-        """)
-    
-    if avg_tempo > 150:
-        recommendations.append("""
-        <li><strong>Slow Down Your Pace:</strong> Practice speaking at 120-140 words per minute for optimal comprehension.</li>
-        <li><strong>Use Strategic Pauses:</strong> Incorporate brief pauses after key points to allow absorption of information.</li>
-        """)
-    elif avg_tempo < 120:
-        recommendations.append("""
-        <li><strong>Increase Speaking Pace:</strong> Aim for a more energetic delivery to maintain listener engagement.</li>
-        <li><strong>Reduce Unnecessary Pauses:</strong> Minimize filler words and extended hesitations.</li>
-        """)
-    
-    if total_pause > 120:
-        recommendations.append("""
-        <li><strong>Reduce Total Pause Time:</strong> Practice speaking more continuously while maintaining clarity.</li>
-        <li><strong>Plan Your Responses:</strong> Structure your thoughts before speaking to reduce hesitation time.</li>
-        """)
-    
-    if avg_confidence < 90:
-        recommendations.append("""
-        <li><strong>Improve Audio Clarity:</strong> Record in a quiet environment with minimal background noise.</li>
-        <li><strong>Enunciate Clearly:</strong> Focus on pronouncing words fully and distinctly.</li>
-        <li><strong>Consider Equipment:</strong> Use a high-quality microphone for better audio capture.</li>
-        """)
-    
-    # Default recommendations if none generated
-    if not recommendations:
-        recommendations.append("""
-        <li><strong>Maintain Current Performance:</strong> Continue practicing regularly to maintain your strong interview skills.</li>
-        <li><strong>Expand Your Examples:</strong> Develop additional diverse examples for different question types.</li>
-        <li><strong>Practice Time Management:</strong> Work on delivering complete answers within typical interview timeframes.</li>
-        """)
-    
-    html_content += f"""
-        <div class="recommendations">
-            <h2>💡 Actionable Recommendations</h2>
-            <p>Based on your performance analysis, here are specific areas for improvement:</p>
-            <ul>
-                {''.join(recommendations)}
-            </ul>
-            
-            <h3>Practice Strategy:</h3>
-            <p><strong>Immediate Focus (Next 7 days):</strong> Work on the highest-priority items identified above.</p>
-            <p><strong>Medium-Term Goals (Next 30 days):</strong> Record practice sessions weekly and compare progress.</p>
-            <p><strong>Long-Term Development (Next 90 days):</strong> Master multiple interview formats and question types.</p>
-        </div>
-        
-        <div class="footer">
-            <p><strong>SEI-AI Interview Evaluation System</strong></p>
-            <p>This report was generated automatically by AI analysis. The evaluation is based on machine learning models 
-            analyzing speech patterns, content relevance, and communication effectiveness.</p>
-            <p>© {datetime.now().year} SEI-AI. All rights reserved.</p>
-        </div>
-    </body>
-    </html>
-    """
-    
-    return html_content
-
-def create_download_button():
-    """Create a download button for the evaluation report."""
-    html_content = generate_evaluation_report()
-    
-    if html_content:
-        # Create a download link for the HTML report
-        b64_html = base64.b64encode(html_content.encode()).decode()
-        
-        # Create a PDF-like document in a more portable format
-        # We'll create a styled HTML file that can be printed as PDF
-        st.markdown(
-            f"""
-            <style>
-            .download-btn {{
-                display: inline-block;
-                background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-                color: white;
-                padding: 14px 28px;
-                text-decoration: none;
-                border-radius: 8px;
-                font-weight: bold;
-                font-size: 16px;
-                transition: all 0.3s ease;
-                border: none;
-                cursor: pointer;
-                text-align: center;
-                margin: 10px 0;
-            }}
-            .download-btn:hover {{
-                transform: translateY(-2px);
-                box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
-            }}
-            </style>
-            
-            <a href="data:text/html;base64,{b64_html}" download="SEI-AI_Evaluation_Report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html" 
-               class="download-btn">
-               📥 Download Full Evaluation Report (HTML)
-            </a>
-            """,
-            unsafe_allow_html=True
-        )
-        
-        # Also create a simplified text version
-        text_report = generate_text_report()
-        b64_text = base64.b64encode(text_report.encode()).decode()
-        
-        st.markdown(
-            f"""
-            <a href="data:text/plain;base64,{b64_text}" download="SEI-AI_Summary_Report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt" 
-               class="download-btn" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); margin-left: 10px;">
-               📄 Download Summary Report (TXT)
-            </a>
-            """,
-            unsafe_allow_html=True
-        )
-
-def generate_text_report():
-    """Generate a simplified text version of the report."""
-    if not st.session_state.results:
-        return "No results available."
-    
-    report_lines = []
-    report_lines.append("=" * 70)
-    report_lines.append("SEI-AI INTERVIEW EVALUATION REPORT")
-    report_lines.append(f"Generated: {datetime.now().strftime('%B %d, %Y at %H:%M:%S')}")
-    report_lines.append("=" * 70)
-    report_lines.append("")
-    
-    # Overall summary
-    all_scores = [int(res['final_score']) for res in st.session_state.results.values()]
-    avg_score = np.mean(all_scores) if all_scores else 0
-    
-    report_lines.append("OVERALL PERFORMANCE SUMMARY")
-    report_lines.append("-" * 40)
-    report_lines.append(f"Average Score: {avg_score:.2f}/4.0")
-    report_lines.append(f"Number of Questions: {len(st.session_state.results)}")
-    report_lines.append("")
-    
-    # Detailed breakdown
-    report_lines.append("DETAILED QUESTION ANALYSIS")
-    report_lines.append("=" * 70)
-    
-    for q_key, res in st.session_state.results.items():
-        q_num = q_key.replace('q', '')
-        report_lines.append(f"\nQuestion {q_num}:")
-        report_lines.append(f"Question: {res['question']}")
-        report_lines.append(f"Score: {res['final_score']}/4")
-        report_lines.append(f"Transcript Confidence: {res['confidence_score']}")
-        report_lines.append(f"Non-Verbal: {res['non_verbal'].get('qualitative_summary', 'N/A')}")
-        report_lines.append(f"Evaluation: {res['rubric_reason']}")
-        report_lines.append(f"Transcript: {res['transcript'][:200]}...")
-        report_lines.append("-" * 50)
-    
-    # Recommendations
-    report_lines.append("\nRECOMMENDATIONS")
-    report_lines.append("=" * 70)
-    
-    if avg_score < 3.0:
-        report_lines.append("1. Improve answer structure using STAR method")
-        report_lines.append("2. Include more specific examples with measurable outcomes")
-        report_lines.append("3. Align answers more closely with rubric criteria")
-    
-    report_lines.append("\nGENERAL ADVICE:")
-    report_lines.append("- Practice regularly with different question types")
-    report_lines.append("- Record and review your practice sessions")
-    report_lines.append("- Focus on both content and delivery aspects")
-    
-    report_lines.append("\n" + "=" * 70)
-    report_lines.append("End of Report")
-    report_lines.append("© SEI-AI Interview Evaluation System")
-    
-    return "\n".join(report_lines)
 
 # --- Global CSS Injection ---
 def inject_global_css():
@@ -1115,47 +650,7 @@ def inject_global_css():
         box-shadow: 0 10px 30px rgba(0,0,0,0.05);
     }
     
-    /* 10. DOWNLOAD BUTTON STYLING */
-    .download-container {
-        background: linear-gradient(135deg, #f8fff9 0%, #f0fff4 100%);
-        border-radius: 15px;
-        padding: 25px;
-        margin: 30px 0;
-        border: 2px solid #2ecc71;
-        box-shadow: 0 5px 20px rgba(46, 204, 113, 0.15);
-    }
-    
-    .download-header {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        margin-bottom: 20px;
-    }
-    
-    .download-icon {
-        font-size: 32px;
-    }
-    
-    .download-title {
-        font-size: 24px;
-        font-weight: 700;
-        color: #27ae60;
-        margin: 0;
-    }
-    
-    .download-description {
-        color: #666;
-        margin-bottom: 20px;
-        line-height: 1.6;
-    }
-    
-    .download-buttons {
-        display: flex;
-        gap: 15px;
-        flex-wrap: wrap;
-    }
-    
-    /* 11. RESPONSIVE DESIGN */
+    /* 10. RESPONSIVE DESIGN */
     @media (max-width: 1200px) {
         .main-content {
             padding-left: 30px !important;
@@ -1173,10 +668,6 @@ def inject_global_css():
         
         .features-grid {
             grid-template-columns: repeat(2, 1fr);
-        }
-        
-        .download-buttons {
-            flex-direction: column;
         }
     }
     
@@ -1240,14 +731,6 @@ def inject_global_css():
             min-width: 80px;
             padding: 6px 16px;
             font-size: 13px;
-        }
-        
-        .download-container {
-            padding: 20px;
-        }
-        
-        .download-title {
-            font-size: 20px;
         }
     }
     
@@ -1723,7 +1206,7 @@ def render_processing_page():
     close_navbar()
 
 def render_final_summary_page():
-    """Render the final results page with enhanced report download feature."""
+    """Render the final results page."""
     inject_global_css()
     # Gunakan render_navbar biasa untuk halaman final summary
     render_navbar('final_summary')
@@ -1740,7 +1223,7 @@ def render_final_summary_page():
     # Calculate metrics
     try:
         all_scores = [int(res['final_score']) for res in st.session_state.results.values()]
-        all_confidence = [float(res['confidence_score'].replace('%', '')) 
+        all_confidence = [float(res['confidence_score'].split(' ')[0].replace('%', '')) 
                          for res in st.session_state.results.values()]
         
         all_tempo = []
@@ -1811,45 +1294,6 @@ def render_final_summary_page():
     st.markdown('</div>', unsafe_allow_html=True)  # Close metric-wrapper
     st.markdown('</div>', unsafe_allow_html=True)  # Close metric-container
     
-    # --- DOWNLOAD REPORT SECTION ---
-    st.markdown("---")
-    st.subheader("📥 Download Detailed Report")
-    
-    # Create a styled download container
-    st.markdown('<div class="download-container">', unsafe_allow_html=True)
-    st.markdown("""
-        <div class="download-header">
-            <div class="download-icon">📊</div>
-            <h3 class="download-title">Comprehensive Evaluation Report</h3>
-        </div>
-        <p class="download-description">
-            Download a detailed report containing complete analysis of each question, including:
-            • Full question-by-question breakdown<br>
-            • Transcript analysis with confidence scores<br>
-            • Non-verbal communication assessment<br>
-            • Rubric-based scoring rationale<br>
-            • Personalized improvement recommendations
-        </p>
-    """, unsafe_allow_html=True)
-    
-    # Generate and display download buttons
-    create_download_button()
-    
-    st.markdown("""
-        <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #3498db;">
-            <strong>📋 Report Features:</strong>
-            <ul style="margin: 10px 0; padding-left: 20px;">
-                <li>Professional HTML format with full styling</li>
-                <li>Printable design for physical records</li>
-                <li>Includes all transcripts and evaluations</li>
-                <li>Actionable recommendations for improvement</li>
-                <li>Timestamped for progress tracking</li>
-            </ul>
-        </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)  # Close download-container
-    
     # Evaluation and Recommendations
     st.markdown("---")
     st.subheader("💡 Objective Evaluation & Action Plan")
@@ -1901,7 +1345,7 @@ def render_final_summary_page():
     
     # Detailed question breakdown
     st.markdown("---")
-    with st.expander("📋 View Detailed Breakdown by Question", expanded=True):
+    with st.expander("📋 View Detailed Breakdown by Question"):
         for q_key, res in st.session_state.results.items():
             q_num = q_key.replace('q', '')
             
@@ -1912,7 +1356,7 @@ def render_final_summary_page():
             with col_a:
                 st.metric("Rubric Score", f"{res['final_score']}/4")
             with col_b:
-                st.metric("Confidence", f"{res['confidence_score']}%")
+                st.metric("Confidents", f"{res['confidence_score']}%")
             with col_c:
                 st.metric("Non-Verbal Analysis", res['non_verbal'].get('qualitative_summary', 'N/A'))
             
@@ -1934,16 +1378,8 @@ def render_final_summary_page():
             next_page('home')
     
     with col_btn2:
-        # Preview button for the report
-        if st.button("👁️ Preview Report", use_container_width=True):
-            # Generate and display a preview of the report
-            html_content = generate_evaluation_report()
-            if html_content:
-                # Display first 2000 characters as preview
-                preview_text = html_content[:2000] + "..." if len(html_content) > 2000 else html_content
-                with st.expander("Report Preview", expanded=True):
-                    st.markdown("**Note:** This is a preview. Download the full report for complete details.")
-                    st.components.v1.html(preview_text, height=300, scrolling=True)
+        if st.button("📥 Download Report", use_container_width=True):
+            st.info("Download feature coming soon!")
     
     with col_btn3:
         if st.button("🏠 Back to Home", use_container_width=True):
