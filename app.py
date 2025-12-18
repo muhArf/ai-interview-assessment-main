@@ -321,10 +321,11 @@ def inject_global_css():
 .step-card {
     background: white;
     border-radius: 20px;
-    padding: 60px 25px 35px 25px; /* Atas lebih besar untuk number, bawah konsisten */
+    padding: 60px 10px 35px 10px; /* UBAH: dari 25px ke 10px (samping) */
     text-align: center;
-    width: 240px; /* Lebar tetap */
-    height: 320px; /* Tinggi tetap - SEMUA CARD SAMA TINGGI */
+    width: calc(20% - 12px);
+    min-width: 200px;
+    height: 320px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.08);
     position: relative;
     transition: all 0.4s ease;
@@ -332,8 +333,8 @@ def inject_global_css():
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* Konten mulai dari atas */
-    flex: 0 0 auto; /* Tidak fleksibel, ukuran tetap */
+    justify-content: flex-start;
+    flex: 1;
 }
 
 .step-card:hover {
@@ -360,31 +361,34 @@ def inject_global_css():
 }
 
 .step-title {
-    font-size: 20px;
+    font-size: 18px; /* UBAH: dari 20px ke 18px */
     font-weight: 700;
-    margin: 0 0 15px 0; /* Margin atas dihapus karena sudah ada padding atas */
+    margin: 0 0 12px 0;
     color: #000000;
-    line-height: 1.4;
+    line-height: 1.3; /* UBAH: dari 1.4 ke 1.3 */
     text-align: center;
     width: 100%;
-    min-height: 60px; /* Tinggi minimum untuk judul */
+    min-height: 50px; /* UBAH: dari 60px ke 50px */
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0 5px; /* TAMBAH: padding horizontal */
+    word-break: break-word; /* TAMBAH: untuk memecah kata panjang */
 }
 
 .step-description {
     color: #666666;
-    font-size: 15px;
-    line-height: 1.6;
+    font-size: 14px; /* UBAH: dari 15px ke 14px */
+    line-height: 1.5;
     font-weight: 400;
     text-align: center;
     width: 100%;
-    flex-grow: 1; /* Deskripsi mengambil ruang yang tersisa */
+    flex-grow: 1;
     display: flex;
-    align-items: center; /* Vertikal center untuk teks */
-    justify-content: center; /* Horizontal center untuk teks */
-    padding: 0 5px; /* Sedikit padding samping */
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px; /* TAMBAH: padding horizontal */
+    word-break: break-word; /* TAMBAH: untuk memecah kata panjang */
 }
 
 /* Responsive design untuk step-card */
