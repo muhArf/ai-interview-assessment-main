@@ -640,7 +640,7 @@ def inject_global_css():
     
     @media (max-width: 768px) {
         .main-content {
-            padding-top: 80px !important;
+            padding-top: 50px !important;
             padding-left: 20px !important;
             padding-right: 20px !important;
         }
