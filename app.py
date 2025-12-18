@@ -323,7 +323,7 @@ def inject_global_css():
     border-radius: 20px;
     padding: 60px 25px 35px 25px; /* Atas lebih besar untuk number, bawah konsisten */
     text-align: center;
-    width: 220px; /* Lebar tetap */
+    width: 280px; /* Lebar tetap */
     height: 320px; /* Tinggi tetap - SEMUA CARD SAMA TINGGI */
     box-shadow: 0 10px 40px rgba(0,0,0,0.08);
     position: relative;
