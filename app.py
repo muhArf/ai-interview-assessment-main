@@ -441,7 +441,7 @@ def inject_global_css():
     .step-title {
         font-size: 20px;
         font-weight: 700;
-        margin: 0 0 15px 0;
+        margin: 0 0 10px 0;
         color: #000000;
         line-height: 1.4;
         text-align: center;
