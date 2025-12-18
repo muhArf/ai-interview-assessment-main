@@ -359,23 +359,18 @@ def inject_global_css():
     box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
 }
 
-.step-title, 
-h3.step-title,
-.step-card h3 {
-    font-size: 18px !important;
-    font-weight: 700 !important;
-    margin: 0 0 15px 0 !important;
-    color: #000000 !important;
-    line-height: 1.3 !important;
-    text-align: center !important;
-    width: 100% !important;
-    min-height: 50px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 0 10px !important;
-    word-break: break-word !important;
-    box-sizing: border-box !important;
+.step-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 15px 0; /* Margin atas dihapus karena sudah ada padding atas */
+    color: #000000;
+    line-height: 1.4;
+    text-align: center;
+    width: 100%;
+    min-height: 60px; /* Tinggi minimum untuk judul */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .step-description {
