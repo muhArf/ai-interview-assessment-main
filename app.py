@@ -360,17 +360,20 @@ def inject_global_css():
 }
 
 .step-title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
-    margin: 0 0 15px 0; /* Margin atas dihapus karena sudah ada padding atas */
+    margin: 0 0 15px 0;
     color: #000000;
-    line-height: 1.4;
+    line-height: 1.3;
     text-align: center;
     width: 100%;
-    min-height: 60px; /* Tinggi minimum untuk judul */
+    min-height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0 10px; /* TAMBAH INI */
+    word-break: break-word; /* TAMBAH INI */
+    box-sizing: border-box; /* TAMBAH INI */
 }
 
 .step-description {
