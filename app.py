@@ -11,6 +11,24 @@ import base64
 import uuid
 from datetime import datetime
 
+def get_local_time_indonesia():
+    """Get current time in Indonesia timezone."""
+    try:
+        # Simple manual adjustment for Indonesia timezones
+        from datetime import datetime, timedelta
+        utc_now = datetime.utcnow()
+        
+        # Choose your timezone:
+        # WIB (UTC+7): Jakarta, Sumatra, Java, West Kalimantan
+        # WITA (UTC+8): Bali, Nusa Tenggara, South/East Kalimantan, Sulawesi
+        # WIT (UTC+9): Maluku, Papua
+        
+        # Default to WIB
+        local_time = utc_now + timedelta(hours=7)
+        return local_time
+    except:
+        return datetime.now()
+
 # Add current directory and 'models' to PATH
 sys.path.append(os.path.dirname(__file__))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'models'))
@@ -819,7 +837,7 @@ def render_candidate_form():
                     # FIX: Get local time for Indonesia (WIB/WITA/WIT)
                     try:
                         # Method 1: Try to get system time (works if server is in Indonesia)
-                        now_local = datetime.now()
+                        now_local = get_local_time_indonesia()
                         
                         # Method 2: If system time is UTC, adjust manually
                         # Add 7 hours for WIB (UTC+7), 8 for WITA (UTC+8), 9 for WIT (UTC+9)
@@ -828,7 +846,7 @@ def render_candidate_form():
                         # now_local = datetime.now() + timedelta(hours=7)  # WIB (UTC+7)
                         
                     except Exception as e:
-                        now_local = datetime.now()
+                        now_local = get_local_time_indonesia()
                     
                     # Format the date
                     start_time = now_local.strftime("%Y-%m-%d %H:%M:%S")
