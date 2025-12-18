@@ -9,7 +9,7 @@ import base64
 from datetime import datetime
 from io import BytesIO
 import matplotlib.pyplot as plt
-import seaborn as sns
+
 
 # Add current directory and 'models' to PATH
 sys.path.append(os.path.dirname(__file__))
