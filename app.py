@@ -293,226 +293,237 @@ def inject_global_css():
     }
     
     /* 5. HOW IT WORKS SECTION - STEP CARDS */
-    .section-title {
-        font-size: 42px;
-        font-weight: 800;
-        text-align: center;
-        margin-bottom: 60px;
-        color: #000000;
-        letter-spacing: -0.5px;
-    }
-    
-    .step-card-container {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-        margin-bottom: 80px;
-        padding: 0 20px;
-    }
-    
+.section-title {
+    font-size: 42px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 60px;
+    color: #000000;
+    letter-spacing: -0.5px;
+}
+
+.step-card-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 80px;
+    padding: 0 20px;
+}
+
+.step-card-wrapper {
+    display: flex;
+    justify-content: space-between; /* Menggunakan space-between untuk distribusi merata */
+    width: 100%;
+    max-width: 1400px;
+    gap: 20px; /* Gap antar card */
+}
+
+.step-card {
+    background: white;
+    border-radius: 20px;
+    padding: 60px 25px 35px 25px; /* Atas lebih besar untuk number, bawah konsisten */
+    text-align: center;
+    width: 220px; /* Lebar tetap */
+    height: 320px; /* Tinggi tetap - SEMUA CARD SAMA TINGGI */
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    position: relative;
+    transition: all 0.4s ease;
+    border: 1px solid #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Konten mulai dari atas */
+    flex: 0 0 auto; /* Tidak fleksibel, ukuran tetap */
+}
+
+.step-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+}
+
+.step-number {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 700;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.step-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 15px 0; /* Margin atas dihapus karena sudah ada padding atas */
+    color: #000000;
+    line-height: 1.4;
+    text-align: center;
+    width: 100%;
+    min-height: 60px; /* Tinggi minimum untuk judul */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.step-description {
+    color: #666666;
+    font-size: 15px;
+    line-height: 1.6;
+    font-weight: 400;
+    text-align: center;
+    width: 100%;
+    flex-grow: 1; /* Deskripsi mengambil ruang yang tersisa */
+    display: flex;
+    align-items: center; /* Vertikal center untuk teks */
+    justify-content: center; /* Horizontal center untuk teks */
+    padding: 0 5px; /* Sedikit padding samping */
+}
+
+/* Responsive design untuk step-card */
+@media (max-width: 1400px) {
     .step-card-wrapper {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 25px;
-        width: 100%;
-        max-width: 1400px;
+        gap: 15px;
     }
     
     .step-card {
-        background: white;
-        border-radius: 20px;
-        padding: 50px 25px 30px 25px;
-        text-align: center;
-        width: 220px;
-        min-height: 280px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-        position: relative;
-        transition: all 0.4s ease;
-        border: 1px solid #f0f0f0;
-        flex: 0 0 auto;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        width: 200px;
+        height: 300px;
+        padding: 55px 20px 30px 20px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .step-card-wrapper {
+        flex-wrap: wrap; /* Allow wrapping jika tidak cukup space */
+        justify-content: center;
+        gap: 25px;
+        max-width: 1000px;
     }
     
-    .step-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+    .step-card {
+        width: 180px;
+        height: 290px;
+        padding: 50px 15px 25px 15px;
+    }
+    
+    .step-title {
+        font-size: 18px;
+        min-height: 55px;
+    }
+    
+    .step-description {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 992px) {
+    .step-card-wrapper {
+        gap: 20px;
+    }
+    
+    .step-card {
+        width: 170px;
+        height: 280px;
+        padding: 45px 12px 20px 12px;
+    }
+    
+    .step-title {
+        font-size: 17px;
+        min-height: 50px;
+        margin: 0 0 12px 0;
+    }
+    
+    .step-description {
+        font-size: 13px;
+        line-height: 1.5;
+    }
+}
+
+@media (max-width: 768px) {
+    .step-card-container {
+        padding: 0 15px;
+    }
+    
+    .step-card-wrapper {
+        gap: 20px;
+        max-width: 600px;
+    }
+    
+    .step-card {
+        width: 160px;
+        height: 270px;
+        padding: 40px 10px 18px 10px;
     }
     
     .step-number {
-        position: absolute;
-        top: -25px;
-        left: 50%;
-        transform: translateX(-50%);
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+        top: -22px;
+    }
+    
+    .step-title {
+        font-size: 16px;
+        min-height: 45px;
+        margin: 0 0 10px 0;
+    }
+    
+    .step-description {
+        font-size: 13px;
+        line-height: 1.4;
+    }
+}
+
+@media (max-width: 640px) {
+    .step-card-wrapper {
+        flex-direction: column;
+        align-items: center;
+        gap: 50px; /* Gap lebih besar untuk mobile */
+        max-width: 400px;
+    }
+    
+    .step-card {
+        width: 100%;
+        max-width: 300px;
+        height: auto; /* Biarkan tinggi otomatis di mobile */
+        min-height: 280px;
+        padding: 55px 25px 30px 25px;
+    }
+    
+    .step-number {
         width: 50px;
         height: 50px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
         font-size: 22px;
-        font-weight: 700;
-        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        top: -25px;
     }
     
     .step-title {
         font-size: 20px;
-        font-weight: 700;
-        margin: 25px 0 15px 0;
-        color: #000000;
-        line-height: 1.4;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        min-height: 60px;
+        min-height: auto;
+        margin: 0 0 15px 0;
     }
     
     .step-description {
-        color: #666666;
         font-size: 15px;
         line-height: 1.6;
-        font-weight: 400;
-        flex-grow: 1;
-        width: 100%;
     }
-    
-    /* Responsive design untuk step-card */
-    @media (max-width: 1400px) {
-        .step-card-wrapper {
-            gap: 20px;
-        }
-        
-        .step-card {
-            width: 200px;
-            min-height: 270px;
-            padding: 45px 20px 25px 20px;
-        }
+}
+
+@media (max-width: 480px) {
+    .step-card {
+        padding: 50px 20px 25px 20px;
+        max-width: 280px;
+        min-height: 260px;
     }
-    
-    @media (max-width: 1200px) {
-        .step-card-wrapper {
-            gap: 25px;
-            max-width: 1000px;
-        }
-        
-        .step-card {
-            width: 180px;
-            min-height: 260px;
-        }
-        
-        .step-title {
-            font-size: 18px;
-            min-height: 55px;
-        }
-        
-        .step-description {
-            font-size: 14px;
-        }
-    }
-    
-    @media (max-width: 992px) {
-        .step-card-wrapper {
-            gap: 20px;
-        }
-        
-        .step-card {
-            width: 170px;
-            min-height: 250px;
-            padding: 40px 15px 20px 15px;
-        }
-        
-        .step-title {
-            font-size: 17px;
-            min-height: 50px;
-            margin: 20px 0 12px 0;
-        }
-        
-        .step-description {
-            font-size: 13px;
-            line-height: 1.5;
-        }
-    }
-    
-    @media (max-width: 768px) {
-        .step-card-container {
-            padding: 0 15px;
-        }
-        
-        .step-card-wrapper {
-            gap: 20px;
-            max-width: 600px;
-        }
-        
-        .step-card {
-            width: 160px;
-            min-height: 240px;
-            padding: 35px 12px 18px 12px;
-        }
-        
-        .step-number {
-            width: 45px;
-            height: 45px;
-            font-size: 20px;
-            top: -22px;
-        }
-        
-        .step-title {
-            font-size: 16px;
-            min-height: 45px;
-            margin: 18px 0 10px 0;
-        }
-        
-        .step-description {
-            font-size: 13px;
-            line-height: 1.4;
-        }
-    }
-    
-    @media (max-width: 640px) {
-        .step-card-wrapper {
-            flex-direction: column;
-            align-items: center;
-            gap: 40px;
-            max-width: 400px;
-        }
-        
-        .step-card {
-            width: 100%;
-            max-width: 300px;
-            min-height: auto;
-            padding: 50px 25px 30px 25px;
-        }
-        
-        .step-number {
-            width: 50px;
-            height: 50px;
-            font-size: 22px;
-            top: -25px;
-        }
-        
-        .step-title {
-            font-size: 20px;
-            min-height: auto;
-            margin: 25px 0 15px 0;
-        }
-        
-        .step-description {
-            font-size: 15px;
-            line-height: 1.6;
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .step-card {
-            padding: 45px 20px 25px 20px;
-            max-width: 280px;
-        }
-    }
+}
     
     /* 6. FEATURES SECTION */
     .features-grid {
