@@ -236,7 +236,7 @@ def inject_global_css():
     
     /* 3. MAIN CONTENT PADDING (to account for fixed navbar) */
     .main-content {
-        padding-top: 90px !important;
+        padding-top: 50px !important;
         padding-left: 40px !important;
         padding-right: 40px !important;
         max-width: 1400px !important;
