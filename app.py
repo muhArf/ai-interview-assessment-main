@@ -371,7 +371,7 @@ def inject_global_css():
         margin: 20px 0;
     }
     
-    /* 6. HOW IT WORKS SECTION - STEP CARDS */
+    /* 6. HOW IT WORKS SECTION - STEP CARDS - FIX ZOOM ISSUE */
     
     .section-title {
         font-size: 42px;
@@ -388,18 +388,19 @@ def inject_global_css():
         width: 100%;
         margin-bottom: 80px;
         padding: 0 20px;
+        overflow: visible; /* Biarkan terlihat */
     }
 
     .step-card-wrapper {
         display: flex;
-        justify-content: space-between;
+        justify-content: center; /* Center cards */
         width: 100%;
         max-width: 1400px;
         gap: 20px;
-        flex-wrap: nowrap;
+        flex-wrap: wrap; /* Kembali ke wrap tapi dengan kontrol */
     }
 
-    /* STEP CARD - TETAP BENTUK ASLI */
+    /* STEP CARD - FIXED PROPORTIONS */
     .step-card {
         background: white;
         border-radius: 20px;
@@ -415,7 +416,8 @@ def inject_global_css():
         flex-direction: column;
         align-items: center;
         justify-content: flex-start;
-        flex-shrink: 0; /* Tidak mengecil */
+        flex: 0 0 auto; /* Tidak tumbuh atau menyusut */
+        margin: 0; /* Reset margin */
     }
     
     .step-number {
@@ -448,6 +450,8 @@ def inject_global_css():
         display: flex;
         align-items: center;
         justify-content: center;
+        word-break: break-word; /* Untuk teks panjang */
+        overflow-wrap: break-word;
     }
     
     .step-description {
@@ -462,9 +466,11 @@ def inject_global_css():
         align-items: center;
         justify-content: center;
         padding: 0 5px;
+        word-break: break-word; /* Untuk teks panjang */
+        overflow-wrap: break-word;
     }
     
-         /* 12. RESPONSIVE DESIGN - ONLY FONT SIZE ADJUSTMENTS */
+         /* 12. RESPONSIVE DESIGN - FIX FOR ZOOM */
     @media (max-width: 1200px) {
         .main-content {
             padding-left: 30px !important;
@@ -484,7 +490,7 @@ def inject_global_css():
             grid-template-columns: repeat(2, 1fr);
         }
         
-        /* HANYA PERUBAHAN UKURAN FONT UNTUK STEP CARDS */
+        /* RESPONSIVE STEP CARDS - PERTAHANKAN BENTUK */
         .step-card {
             width: 230px; /* Sedikit lebih kecil */
             height: 300px;
@@ -499,14 +505,24 @@ def inject_global_css():
         .step-description {
             font-size: 14px;
         }
+        
+        /* Atur jumlah card per baris berdasarkan lebar */
+        .step-card-wrapper {
+            justify-content: center;
+        }
     }
     
     @media (max-width: 992px) {
-        /* Biarkan layout seperti semula, hanya adjust ukuran */
+        /* Untuk layar tablet, 3 cards per baris */
+        .step-card-wrapper {
+            justify-content: center;
+        }
+        
         .step-card {
             width: 200px;
             height: 280px;
             padding: 45px 18px 25px 18px;
+            flex: 0 0 auto; /* Tetap auto */
         }
         
         .step-number {
@@ -523,17 +539,6 @@ def inject_global_css():
         
         .step-description {
             font-size: 13.5px;
-        }
-        
-        /* Untuk layar sedang, biarkan horizontal scroll jika perlu */
-        .step-card-container {
-            overflow-x: auto;
-            justify-content: flex-start;
-        }
-        
-        .step-card-wrapper {
-            justify-content: flex-start;
-            padding-bottom: 10px;
         }
     }
     
@@ -576,7 +581,7 @@ def inject_global_css():
             gap: 10px;
         }
         
-        /* STEP CARDS - KECILKAN TAPI TETAP BENTUK */
+        /* STEP CARDS - 2 cards per baris di mobile */
         .step-card {
             width: 180px;
             height: 260px;
@@ -610,9 +615,14 @@ def inject_global_css():
             padding: 20px;
         }
         
-        /* STEP CARDS - UNTUK MOBILE BIARKAN HORIZONTAL SCROLL */
+        /* STEP CARDS - 2 cards per baris dengan spacing lebih baik */
         .step-card-container {
             padding: 0 10px;
+        }
+        
+        .step-card-wrapper {
+            gap: 15px;
+            justify-content: center;
         }
         
         .step-card {
@@ -636,21 +646,34 @@ def inject_global_css():
         }
     }
     
-    /* Untuk layar sangat kecil, tetap pertahankan bentuk */
     @media (max-width: 480px) {
+        /* STEP CARDS - 1 card per baris di sangat kecil */
+        .step-card-wrapper {
+            flex-direction: column; /* Stack vertikal */
+            align-items: center;
+            gap: 40px; /* Beri jarak lebih */
+        }
+        
         .step-card {
-            width: 150px;
-            height: 230px;
-            padding: 30px 10px 18px 10px;
+            width: 250px; /* Kembali ke ukuran normal */
+            height: 280px;
+            padding: 45px 20px 25px 20px;
+        }
+        
+        .step-number {
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            top: -20px;
         }
         
         .step-title {
-            font-size: 14px;
-            min-height: 35px;
+            font-size: 18px;
+            min-height: 50px;
         }
         
         .step-description {
-            font-size: 12px;
+            font-size: 14px;
         }
         
         .hero-title {
@@ -662,11 +685,30 @@ def inject_global_css():
         }
     }
     
-    /* Untuk mencegah perubahan saat zoom */
-    .step-card,
-    .metric-card,
-    .feature-card {
-        transform-origin: center center;
+    /* FIX UNTUK ZOOM - TAMBAHKAN INI */
+    @media screen and (max-width: 1400px) and (min-width: 1201px) {
+        .step-card-wrapper {
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .step-card {
+            margin: 10px;
+        }
+    }
+    
+    /* Mencegah transformasi saat zoom */
+    .step-card {
+        transform: none !important;
+        transform-origin: center !important;
+    }
+    
+    /* Untuk layar sangat lebar */
+    @media screen and (min-width: 1401px) {
+        .step-card-wrapper {
+            justify-content: space-between;
+            flex-wrap: nowrap;
+        }
     }
     
     /* 7. FEATURES SECTION */
