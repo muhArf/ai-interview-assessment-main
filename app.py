@@ -179,7 +179,7 @@ def inject_global_css():
     }
     
     .logo-img {
-        height: 40px;
+        height: 100px;
         width: auto;
         object-fit: contain;
     }
@@ -235,10 +235,7 @@ def inject_global_css():
     }
     
     /* 3. MAIN CONTENT PADDING (to account for fixed navbar) */
-    .main-content {
-        padding-top: 90px;
-    }
-    
+   
     /* 4. LANDING PAGE HERO SECTION */
     .hero-section {
         background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFF 100%);
@@ -267,7 +264,7 @@ def inject_global_css():
     }
     
     .hero-subtitle {
-        font-size: 20px;
+        font-size: 30px;
         color: #5d5988;
         max-width: 680px;
         margin: 0 auto 48px auto;
@@ -293,7 +290,7 @@ def inject_global_css():
         box-shadow: 0 12px 35px rgba(0,0,0,0.15);
     }
     
-    /* 5. HOW IT WORKS SECTION - PERBAIKAN LAYOUT */
+    /* 5. HOW IT WORKS SECTION */
     .section-title {
         font-size: 42px;
         font-weight: 800;
@@ -304,29 +301,25 @@ def inject_global_css():
     }
     
     .steps-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        display: flex;
+        justify-content: center;
         gap: 30px;
+        flex-wrap: wrap;
         padding: 0 20px;
         margin-bottom: 80px;
-        max-width: 1400px;
-        margin-left: auto;
-        margin-right: auto;
     }
     
     .step-card {
         background: white;
         border-radius: 20px;
-        padding: 45px 25px 30px 25px;
+        padding: 45px 30px 30px 30px;
         text-align: center;
+        width: 260px;
         min-height: 300px;
         box-shadow: 0 10px 40px rgba(0,0,0,0.08);
         position: relative;
         transition: all 0.4s ease;
         border: 1px solid #f0f0f0;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
     }
     
     .step-card:hover {
@@ -350,7 +343,6 @@ def inject_global_css():
         font-size: 24px;
         font-weight: 700;
         box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-        z-index: 1;
     }
     
     .step-title {
@@ -358,7 +350,6 @@ def inject_global_css():
         font-weight: 700;
         margin: 25px 0 15px 0;
         color: #000000;
-        line-height: 1.3;
     }
     
     .step-description {
@@ -366,19 +357,15 @@ def inject_global_css():
         font-size: 15px;
         line-height: 1.6;
         font-weight: 400;
-        flex-grow: 1;
     }
     
     /* 6. FEATURES SECTION */
     .features-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(3, 1fr);
         gap: 30px;
         margin: 60px 0;
         padding: 0 20px;
-        max-width: 1200px;
-        margin-left: auto;
-        margin-right: auto;
     }
     
     .feature-card {
@@ -389,7 +376,6 @@ def inject_global_css():
         box-shadow: 0 8px 30px rgba(0,0,0,0.06);
         border: 1px solid #f0f0f0;
         transition: transform 0.3s ease;
-        height: 100%;
     }
     
     .feature-card:hover {
@@ -440,7 +426,7 @@ def inject_global_css():
     /* 8. METRIC CARDS FOR RESULTS */
     .metric-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
         gap: 20px;
         margin: 30px 0 50px 0;
     }
@@ -472,44 +458,16 @@ def inject_global_css():
     .pause-color { color: #e74c3c; }
     
     /* 9. INTERVIEW PAGE STYLING */
-    .question-container {
-        background: white;
-        border-radius: 20px;
-        padding: 30px;
-        margin: 30px 0;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.06);
-        border: 1px solid #f0f0f0;
-    }
+
     
-    /* 10. RESPONSIVE DESIGN - IMPROVED */
-    @media (max-width: 1400px) {
-        .steps-container {
-            grid-template-columns: repeat(4, 1fr);
-        }
-    }
-    
+    /* 10. RESPONSIVE DESIGN */
     @media (max-width: 1200px) {
-        .steps-container {
-            grid-template-columns: repeat(3, 1fr);
+        .metric-grid {
+            grid-template-columns: repeat(2, 1fr);
         }
         
         .features-grid {
             grid-template-columns: repeat(2, 1fr);
-        }
-        
-        .hero-title {
-            font-size: 48px;
-        }
-    }
-    
-    @media (max-width: 992px) {
-        .steps-container {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 40px;
-        }
-        
-        .step-card {
-            min-height: 280px;
         }
     }
     
@@ -527,8 +485,7 @@ def inject_global_css():
         }
         
         .hero-subtitle {
-            font-size: 18px;
-            padding: 0 20px;
+            font-size: 28px;
         }
         
         .hero-section {
@@ -537,27 +494,24 @@ def inject_global_css():
         
         .section-title {
             font-size: 32px;
-            padding: 0 20px;
         }
         
         .steps-container {
-            grid-template-columns: 1fr;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-            gap: 50px;
+            flex-direction: column;
+            align-items: center;
         }
         
         .step-card {
             width: 100%;
-            min-height: 260px;
+            max-width: 320px;
         }
         
         .features-grid {
             grid-template-columns: 1fr;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
+        }
+        
+        .metric-grid {
+            grid-template-columns: 1fr;
         }
         
         .custom-footer {
@@ -578,34 +532,6 @@ def inject_global_css():
         }
     }
     
-    @media (max-width: 576px) {
-        .steps-container {
-            padding: 0 15px;
-            gap: 60px;
-        }
-        
-        .step-card {
-            padding: 45px 20px 30px 20px;
-        }
-        
-        .step-title {
-            font-size: 20px;
-        }
-        
-        .hero-title {
-            font-size: 36px;
-            padding: 0 20px;
-        }
-        
-        .hero-subtitle {
-            font-size: 16px;
-        }
-        
-        .section-title {
-            font-size: 28px;
-        }
-    }
-    
     @media (max-width: 480px) {
         .logo-text {
             font-size: 20px;
@@ -619,35 +545,6 @@ def inject_global_css():
             min-width: 70px;
             padding: 5px 12px;
             font-size: 12px;
-        }
-        
-        .steps-container {
-            gap: 70px;
-        }
-        
-        .step-number {
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
-            top: -25px;
-        }
-    }
-    
-    @media (max-width: 360px) {
-        .hero-title {
-            font-size: 32px;
-        }
-        
-        .step-card {
-            min-height: 280px;
-        }
-        
-        .step-title {
-            font-size: 18px;
-        }
-        
-        .step-description {
-            font-size: 14px;
         }
     }
     </style>
@@ -684,11 +581,11 @@ def create_navbar_html(current_page='home'):
     
     # Home button
     home_active = "active" if current_page == 'home' else ""
-    html_parts.append(f'      <a href="#" class="navbar-btn {home_active}" id="nav-home">🏠 Home</a>')
+    html_parts.append(f'      <a href="#" class="navbar-btn {home_active}" id="nav-home"> Home</a>')
     
     # Info button
     info_active = "active" if current_page == 'info' else ""
-    html_parts.append(f'      <a href="#" class="navbar-btn {home_active}" id="nav-info">ℹ️ Info</a>')
+    html_parts.append(f'      <a href="#" class="navbar-btn {info_active}" id="nav-info"> Info</a>')
     
     html_parts.append('    </div>')
     html_parts.append('  </div>')
@@ -776,12 +673,12 @@ def render_home_page():
     render_navbar('home')
     
     # HERO SECTION
-    st.markdown('<section class="hero-section">', unsafe_allow_html=True)
+   
     
     st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
     st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job with comprehensive evaluation and actionable insights.</p>', unsafe_allow_html=True)
     
-    if st.button("▶️ Start Interview Now", key="hero_start", type="primary"):
+    if st.button("Start Interview Now", key="hero_start", type="primary"):
         st.session_state.answers = {}
         st.session_state.results = None
         st.session_state.current_q = 1
@@ -794,7 +691,8 @@ def render_home_page():
     st.markdown('<h2 class="section-title">How To Use</h2>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Steps menggunakan CSS Grid, bukan Streamlit columns
+    st.markdown('<div class="steps-container">', unsafe_allow_html=True)
+    
     steps = [
         ("1", "Upload Answer Video", "Upload your video answer for each interview question provided by the system."),
         ("2", "AI Processing", "The AI processes video into transcript and analyzes non-verbal communication aspects."),
@@ -803,22 +701,23 @@ def render_home_page():
         ("5", "Improve Your Skills", "Use personalized recommendations to practice and enhance your interview performance.")
     ]
     
-    # Buat HTML untuk steps dengan CSS Grid
-    steps_html = '<div class="steps-container">'
-    for num, title, desc in steps:
-        steps_html += f"""
-        <div class="step-card">
-            <div class="step-number">{num}</div>
-            <h3 class="step-title">{title}</h3>
-            <p class="step-description">{desc}</p>
-        </div>
-        """
-    steps_html += '</div>'
+    cols = st.columns(5)
+    for i, (num, title, desc) in enumerate(steps):
+        with cols[i]:
+            st.markdown(f"""
+            <div class="step-card">
+                <div class="step-number">{num}</div>
+                <h3 class="step-title">{title}</h3>
+                <p class="step-description">{desc}</p>
+            </div>
+            """, unsafe_allow_html=True)
     
-    st.markdown(steps_html, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # KEY FEATURES SECTION
     st.markdown('<h2 class="section-title">Key Features</h2>', unsafe_allow_html=True)
+    
+    st.markdown('<div class="features-grid">', unsafe_allow_html=True)
     
     features = [
         ("🎤", "Advanced Speech-to-Text", "High-accuracy audio transcription using Whisper AI model"),
@@ -829,19 +728,22 @@ def render_home_page():
         ("🔒", "Privacy Focused", "Your data is processed securely and not stored permanently")
     ]
     
-    # Buat HTML untuk features dengan CSS Grid
-    features_html = '<div class="features-grid">'
-    for icon, title, desc in features:
-        features_html += f"""
-        <div class="feature-card">
-            <div class="feature-icon">{icon}</div>
-            <h3 class="feature-title">{title}</h3>
-            <p class="feature-desc">{desc}</p>
-        </div>
-        """
-    features_html += '</div>'
+    # Create two rows of features
+    for i in range(0, len(features), 3):
+        cols = st.columns(3)
+        for j in range(3):
+            if i + j < len(features):
+                icon, title, desc = features[i + j]
+                with cols[j]:
+                    st.markdown(f"""
+                    <div class="feature-card">
+                        <div class="feature-icon">{icon}</div>
+                        <h3 class="feature-title">{title}</h3>
+                        <p class="feature-desc">{desc}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
     
-    st.markdown(features_html, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # FOOTER
     st.markdown("""
