@@ -1,3 +1,4 @@
+app.py
 import streamlit as st
 import pandas as pd
 import json
@@ -6,6 +7,8 @@ import tempfile
 import sys
 import numpy as np
 import base64
+import uuid
+from datetime import datetime
 
 # Add current directory and 'models' to PATH
 sys.path.append(os.path.dirname(__file__))
@@ -49,6 +52,8 @@ if 'answers' not in st.session_state:
     st.session_state.answers = {}
 if 'results' not in st.session_state:
     st.session_state.results = None
+if 'candidate_data' not in st.session_state:
+    st.session_state.candidate_data = None
 
 # Constants
 TOTAL_QUESTIONS = 5
@@ -58,6 +63,12 @@ VIDEO_MAX_SIZE_MB = 50
 def next_page(page_name):
     st.session_state.page = page_name
     st.rerun()
+
+def generate_candidate_id():
+    """Generate unique candidate ID with timestamp"""
+    timestamp = datetime.now().strftime("%Y%m%d")
+    unique_id = str(uuid.uuid4())[:8].upper()
+    return f"CAND-{timestamp}-{unique_id}"
 
 @st.cache_resource
 def get_models():
@@ -233,6 +244,41 @@ def inject_global_css():
         color: white;
     }
     
+    /* Candidate info banner */
+    .candidate-banner {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 25px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .candidate-info {
+        display: flex;
+        gap: 20px;
+        font-size: 16px;
+    }
+    
+    .candidate-info-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .candidate-label {
+        font-size: 12px;
+        opacity: 0.8;
+        margin-bottom: 4px;
+    }
+    
+    .candidate-value {
+        font-weight: 600;
+        font-size: 16px;
+    }
+    
     /* 3. MAIN CONTENT PADDING (to account for fixed navbar) */
     .main-content {
         padding-top: 50px !important;
@@ -243,7 +289,6 @@ def inject_global_css():
     }
     
     /* 4. LANDING PAGE HERO SECTION */
- 
     
     .hero-section::before {
         content: '';
@@ -291,238 +336,117 @@ def inject_global_css():
         box-shadow: 0 12px 35px rgba(0,0,0,0.15);
     }
     
+    /* Candidate registration form */
+    .registration-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+        max-width: 800px;
+        margin: 40px auto;
+        border: 1px solid #e0e0e0;
+    }
+    
+    .registration-title {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #333;
+    }
+    
     /* 5. HOW IT WORKS SECTION - STEP CARDS */
-.section-title {
-    font-size: 42px;
-    font-weight: 800;
-    text-align: center;
-    margin-bottom: 60px;
-    color: #000000;
-    letter-spacing: -0.5px;
-}
-
-.step-card-container {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-bottom: 80px;
-    padding: 0 20px;
-}
-
-.step-card-wrapper {
-    display: flex;
-    justify-content: space-between; /* Menggunakan space-between untuk distribusi merata */
-    width: 100%;
-    max-width: 1400px;
-    gap: 20px; /* Gap antar card */
-}
-
-.step-card {
-    background: white;
-    border-radius: 20px;
-    padding: 60px 25px 35px 25px; /* Atas lebih besar untuk number, bawah konsisten */
-    text-align: center;
-    width: 250px; /* Lebar tetap */
-    height: 320px; /* Tinggi tetap - SEMUA CARD SAMA TINGGI */
-    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-    position: relative;
-    transition: all 0.4s ease;
-    border: 1px solid #f0f0f0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start; /* Konten mulai dari atas */
-    flex: 0 0 auto; /* Tidak fleksibel, ukuran tetap */
-}
-
-.step-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.12);
-}
-
-.step-number {
-    position: absolute;
-    top: -25px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    font-weight: 700;
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-}
-
-.step-title {
-    font-size: 20px;
-    font-weight: 700;
-    margin: 0 0 15px 0; /* Margin atas dihapus karena sudah ada padding atas */
-    color: #000000;
-    line-height: 1.4;
-    text-align: center;
-    width: 100%;
-    min-height: 60px; /* Tinggi minimum untuk judul */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.step-description {
-    color: #666666;
-    font-size: 15px;
-    line-height: 1.6;
-    font-weight: 400;
-    text-align: center;
-    width: 100%;
-    flex-grow: 1; /* Deskripsi mengambil ruang yang tersisa */
-    display: flex;
-    align-items: center; /* Vertikal center untuk teks */
-    justify-content: center; /* Horizontal center untuk teks */
-    padding: 0 5px; /* Sedikit padding samping */
-}
-
-/* Responsive design untuk step-card */
-@media (max-width: 1400px) {
-    .step-card-wrapper {
-        gap: 15px;
+    .section-title {
+        font-size: 42px;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 60px;
+        color: #000000;
+        letter-spacing: -0.5px;
     }
-    
-    .step-card {
-        width: 200px;
-        height: 300px;
-        padding: 55px 20px 30px 20px;
-    }
-}
 
-@media (max-width: 1200px) {
-    .step-card-wrapper {
-        flex-wrap: wrap; /* Allow wrapping jika tidak cukup space */
-        justify-content: center;
-        gap: 25px;
-        max-width: 1000px;
-    }
-    
-    .step-card {
-        width: 180px;
-        height: 290px;
-        padding: 50px 15px 25px 15px;
-    }
-    
-    .step-title {
-        font-size: 18px;
-        min-height: 55px;
-    }
-    
-    .step-description {
-        font-size: 14px;
-    }
-}
-
-@media (max-width: 992px) {
-    .step-card-wrapper {
-        gap: 20px;
-    }
-    
-    .step-card {
-        width: 170px;
-        height: 280px;
-        padding: 45px 12px 20px 12px;
-    }
-    
-    .step-title {
-        font-size: 17px;
-        min-height: 50px;
-        margin: 0 0 12px 0;
-    }
-    
-    .step-description {
-        font-size: 13px;
-        line-height: 1.5;
-    }
-}
-
-@media (max-width: 768px) {
     .step-card-container {
-        padding: 0 15px;
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 80px;
+        padding: 0 20px;
     }
-    
-    .step-card-wrapper {
-        gap: 20px;
-        max-width: 600px;
-    }
-    
-    .step-card {
-        width: 160px;
-        height: 270px;
-        padding: 40px 10px 18px 10px;
-    }
-    
-    .step-number {
-        width: 45px;
-        height: 45px;
-        font-size: 20px;
-        top: -22px;
-    }
-    
-    .step-title {
-        font-size: 16px;
-        min-height: 45px;
-        margin: 0 0 10px 0;
-    }
-    
-    .step-description {
-        font-size: 13px;
-        line-height: 1.4;
-    }
-}
 
-@media (max-width: 640px) {
     .step-card-wrapper {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 1400px;
+        gap: 20px;
+    }
+
+    .step-card {
+        background: white;
+        border-radius: 20px;
+        padding: 60px 25px 35px 25px;
+        text-align: center;
+        width: 250px;
+        height: 320px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        position: relative;
+        transition: all 0.4s ease;
+        border: 1px solid #f0f0f0;
+        display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 50px; /* Gap lebih besar untuk mobile */
-        max-width: 400px;
+        justify-content: flex-start;
+        flex: 0 0 auto;
     }
-    
-    .step-card {
-        width: 100%;
-        max-width: 300px;
-        height: auto; /* Biarkan tinggi otomatis di mobile */
-        min-height: 280px;
-        padding: 55px 25px 30px 25px;
+
+    .step-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.12);
     }
-    
+
     .step-number {
+        position: absolute;
+        top: -25px;
+        left: 50%;
+        transform: translateX(-50%);
         width: 50px;
         height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-size: 22px;
-        top: -25px;
+        font-weight: 700;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
     }
-    
+
     .step-title {
         font-size: 20px;
-        min-height: auto;
+        font-weight: 700;
         margin: 0 0 15px 0;
+        color: #000000;
+        line-height: 1.4;
+        text-align: center;
+        width: 100%;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    
+
     .step-description {
+        color: #666666;
         font-size: 15px;
         line-height: 1.6;
+        font-weight: 400;
+        text-align: center;
+        width: 100%;
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 5px;
     }
-}
-
-@media (max-width: 480px) {
-    .step-card {
-        padding: 50px 20px 25px 20px;
-        max-width: 280px;
-        min-height: 260px;
-    }
-}
     
     /* 6. FEATURES SECTION */
     .features-grid {
@@ -588,8 +512,7 @@ def inject_global_css():
         font-weight: 400;
     }
     
-    /* 8. METRIC CARDS FOR RESULTS - PERBAIKAN DI SINI */
-    /* Container untuk metric cards */
+    /* 8. METRIC CARDS FOR RESULTS */
     .metric-container {
         display: flex;
         justify-content: center;
@@ -603,7 +526,7 @@ def inject_global_css():
         width: 100%;
         max-width: 1400px;
         gap: 20px;
-        flex-wrap: nowrap; /* Tidak boleh wrap di desktop */
+        flex-wrap: nowrap;
     }
     
     .metric-card {
@@ -612,8 +535,8 @@ def inject_global_css():
         padding: 25px;
         box-shadow: 0 6px 25px rgba(0,0,0,0.06);
         border: 1px solid #f0f0f0;
-        flex: 1; /* Mengambil ruang yang sama */
-        min-width: 0; /* Agar tidak meledak */
+        flex: 1;
+        min-width: 0;
         min-height: 120px;
         display: flex;
         flex-direction: column;
@@ -658,11 +581,11 @@ def inject_global_css():
         }
         
         .metric-wrapper {
-            flex-wrap: wrap; /* Boleh wrap di tablet */
+            flex-wrap: wrap;
         }
         
         .metric-card {
-            flex: 0 0 calc(50% - 10px); /* 2 cards per row */
+            flex: 0 0 calc(50% - 10px);
             min-width: 250px;
         }
         
@@ -708,7 +631,7 @@ def inject_global_css():
         }
         
         .metric-wrapper {
-            flex-direction: column; /* Stack vertical di mobile */
+            flex-direction: column;
         }
         
         .metric-card {
@@ -731,6 +654,17 @@ def inject_global_css():
             min-width: 80px;
             padding: 6px 16px;
             font-size: 13px;
+        }
+        
+        .candidate-banner {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+        
+        .candidate-info {
+            flex-direction: column;
+            gap: 10px;
         }
     }
     
@@ -760,6 +694,11 @@ def inject_global_css():
             min-width: 70px;
             padding: 5px 12px;
             font-size: 12px;
+        }
+        
+        .registration-card {
+            padding: 25px;
+            margin: 20px auto;
         }
     }
     </style>
@@ -800,7 +739,7 @@ def create_navbar_html(current_page='home'):
     
     # Info button
     info_active = "active" if current_page == 'info' else ""
-    html_parts.append(f'      <a href="#" class="navbar-btn {info_active}" id="nav-info"> Info</a>')
+    html_parts.append(f'      <a href="#" class="navbar-btn {home_active}" id="nav-info"> Info</a>')
     
     html_parts.append('    </div>')
     html_parts.append('  </div>')
@@ -880,6 +819,107 @@ def close_navbar():
     """Close the navbar HTML structure."""
     st.markdown("</div>", unsafe_allow_html=True)
 
+def render_candidate_info():
+    """Render candidate information banner if data exists."""
+    if st.session_state.candidate_data:
+        candidate = st.session_state.candidate_data
+        st.markdown(f"""
+        <div class="candidate-banner">
+            <div class="candidate-info">
+                <div class="candidate-info-item">
+                    <span class="candidate-label">CANDIDATE ID</span>
+                    <span class="candidate-value">{candidate['id']}</span>
+                </div>
+                <div class="candidate-info-item">
+                    <span class="candidate-label">NAME</span>
+                    <span class="candidate-value">{candidate['name']}</span>
+                </div>
+                <div class="candidate-info-item">
+                    <span class="candidate-label">EMAIL</span>
+                    <span class="candidate-value">{candidate['email']}</span>
+                </div>
+            </div>
+            <div style="font-size: 14px; opacity: 0.9;">
+                Interview Session
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+def render_registration_page():
+    """Render candidate registration page."""
+    inject_global_css()
+    render_navbar('registration')
+    
+    st.markdown('<div class="registration-card">', unsafe_allow_html=True)
+    
+    st.markdown('<h2 class="registration-title">👤 Candidate Registration</h2>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; color: #666; margin-bottom: 30px;">Please fill in your details to start the interview session</p>', unsafe_allow_html=True)
+    
+    with st.form("candidate_registration"):
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            name = st.text_input(
+                "Full Name *",
+                placeholder="Enter your full name",
+                help="Your complete name as per your CV"
+            )
+        
+        with col2:
+            email = st.text_input(
+                "Email Address *",
+                placeholder="Enter your email address",
+                help="Valid email for communication"
+            )
+        
+        # Auto-generated ID display
+        candidate_id = generate_candidate_id()
+        st.info(f"**Candidate ID:** {candidate_id}")
+        st.caption("This ID is automatically generated and will be used to track your interview session.")
+        
+        st.markdown("---")
+        
+        col_btn1, col_btn2, col_btn3 = st.columns(3)
+        
+        with col_btn2:
+            submitted = st.form_submit_button(
+                "🚀 Start Interview",
+                type="primary",
+                use_container_width=True
+            )
+        
+        if submitted:
+            if not name or not email:
+                st.error("Please fill in all required fields (Name and Email)")
+            elif '@' not in email or '.' not in email.split('@')[-1]:
+                st.error("Please enter a valid email address")
+            else:
+                # Save candidate data
+                st.session_state.candidate_data = {
+                    'id': candidate_id,
+                    'name': name.strip(),
+                    'email': email.strip().lower(),
+                    'registration_date': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                }
+                
+                # Initialize interview session
+                st.session_state.answers = {}
+                st.session_state.results = None
+                st.session_state.current_q = 1
+                
+                st.success("Registration successful! Redirecting to interview...")
+                st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Back button
+    col_back, _, _ = st.columns(3)
+    with col_back:
+        if st.button("← Back to Home", use_container_width=True):
+            next_page('home')
+    
+    close_navbar()
+
 def render_home_page():
     """Render the fixed landing page."""
     inject_global_css()
@@ -887,17 +927,12 @@ def render_home_page():
     # Render navbar dengan semua elemen dalam HTML
     render_navbar('home')
     
-    # HERO SECTION
-
-    
     st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
     st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job with comprehensive evaluation and actionable insights.</p>', unsafe_allow_html=True)
     
     if st.button("Start Interview Now", key="hero_start", type="primary"):
-        st.session_state.answers = {}
-        st.session_state.results = None
-        st.session_state.current_q = 1
-        next_page("interview")
+        # Redirect to registration page instead of directly to interview
+        next_page("registration")
     
     st.markdown('</section>', unsafe_allow_html=True)
     
@@ -911,11 +946,11 @@ def render_home_page():
     st.markdown('<div class="step-card-wrapper">', unsafe_allow_html=True)
     
     steps = [
-        ("1", "Upload Answer Video", "Upload your video answer for each interview question provided by the system."),
-        ("2", "AI Processing", "The AI processes video into transcript and analyzes non-verbal communication aspects."),
-        ("3", "Semantic Scoring", "Your answer is compared to ideal rubric criteria for content relevance scoring."),
-        ("4", "Get Instant Feedback", "Receive final score, detailed rationale, and communication analysis immediately."),
-        ("5", "Improve Your Skills", "Use personalized recommendations to practice and enhance your interview performance.")
+        ("1", "Register Candidate", "Fill in your name and email to get a unique candidate ID"),
+        ("2", "Upload Answer Video", "Upload your video answer for each interview question"),
+        ("3", "AI Processing", "The AI analyzes speech, content, and non-verbal communication"),
+        ("4", "Semantic Scoring", "Compare answers to ideal rubric criteria"),
+        ("5", "Get Final Report", "Receive detailed evaluation and personalized feedback")
     ]
     
     # Menggunakan st.columns dengan 5 kolom untuk desktop
@@ -930,8 +965,8 @@ def render_home_page():
             </div>
             """, unsafe_allow_html=True)
     
-    st.markdown('</div>', unsafe_allow_html=True)  # Close step-card-wrapper
-    st.markdown('</div>', unsafe_allow_html=True)  # Close step-card-container
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # KEY FEATURES SECTION
     st.markdown('<h2 class="section-title">Key Features</h2>', unsafe_allow_html=True)
@@ -939,12 +974,12 @@ def render_home_page():
     st.markdown('<div class="features-grid">', unsafe_allow_html=True)
     
     features = [
-        ("🎤", "Advanced Speech-to-Text", "High-accuracy audio transcription using Whisper AI model"),
-        ("📊", "Comprehensive Analysis", "Evaluate content, structure, and non-verbal aspects simultaneously"),
-        ("⚡", "Real-time Feedback", "Instant evaluation results and personalized recommendations"),
-        ("🎯", "Rubric-based Scoring", "Objective assessment against industry-standard interview rubrics"),
-        ("📈", "Progress Tracking", "Monitor improvement across multiple practice sessions"),
-        ("🔒", "Privacy Focused", "Your data is processed securely and not stored permanently")
+        ("👤", "Candidate Tracking", "Unique ID generation and session management for each candidate"),
+        ("🎤", "Advanced Speech-to-Text", "High-accuracy audio transcription using Whisper AI"),
+        ("📊", "Comprehensive Analysis", "Evaluate content, structure, and non-verbal aspects"),
+        ("⚡", "Real-time Feedback", "Instant evaluation results and recommendations"),
+        ("🎯", "Rubric-based Scoring", "Objective assessment against industry standards"),
+        ("🔒", "Privacy Focused", "Secure data processing with no permanent storage")
     ]
     
     # Create two rows of features
@@ -977,7 +1012,6 @@ def render_home_page():
 def render_info_page():
     """Render the information page."""
     inject_global_css()
-    # Gunakan render_navbar biasa untuk halaman info
     render_navbar('info')
     
     st.title("📚 Application Information")
@@ -989,10 +1023,16 @@ def render_info_page():
     to analyze video interview answers and provide comprehensive feedback.
     
     #### Analysis Process
-    1. **Speech-to-Text (STT)**: Converts spoken responses to text using the Whisper model
-    2. **Text Cleaning**: Corrects spelling errors and ambiguities in the transcript
-    3. **Non-Verbal Analysis**: Analyzes speaking tempo, pauses, and vocal characteristics
-    4. **Semantic Scoring**: Compares answers against ideal rubric criteria using Sentence-Transformer models
+    1. **Candidate Registration**: Collect candidate information and generate unique ID
+    2. **Speech-to-Text (STT)**: Converts spoken responses to text using the Whisper model
+    3. **Text Cleaning**: Corrects spelling errors and ambiguities in the transcript
+    4. **Non-Verbal Analysis**: Analyzes speaking tempo, pauses, and vocal characteristics
+    5. **Semantic Scoring**: Compares answers against ideal rubric criteria using Sentence-Transformer models
+    
+    #### Candidate Data
+    * **Required**: Full Name and Email Address
+    * **Generated**: Unique Candidate ID
+    * **Purpose**: Session tracking and personalized reporting
     
     #### Video Requirements
     * **Duration**: Recommended 30-90 seconds per answer
@@ -1009,6 +1049,7 @@ def render_info_page():
     * All videos are processed in real-time
     * No permanent data storage
     * Local processing where possible
+    * Candidate data used only for session tracking
     
     ### Support
     For technical assistance or questions:
@@ -1026,8 +1067,17 @@ def render_info_page():
 def render_interview_page():
     """Render the interview page."""
     inject_global_css()
-    # Gunakan render_navbar biasa untuk halaman interview
+    
+    # Check if candidate data exists
+    if not st.session_state.candidate_data:
+        st.warning("No candidate data found. Redirecting to registration...")
+        next_page('registration')
+        return
+    
     render_navbar('interview')
+    
+    # Render candidate info banner
+    render_candidate_info()
     
     st.title(f"🎯 Interview Question {st.session_state.current_q} of {TOTAL_QUESTIONS}")
     
@@ -1110,8 +1160,17 @@ def render_interview_page():
 def render_processing_page():
     """Render the processing page."""
     inject_global_css()
-    # Gunakan render_navbar biasa untuk halaman processing
+    
+    # Check if candidate data exists
+    if not st.session_state.candidate_data:
+        st.warning("No candidate data found. Redirecting to registration...")
+        next_page('registration')
+        return
+    
     render_navbar('processing')
+    
+    # Render candidate info banner
+    render_candidate_info()
     
     st.title("⚙️ Analysis Process")
     st.info("Please wait, this process may take a few minutes depending on video duration.")
@@ -1208,10 +1267,31 @@ def render_processing_page():
 def render_final_summary_page():
     """Render the final results page."""
     inject_global_css()
-    # Gunakan render_navbar biasa untuk halaman final summary
+    
+    # Check if candidate data exists
+    if not st.session_state.candidate_data:
+        st.warning("No candidate data found. Redirecting to registration...")
+        next_page('registration')
+        return
+    
     render_navbar('final_summary')
     
+    # Render candidate info banner
+    render_candidate_info()
+    
     st.title("🏆 Final Evaluation Report")
+    st.markdown("---")
+    
+    # Display candidate information in report header
+    candidate = st.session_state.candidate_data
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Candidate ID", candidate['id'])
+    with col2:
+        st.metric("Name", candidate['name'])
+    with col3:
+        st.metric("Email", candidate['email'])
+    
     st.markdown("---")
     
     if not st.session_state.results:
@@ -1291,8 +1371,8 @@ def render_final_summary_page():
         </div>
         """, unsafe_allow_html=True)
     
-    st.markdown('</div>', unsafe_allow_html=True)  # Close metric-wrapper
-    st.markdown('</div>', unsafe_allow_html=True)  # Close metric-container
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # Evaluation and Recommendations
     st.markdown("---")
@@ -1303,11 +1383,11 @@ def render_final_summary_page():
     with col1:
         st.markdown("### Performance Conclusion")
         if avg_score >= 3.5:
-            st.success("**Excellent Performance!** Content and relevance of answers were strong and well-structured.")
+            st.success(f"**Excellent Performance, {candidate['name']}!** Content and relevance of answers were strong and well-structured.")
         elif avg_score >= 2.5:
-            st.warning("**Good Performance.** Answer content was adequate but could be improved for deeper understanding.")
+            st.warning(f"**Good Performance, {candidate['name']}.** Answer content was adequate but could be improved for deeper understanding.")
         else:
-            st.error("**Needs Improvement.** Focus is needed on aligning answers with rubric criteria.")
+            st.error(f"**Needs Improvement, {candidate['name']}.** Focus is needed on aligning answers with rubric criteria.")
         
         if 125 <= avg_tempo <= 150:
             st.success("**Optimal speaking tempo** for effective communication.")
@@ -1356,7 +1436,7 @@ def render_final_summary_page():
             with col_a:
                 st.metric("Rubric Score", f"{res['final_score']}/4")
             with col_b:
-                st.metric("Confidents", f"{res['confidence_score']}%")
+                st.metric("Confidence", f"{res['confidence_score']}%")
             with col_c:
                 st.metric("Non-Verbal Analysis", res['non_verbal'].get('qualitative_summary', 'N/A'))
             
@@ -1379,7 +1459,29 @@ def render_final_summary_page():
     
     with col_btn2:
         if st.button("📥 Download Report", use_container_width=True):
-            st.info("Download feature coming soon!")
+            # Create a summary report
+            report_data = {
+                "candidate_info": st.session_state.candidate_data,
+                "interview_summary": {
+                    "average_score": f"{avg_score:.2f}",
+                    "average_confidence": f"{avg_confidence:.2f}%",
+                    "average_tempo": f"{avg_tempo:.1f} BPM",
+                    "total_pause": f"{total_pause:.1f} seconds"
+                },
+                "detailed_results": st.session_state.results
+            }
+            
+            # Convert to JSON
+            report_json = json.dumps(report_data, indent=2, ensure_ascii=False)
+            
+            # Create download button
+            st.download_button(
+                label="⬇️ Download JSON Report",
+                data=report_json,
+                file_name=f"{candidate['id']}_interview_report.json",
+                mime="application/json",
+                use_container_width=True
+            )
     
     with col_btn3:
         if st.button("🏠 Back to Home", use_container_width=True):
@@ -1390,6 +1492,8 @@ def render_final_summary_page():
 # Main App Execution Flow
 if st.session_state.page == 'home':
     render_home_page()
+elif st.session_state.page == 'registration':
+    render_registration_page()
 elif st.session_state.page == 'info':
     render_info_page()
 elif st.session_state.page == 'interview':
