@@ -236,7 +236,7 @@ def inject_global_css():
     
     /* 3. MAIN CONTENT PADDING (to account for fixed navbar) */
     .main-content {
-        padding-top: 50px !important;
+        padding-top: 70px !important;
         padding-left: 40px !important;
         padding-right: 40px !important;
         max-width: 1400px !important;
@@ -244,7 +244,11 @@ def inject_global_css():
     }
     
     /* 4. LANDING PAGE HERO SECTION */
- 
+    .hero-section {
+        text-align: center;
+        padding: 80px 0 100px 0;
+        position: relative;
+    }
     
     .hero-section::before {
         content: '';
@@ -312,19 +316,19 @@ def inject_global_css():
 
 .step-card-wrapper {
     display: flex;
-    justify-content: space-between; /* Menggunakan space-between untuk distribusi merata */
+    justify-content: space-between;
     width: 100%;
     max-width: 1400px;
-    gap: 20px; /* Gap antar card */
+    gap: 20px;
 }
 
 .step-card {
     background: white;
     border-radius: 20px;
-    padding: 60px 25px 35px 25px; /* Atas lebih besar untuk number, bawah konsisten */
+    padding: 60px 25px 35px 25px;
     text-align: center;
-    width: 250px; /* Lebar tetap */
-    height: 320px; /* Tinggi tetap - SEMUA CARD SAMA TINGGI */
+    width: 250px;
+    height: 320px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.08);
     position: relative;
     transition: all 0.4s ease;
@@ -332,8 +336,8 @@ def inject_global_css():
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* Konten mulai dari atas */
-    flex: 0 0 auto; /* Tidak fleksibel, ukuran tetap */
+    justify-content: flex-start;
+    flex: 0 0 auto;
 }
 
 .step-card:hover {
@@ -362,12 +366,12 @@ def inject_global_css():
 .step-title {
     font-size: 20px;
     font-weight: 700;
-    margin: 0 0 15px 0; /* Margin atas dihapus karena sudah ada padding atas */
+    margin: 0 0 15px 0;
     color: #000000;
     line-height: 1.4;
     text-align: center;
     width: 100%;
-    min-height: 60px; /* Tinggi minimum untuk judul */
+    min-height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -380,11 +384,11 @@ def inject_global_css():
     font-weight: 400;
     text-align: center;
     width: 100%;
-    flex-grow: 1; /* Deskripsi mengambil ruang yang tersisa */
+    flex-grow: 1;
     display: flex;
-    align-items: center; /* Vertikal center untuk teks */
-    justify-content: center; /* Horizontal center untuk teks */
-    padding: 0 5px; /* Sedikit padding samping */
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
 }
 
 /* Responsive design untuk step-card */
@@ -402,7 +406,7 @@ def inject_global_css():
 
 @media (max-width: 1200px) {
     .step-card-wrapper {
-        flex-wrap: wrap; /* Allow wrapping jika tidak cukup space */
+        flex-wrap: wrap;
         justify-content: center;
         gap: 25px;
         max-width: 1000px;
@@ -486,14 +490,14 @@ def inject_global_css():
     .step-card-wrapper {
         flex-direction: column;
         align-items: center;
-        gap: 50px; /* Gap lebih besar untuk mobile */
+        gap: 50px;
         max-width: 400px;
     }
     
     .step-card {
         width: 100%;
         max-width: 300px;
-        height: auto; /* Biarkan tinggi otomatis di mobile */
+        height: auto;
         min-height: 280px;
         padding: 55px 25px 30px 25px;
     }
@@ -769,11 +773,11 @@ def create_navbar_html(current_page='home'):
     
     # Home button
     home_active = "active" if current_page == 'home' else ""
-    html_parts.append(f'      <a href="#" class="navbar-btn {home_active}" id="nav-home"> Home</a>')
+    html_parts.append(f'      <button class="navbar-btn {home_active}" id="nav-home" onclick="handleNavClick(\'home\')">Home</button>')
     
     # Info button
     info_active = "active" if current_page == 'info' else ""
-    html_parts.append(f'      <a href="#" class="navbar-btn {info_active}" id="nav-info"> Info</a>')
+    html_parts.append(f'      <button class="navbar-btn {info_active}" id="nav-info" onclick="handleNavClick(\'info\')">Info</button>')
     
     html_parts.append('    </div>')
     html_parts.append('  </div>')
@@ -782,72 +786,75 @@ def create_navbar_html(current_page='home'):
     return '\n'.join(html_parts)
 
 def inject_navbar_js():
-    """Inject JavaScript untuk navbar secara terpisah."""
+    """Inject JavaScript untuk navbar."""
     st.markdown("""
     <script>
-    // Setup navbar buttons
-    function setupNavbar() {
-        // Home button
-        const homeBtn = document.getElementById('nav-home');
-        if (homeBtn) {
-            homeBtn.onclick = function(e) {
-                e.preventDefault();
-                // Simpan ke session storage untuk Streamlit
-                sessionStorage.setItem('nav_to', 'home');
-                // Trigger page reload
-                window.location.reload();
-            };
+    // Function to handle navbar button clicks
+    function handleNavClick(page) {
+        // Store the target page in localStorage
+        localStorage.setItem('nav_target_page', page);
+        
+        // Trigger Streamlit to rerun with a query parameter
+        const url = new URL(window.location);
+        url.searchParams.set('nav_to', page);
+        window.history.pushState({}, '', url);
+        
+        // Trigger Streamlit rerun
+        if (window.parent !== window) {
+            window.parent.postMessage({
+                type: 'streamlit:setComponentValue',
+                value: page
+            }, '*');
         }
         
-        // Info button
-        const infoBtn = document.getElementById('nav-info');
-        if (infoBtn) {
-            infoBtn.onclick = function(e) {
-                e.preventDefault();
-                // Simpan ke session storage untuk Streamlit
-                sessionStorage.setItem('nav_to', 'info');
-                // Trigger page reload
-                window.location.reload();
-            };
-        }
+        // Add a small delay and reload to ensure Streamlit picks up the change
+        setTimeout(() => {
+            window.location.reload();
+        }, 100);
     }
     
-    // Jalankan setup saat DOM siap
-    document.addEventListener('DOMContentLoaded', setupNavbar);
-    
-    // Juga jalankan setelah timeout untuk memastikan
-    setTimeout(setupNavbar, 100);
+    // Check for navigation on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const navTo = urlParams.get('nav_to');
+        
+        if (navTo) {
+            // Clean up the URL
+            const url = new URL(window.location);
+            url.searchParams.delete('nav_to');
+            window.history.replaceState({}, '', url);
+        }
+    });
     </script>
     """, unsafe_allow_html=True)
 
 # --- Page Render Functions ---
 
 def render_navbar(current_page='home'):
-    """Render fixed navbar dengan logo dan tombol sepenuhnya dalam HTML."""
+    """Render fixed navbar dengan logo dan tombol."""
     
-    # Buat HTML navbar
+    # Inject CSS
+    inject_global_css()
+    
+    # Buat dan render HTML navbar
     navbar_html = create_navbar_html(current_page)
-    
-    # Render navbar HTML
     st.markdown(navbar_html, unsafe_allow_html=True)
     
-    # Inject JavaScript secara terpisah
+    # Inject JavaScript
     inject_navbar_js()
     
-    # Buka main content
+    # Mulai main content
     st.markdown('<div class="main-content">', unsafe_allow_html=True)
     
-    # Cek session storage untuk navigasi
-    try:
-        # Gunakan JavaScript untuk membaca session storage
-        if 'nav_to' in st.session_state:
-            nav_to = st.session_state.nav_to
-            if nav_to and nav_to in ['home', 'info']:
-                next_page(nav_to)
-                # Clear setelah digunakan
-                del st.session_state.nav_to
-    except:
-        pass
+    # Handle navigation from query parameters
+    query_params = st.query_params
+    if 'nav_to' in query_params:
+        target_page = query_params['nav_to']
+        if target_page in ['home', 'info']:
+            st.session_state.page = target_page
+            # Hapus parameter dari URL
+            st.query_params.clear()
+            st.rerun()
 
 def close_navbar():
     """Close the navbar HTML structure."""
@@ -855,13 +862,12 @@ def close_navbar():
 
 def render_home_page():
     """Render the fixed landing page."""
-    inject_global_css()
     
-    # Render navbar dengan semua elemen dalam HTML
+    # Render navbar
     render_navbar('home')
     
     # HERO SECTION
-
+    st.markdown('<section class="hero-section">', unsafe_allow_html=True)
     
     st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
     st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job with comprehensive evaluation and actionable insights.</p>', unsafe_allow_html=True)
@@ -870,7 +876,8 @@ def render_home_page():
         st.session_state.answers = {}
         st.session_state.results = None
         st.session_state.current_q = 1
-        next_page("interview")
+        st.session_state.page = "interview"
+        st.rerun()
     
     st.markdown('</section>', unsafe_allow_html=True)
     
@@ -879,7 +886,7 @@ def render_home_page():
     st.markdown('<h2 class="section-title">How To Use</h2>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Container untuk step cards dengan flex layout yang lebih baik
+    # Container untuk step cards
     st.markdown('<div class="step-card-container">', unsafe_allow_html=True)
     st.markdown('<div class="step-card-wrapper">', unsafe_allow_html=True)
     
@@ -891,7 +898,7 @@ def render_home_page():
         ("5", "Improve Your Skills", "Use personalized recommendations to practice and enhance your interview performance.")
     ]
     
-    # Menggunakan st.columns dengan 5 kolom untuk desktop
+    # Menggunakan st.columns dengan 5 kolom
     cols = st.columns(5)
     for i, (num, title, desc) in enumerate(steps):
         with cols[i]:
@@ -903,8 +910,8 @@ def render_home_page():
             </div>
             """, unsafe_allow_html=True)
     
-    st.markdown('</div>', unsafe_allow_html=True)  # Close step-card-wrapper
-    st.markdown('</div>', unsafe_allow_html=True)  # Close step-card-container
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # KEY FEATURES SECTION
     st.markdown('<h2 class="section-title">Key Features</h2>', unsafe_allow_html=True)
@@ -949,8 +956,7 @@ def render_home_page():
 
 def render_info_page():
     """Render the information page."""
-    inject_global_css()
-    # Gunakan render_navbar biasa untuk halaman info
+    # Render navbar
     render_navbar('info')
     
     st.title("📚 Application Information")
@@ -992,14 +998,14 @@ def render_info_page():
     
     # Tombol Back to Home menggunakan Streamlit
     if st.button("🏠 Back to Home", type="primary"):
-        next_page('home')
+        st.session_state.page = 'home'
+        st.rerun()
     
     close_navbar()
 
 def render_interview_page():
     """Render the interview page."""
-    inject_global_css()
-    # Gunakan render_navbar biasa untuk halaman interview
+    # Render navbar
     render_navbar('interview')
     
     st.title(f"🎯 Interview Question {st.session_state.current_q} of {TOTAL_QUESTIONS}")
@@ -1014,12 +1020,12 @@ def render_interview_page():
         st.error("An error occurred while loading the question.")
         if st.button("🏠 Back to Home"):
             st.session_state.clear() 
-            next_page('home')
+            st.session_state.page = 'home'
+            st.rerun()
         return
 
     st.markdown("### 📝 Question:")
     st.info(f"**{question_text}**")
-    st.markdown('</div>', unsafe_allow_html=True)
     
     st.markdown("---")
     
@@ -1071,7 +1077,8 @@ def render_interview_page():
                 st.rerun()
         elif q_num == TOTAL_QUESTIONS:
             if st.button("🏁 Finish & Process", use_container_width=True, disabled=(not is_ready)):
-                next_page('processing')
+                st.session_state.page = 'processing'
+                st.rerun()
         
         if q_num > 1:
             if st.button("⏮️ Previous", use_container_width=True):
@@ -1082,15 +1089,15 @@ def render_interview_page():
 
 def render_processing_page():
     """Render the processing page."""
-    inject_global_css()
-    # Gunakan render_navbar biasa untuk halaman processing
+    # Render navbar
     render_navbar('processing')
     
     st.title("⚙️ Analysis Process")
     st.info("Please wait, this process may take a few minutes depending on video duration.")
     
     if st.session_state.results is not None and st.session_state.results != {}:
-        next_page('final_summary') 
+        st.session_state.page = 'final_summary'
+        st.rerun()
         return
     
     if st.session_state.results is None:
@@ -1102,7 +1109,8 @@ def render_processing_page():
             progress_bar.empty()
             if st.button("🏠 Back to Home"):
                 st.session_state.clear()
-                next_page('home')
+                st.session_state.page = 'home'
+                st.rerun()
             return
         
         try:
@@ -1164,7 +1172,8 @@ def render_processing_page():
                 
                 st.session_state.results = results
                 progress_bar.progress(100, text="Process complete! Redirecting to final report...")
-                next_page('final_summary')
+                st.session_state.page = 'final_summary'
+                st.rerun()
         
         except Exception as e:
             st.error(f"Fatal error during processing: {e}")
@@ -1173,15 +1182,15 @@ def render_processing_page():
             st.session_state.results = None
             if st.button("🏠 Back to Home"):
                 st.session_state.clear()
-                next_page('home')
+                st.session_state.page = 'home'
+                st.rerun()
             return
     
     close_navbar()
 
 def render_final_summary_page():
     """Render the final results page."""
-    inject_global_css()
-    # Gunakan render_navbar biasa untuk halaman final summary
+    # Render navbar
     render_navbar('final_summary')
     
     st.title("🏆 Final Evaluation Report")
@@ -1190,7 +1199,8 @@ def render_final_summary_page():
     if not st.session_state.results:
         st.error("Result data not found.")
         if st.button("Back to Home"):
-            next_page('home')
+            st.session_state.page = 'home'
+            st.rerun()
         return
     
     # Calculate metrics
@@ -1338,7 +1348,8 @@ def render_final_summary_page():
     with col_btn1:
         if st.button("🔄 New Interview", use_container_width=True, type="primary"):
             st.session_state.clear()
-            next_page('home')
+            st.session_state.page = 'home'
+            st.rerun()
     
     with col_btn2:
         if st.button("📥 Download Report", use_container_width=True):
@@ -1346,7 +1357,8 @@ def render_final_summary_page():
     
     with col_btn3:
         if st.button("🏠 Back to Home", use_container_width=True):
-            next_page('home')
+            st.session_state.page = 'home'
+            st.rerun()
     
     close_navbar()
 
