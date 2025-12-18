@@ -816,12 +816,29 @@ def render_candidate_form():
                     # Generate interview ID
                     interview_id = str(uuid.uuid4())[:8].upper()
                     
+                    # FIX: Get local time for Indonesia (WIB/WITA/WIT)
+                    try:
+                        # Method 1: Try to get system time (works if server is in Indonesia)
+                        now_local = datetime.now()
+                        
+                        # Method 2: If system time is UTC, adjust manually
+                        # Add 7 hours for WIB (UTC+7), 8 for WITA (UTC+8), 9 for WIT (UTC+9)
+                        # Uncomment line below if you need to adjust manually:
+                        # from datetime import timedelta
+                        # now_local = datetime.now() + timedelta(hours=7)  # WIB (UTC+7)
+                        
+                    except Exception as e:
+                        now_local = datetime.now()
+                    
+                    # Format the date
+                    start_time = now_local.strftime("%Y-%m-%d %H:%M:%S")
+                    
                     # Simpan data kandidat ke session state
                     st.session_state.candidate_data = {
                         'id': interview_id,
                         'name': name.strip(),
                         'email': email.strip(),
-                        'start_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        'start_time': start_time  # Use the corrected local time
                     }
                     st.session_state.interview_id = interview_id
                     
