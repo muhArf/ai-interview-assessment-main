@@ -1006,7 +1006,6 @@ def render_interview_page():
             next_page('home')
         return
 
-    st.markdown('<div class="question-container">', unsafe_allow_html=True)
     st.markdown("### 📝 Question:")
     st.info(f"**{question_text}**")
     st.markdown('</div>', unsafe_allow_html=True)
