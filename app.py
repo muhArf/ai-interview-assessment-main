@@ -244,12 +244,7 @@ def inject_global_css():
     }
     
     /* 4. LANDING PAGE HERO SECTION */
-    .hero-section {
-        background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFF 100%);
-        padding: 60px 0 100px 0;
-        text-align: center;
-        position: relative;
-    }
+ 
     
     .hero-section::before {
         content: '';
