@@ -749,7 +749,7 @@ def render_home_page():
     st.markdown("""
     <div class="custom-footer">
         <div class="footer-brand">SEI-AI Interviewer</div>
-        <div class="footer-copyright">Copyright © 2024 SEI-AI Interviewer. All Rights Reserved.</div>
+        <div class="footer-copyright">Copyright © 2025 SEI-AI Interviewer. All Rights Reserved.</div>
     </div>
     """, unsafe_allow_html=True)
     
