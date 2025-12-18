@@ -1,4 +1,3 @@
-# app.py
 import streamlit as st
 import pandas as pd
 import json
@@ -589,12 +588,22 @@ def inject_global_css():
         font-weight: 400;
     }
     
-    /* 8. METRIC CARDS FOR RESULTS */
-    .metric-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
+    /* 8. METRIC CARDS FOR RESULTS - PERBAIKAN DI SINI */
+    /* Container untuk metric cards */
+    .metric-container {
+        display: flex;
+        justify-content: center;
+        width: 100%;
         margin: 30px 0 50px 0;
+    }
+    
+    .metric-wrapper {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 1400px;
+        gap: 20px;
+        flex-wrap: nowrap; /* Tidak boleh wrap di desktop */
     }
     
     .metric-card {
@@ -603,6 +612,12 @@ def inject_global_css():
         padding: 25px;
         box-shadow: 0 6px 25px rgba(0,0,0,0.06);
         border: 1px solid #f0f0f0;
+        flex: 1; /* Mengambil ruang yang sama */
+        min-width: 0; /* Agar tidak meledak */
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
     
     .metric-value {
@@ -610,12 +625,14 @@ def inject_global_css():
         font-weight: 800;
         line-height: 1;
         margin-bottom: 8px;
+        text-align: center;
     }
     
     .metric-label {
         font-size: 14px;
         color: #666666;
         font-weight: 500;
+        text-align: center;
     }
     
     .score-color { color: #2ecc71; }
@@ -640,8 +657,13 @@ def inject_global_css():
             padding-right: 30px !important;
         }
         
-        .metric-grid {
-            grid-template-columns: repeat(2, 1fr);
+        .metric-wrapper {
+            flex-wrap: wrap; /* Boleh wrap di tablet */
+        }
+        
+        .metric-card {
+            flex: 0 0 calc(50% - 10px); /* 2 cards per row */
+            min-width: 250px;
         }
         
         .features-grid {
@@ -685,8 +707,13 @@ def inject_global_css():
             grid-template-columns: 1fr;
         }
         
-        .metric-grid {
-            grid-template-columns: 1fr;
+        .metric-wrapper {
+            flex-direction: column; /* Stack vertical di mobile */
+        }
+        
+        .metric-card {
+            width: 100%;
+            flex: 1 0 auto;
         }
         
         .custom-footer {
@@ -1225,37 +1252,47 @@ def render_final_summary_page():
     # Display metrics
     st.subheader("📊 Performance Summary")
     
-    st.markdown('<div class="metric-grid">', unsafe_allow_html=True)
+    # PERBAIKAN DI SINI: Menggunakan st.columns untuk metric cards horizontal
+    st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+    st.markdown('<div class="metric-wrapper">', unsafe_allow_html=True)
     
-    st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-value score-color">{avg_score:.2f}/4</div>
-        <div class="metric-label">Average Content Score</div>
-    </div>
-    """, unsafe_allow_html=True)
+    # Metric cards dalam satu baris horizontal
+    cols = st.columns(4)
     
-    st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-value accuracy-color">{avg_confidence:.2f}%</div>
-        <div class="metric-label">Transcript Accuracy</div>
-    </div>
-    """, unsafe_allow_html=True)
+    with cols[0]:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-value score-color">{avg_score:.2f}/4</div>
+            <div class="metric-label">Average Content Score</div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-value tempo-color">{avg_tempo:.1f}</div>
-        <div class="metric-label">Average Tempo (BPM)</div>
-    </div>
-    """, unsafe_allow_html=True)
+    with cols[1]:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-value accuracy-color">{avg_confidence:.2f}%</div>
+            <div class="metric-label">Transcript Accuracy</div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-value pause-color">{total_pause:.1f}s</div>
-        <div class="metric-label">Total Pause Time</div>
-    </div>
-    """, unsafe_allow_html=True)
+    with cols[2]:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-value tempo-color">{avg_tempo:.1f}</div>
+            <div class="metric-label">Average Tempo (BPM)</div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    st.markdown('</div>', unsafe_allow_html=True)
+    with cols[3]:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-value pause-color">{total_pause:.1f}s</div>
+            <div class="metric-label">Total Pause Time</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)  # Close metric-wrapper
+    st.markdown('</div>', unsafe_allow_html=True)  # Close metric-container
     
     # Evaluation and Recommendations
     st.markdown("---")
