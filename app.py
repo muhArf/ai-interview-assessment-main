@@ -371,7 +371,7 @@ def inject_global_css():
         margin: 20px 0;
     }
     
-    /* 6. HOW IT WORKS SECTION - STEP CARDS */
+    /* 6. HOW IT WORKS SECTION - STEP CARDS - PERBAIKAN RESPONSIVE */
     
     .section-title {
         font-size: 42px;
@@ -388,7 +388,6 @@ def inject_global_css():
         width: 100%;
         margin-bottom: 80px;
         padding: 0 20px;
-        overflow-x: auto; /* Tambahkan ini */
     }
 
     .step-card-wrapper {
@@ -397,20 +396,16 @@ def inject_global_css():
         width: 100%;
         max-width: 1400px;
         gap: 20px;
-        flex-wrap: nowrap;
-        padding: 10px 0; /* Tambahkan padding */
+        flex-wrap: wrap; /* Ubah dari nowrap ke wrap */
     }
 
-    /* STEP CARD - MODIFIKASI */
+    /* STEP CARD - RESPONSIVE FIX */
     .step-card {
         background: white;
         border-radius: 20px;
         padding: 60px 25px 35px 25px;
         text-align: center;
-        min-width: 200px; /* Ubah width ke min-width */
-        max-width: 250px; /* Tambahkan max-width */
-        width: 100%; /* Tambahkan width 100% */
-        height: 320px;
+        min-height: 320px;
         box-shadow: 0 10px 40px rgba(0,0,0,0.08);
         position: relative;
         transition: all 0.4s ease;
@@ -419,7 +414,10 @@ def inject_global_css():
         flex-direction: column;
         align-items: center;
         justify-content: flex-start;
-        flex: 1 0 auto; /* Ubah flex property */
+        flex: 1 1 250px; /* Ubah agar responsif */
+        min-width: 220px; /* Minimum width */
+        max-width: 300px; /* Maximum width */
+        margin: 0 auto; /* Center cards */
     }
     
     .step-number {
@@ -443,15 +441,18 @@ def inject_global_css():
     .step-title {
         font-size: 20px;
         font-weight: 700;
-        margin: 0 0 10px 0;
+        margin: 0 0 15px 0;
         color: #000000;
         line-height: 1.4;
         text-align: center;
         width: 100%;
-        min-height: 60px;
+        height: auto; /* Ubah dari fixed height */
+        min-height: 60px; /* Minimum height untuk judul */
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 0 5px;
+        word-break: break-word; /* Tambahkan untuk wrap kata panjang */
     }
     
     .step-description {
@@ -461,57 +462,151 @@ def inject_global_css():
         font-weight: 400;
         text-align: center;
         width: 100%;
-        flex-grow: 1;
+        height: auto; /* Ubah dari fixed height */
         display: flex;
-        align-items: center;
+        align-items: flex-start; /* Ubah dari center ke flex-start */
         justify-content: center;
         padding: 0 5px;
+        word-break: break-word; /* Tambahkan untuk wrap kata panjang */
+        overflow-wrap: break-word; /* Tambahkan untuk wrap kata panjang */
     }
     
-         /* 12. RESPONSIVE DESIGN */
+    /* METRIC CARDS RESPONSIVE FIX */
+    .metric-container {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin: 30px 0 50px 0;
+    }
+    
+    .metric-wrapper {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 1400px;
+        gap: 20px;
+        flex-wrap: wrap; /* Ubah dari nowrap ke wrap */
+    }
+    
+    .metric-card {
+        background: white;
+        border-radius: 16px;
+        padding: 25px;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.06);
+        border: 1px solid #f0f0f0;
+        flex: 1 1 220px; /* Responsive flex */
+        min-width: 200px; /* Minimum width */
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin: 5px; /* Tambahkan margin untuk spacing */
+    }
+    
+    .metric-value {
+        font-size: 32px;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 8px;
+        text-align: center;
+    }
+    
+    .metric-label {
+        font-size: 14px;
+        color: #666666;
+        font-weight: 500;
+        text-align: center;
+    }
+    
+    /* FEATURE CARDS RESPONSIVE FIX */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+        gap: 30px;
+        margin: 60px 0;
+        padding: 0 20px;
+    }
+    
+    .feature-card {
+        background: white;
+        border-radius: 16px;
+        padding: 35px 25px;
+        text-align: center;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+        border: 1px solid #f0f0f0;
+        transition: transform 0.3s ease;
+        height: auto; /* Biarkan tinggi otomatis */
+        min-height: 200px; /* Minimum height */
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+    }
+    
+    .feature-icon {
+        font-size: 40px;
+        margin-bottom: 20px;
+        flex-shrink: 0; /* Hindari icon menyusut */
+    }
+    
+    .feature-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: #000000;
+        width: 100%;
+        word-break: break-word;
+    }
+    
+    .feature-desc {
+        color: #666666;
+        font-size: 15px;
+        line-height: 1.5;
+        width: 100%;
+        word-break: break-word;
+    }
+    
+    /* 12. RESPONSIVE DESIGN - IMPROVED */
     @media (max-width: 1200px) {
         .main-content {
             padding-left: 30px !important;
             padding-right: 30px !important;
         }
         
-        .metric-wrapper {
-            flex-wrap: wrap;
+        .step-card {
+            flex: 1 1 220px; /* Adjust untuk layar sedang */
+            min-height: 300px;
         }
         
         .metric-card {
-            flex: 0 0 calc(50% - 10px);
-            min-width: 250px;
+            flex: 1 1 calc(50% - 20px); /* 2 cards per row */
+            max-width: calc(50% - 20px);
         }
         
         .features-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        
-        /* RESPONSIVE STEP CARDS - TAMBAHAN */
-        .step-card-wrapper {
-            gap: 15px;
-        }
-        
-        .step-card {
-            min-width: 180px;
-            padding: 50px 20px 30px 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         }
     }
     
     @media (max-width: 992px) {
         .step-card-wrapper {
-            gap: 15px;
-            flex-wrap: wrap; /* Allow wrapping on medium screens */
-            justify-content: center;
+            justify-content: center; /* Center cards pada layar medium */
         }
         
         .step-card {
-            min-width: 170px;
-            max-width: 200px;
-            flex: 0 0 calc(33.333% - 15px); /* 3 cards per row */
-            height: auto;
+            flex: 0 1 calc(33.333% - 20px); /* 3 cards per row */
+            max-width: calc(33.333% - 20px);
             min-height: 280px;
+            padding: 50px 20px 30px 20px;
+        }
+        
+        .step-title {
+            font-size: 18px;
+            min-height: 50px;
+        }
+        
+        .step-description {
+            font-size: 14px;
         }
     }
     
@@ -554,18 +649,12 @@ def inject_global_css():
             gap: 10px;
         }
         
-        /* RESPONSIVE STEP CARDS - TAMBAHAN */
-        .step-card-wrapper {
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
+        /* STEP CARDS RESPONSIVE */
         .step-card {
-            flex: 0 0 calc(50% - 15px); /* 2 cards per row */
-            min-width: 160px;
-            max-width: 200px;
+            flex: 0 1 calc(50% - 20px); /* 2 cards per row */
+            max-width: calc(50% - 20px);
             min-height: 260px;
+            padding: 45px 15px 25px 15px;
         }
         
         .step-number {
@@ -575,13 +664,20 @@ def inject_global_css():
             top: -20px;
         }
         
-        .step-title {
-            font-size: 18px;
-            min-height: 50px;
+        .metric-card {
+            flex: 0 1 100%; /* 1 card per row */
+            max-width: 100%;
+            margin: 5px 0; /* Adjust margin */
         }
         
-        .step-description {
-            font-size: 14px;
+        .features-grid {
+            grid-template-columns: 1fr; /* 1 column pada mobile */
+            gap: 20px;
+        }
+        
+        .section-title {
+            font-size: 36px;
+            margin-bottom: 40px;
         }
     }
     
@@ -590,129 +686,107 @@ def inject_global_css():
             padding: 20px;
         }
         
-        /* RESPONSIVE STEP CARDS - TAMBAHAN */
+        /* STEP CARDS - FULL RESPONSIVE */
         .step-card-container {
             padding: 0 10px;
         }
         
         .step-card-wrapper {
-            gap: 12px;
+            gap: 15px;
         }
         
         .step-card {
-            flex: 0 0 100%; /* 1 card per row on very small screens */
-            max-width: 280px;
+            flex: 0 1 100%; /* 1 card per row pada very small screens */
+            max-width: 320px;
             min-height: 240px;
             padding: 40px 15px 25px 15px;
+        }
+        
+        .step-title {
+            font-size: 17px;
+            min-height: 45px;
+            margin-bottom: 10px;
+        }
+        
+        .step-description {
+            font-size: 13.5px;
+            line-height: 1.5;
         }
         
         .section-title {
             font-size: 32px;
             margin-bottom: 40px;
         }
+        
+        .metric-card {
+            padding: 20px;
+            min-height: 100px;
+        }
+        
+        .metric-value {
+            font-size: 28px;
+        }
+        
+        .metric-label {
+            font-size: 13px;
+        }
     }
     
-    /* 7. FEATURES SECTION */
-    .features-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 30px;
-        margin: 60px 0;
-        padding: 0 20px;
+    @media (max-width: 480px) {
+        .candidate-form-container {
+            padding: 15px;
+        }
+        
+        .step-card {
+            max-width: 280px;
+            min-height: 220px;
+            padding: 35px 12px 20px 12px;
+        }
+        
+        .step-title {
+            font-size: 16px;
+            min-height: 40px;
+        }
+        
+        .step-description {
+            font-size: 13px;
+        }
+        
+        .hero-title {
+            font-size: 36px;
+        }
+        
+        .hero-subtitle {
+            font-size: 24px;
+        }
     }
     
-    .feature-card {
-        background: white;
-        border-radius: 16px;
-        padding: 35px 25px;
-        text-align: center;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.06);
-        border: 1px solid #f0f0f0;
-        transition: transform 0.3s ease;
-    }
-    
-    .feature-card:hover {
-        transform: translateY(-5px);
-    }
-    
-    .feature-icon {
-        font-size: 40px;
-        margin-bottom: 20px;
-    }
-    
-    .feature-title {
-        font-size: 20px;
-        font-weight: 700;
-        margin-bottom: 12px;
-        color: #000000;
-    }
-    
-    .feature-desc {
-        color: #666666;
-        font-size: 15px;
-        line-height: 1.5;
-    }
-    
-    /* 8. FOOTER */
-    .custom-footer {
-        background: #000000;
-        color: white;
-        padding: 40px 50px;
-        margin-top: 100px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .footer-brand {
-        font-size: 24px;
-        font-weight: 700;
-        color: white;
-    }
-    
-    .footer-copyright {
-        font-size: 14px;
-        opacity: 0.7;
-        font-weight: 400;
-    }
-    
-    /* 9. METRIC CARDS FOR RESULTS */
-    .metric-container {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-        margin: 30px 0 50px 0;
-    }
-    
-    .metric-wrapper {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-        max-width: 1400px;
-        gap: 20px;
-        flex-wrap: nowrap;
-    }
-    
-    .metric-card {
-        background: white;
-        border-radius: 16px;
-        padding: 25px;
-        box-shadow: 0 6px 25px rgba(0,0,0,0.06);
-        border: 1px solid #f0f0f0;
-        flex: 1;
-        min-width: 0;
-        min-height: 120px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    
-    .metric-value {
-        font-size: 32px;
-        font-weight: 800;
-        line-height: 1;
-        margin-bottom: 8px;
-        text-align: center;
+    /* Very small screens */
+    @media (max-width: 375px) {
+        .step-card {
+            min-height: 200px;
+            padding: 30px 10px 15px 10px;
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+            top: -18px;
+        }
+        
+        .step-title {
+            font-size: 15px;
+            min-height: 35px;
+        }
+        
+        .step-description {
+            font-size: 12.5px;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+        }
     }
     
     .metric-label {
