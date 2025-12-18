@@ -235,7 +235,14 @@ def inject_global_css():
     }
     
     /* 3. MAIN CONTENT PADDING (to account for fixed navbar) */
-   
+    .main-content {
+        padding-top: 90px !important;
+        padding-left: 40px !important;
+        padding-right: 40px !important;
+        max-width: 1400px !important;
+        margin: 0 auto !important;
+    }
+    
     /* 4. LANDING PAGE HERO SECTION */
     .hero-section {
         background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFF 100%);
@@ -290,7 +297,7 @@ def inject_global_css():
         box-shadow: 0 12px 35px rgba(0,0,0,0.15);
     }
     
-    /* 5. HOW IT WORKS SECTION */
+    /* 5. HOW IT WORKS SECTION - STEP CARDS */
     .section-title {
         font-size: 42px;
         font-weight: 800;
@@ -300,56 +307,71 @@ def inject_global_css():
         letter-spacing: -0.5px;
     }
     
-    .steps-container {
+    .steps-grid-container {
         display: flex;
         justify-content: center;
-        gap: 30px;
-        flex-wrap: wrap;
-        padding: 0 20px;
+        width: 100%;
         margin-bottom: 80px;
+    }
+    
+    .steps-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 25px;
+        width: 100%;
+        max-width: 1400px;
+        padding: 0 20px;
     }
     
     .step-card {
         background: white;
         border-radius: 20px;
-        padding: 45px 30px 30px 30px;
+        padding: 45px 25px 30px 25px;
         text-align: center;
-        width: 260px;
-        min-height: 300px;
         box-shadow: 0 10px 40px rgba(0,0,0,0.08);
         position: relative;
         transition: all 0.4s ease;
         border: 1px solid #f0f0f0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
     
     .step-card:hover {
-        transform: translateY(-12px);
+        transform: translateY(-10px);
         box-shadow: 0 20px 50px rgba(0,0,0,0.12);
     }
     
     .step-number {
         position: absolute;
-        top: -30px;
+        top: -25px;
         left: 50%;
         transform: translateX(-50%);
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
+        font-size: 22px;
         font-weight: 700;
         box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
     }
     
     .step-title {
-        font-size: 22px;
+        font-size: 20px;
         font-weight: 700;
         margin: 25px 0 15px 0;
         color: #000000;
+        line-height: 1.4;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
     }
     
     .step-description {
@@ -357,6 +379,129 @@ def inject_global_css():
         font-size: 15px;
         line-height: 1.6;
         font-weight: 400;
+        flex-grow: 1;
+        width: 100%;
+    }
+    
+    /* Responsive design untuk step-card */
+    @media (max-width: 1400px) {
+        .steps-grid {
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            padding: 0 15px;
+        }
+        
+        .step-card {
+            padding: 40px 20px 25px 20px;
+        }
+        
+        .step-title {
+            font-size: 19px;
+            min-height: 55px;
+        }
+    }
+    
+    @media (max-width: 1200px) {
+        .steps-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 1000px;
+        }
+        
+        .step-card {
+            padding: 45px 25px 30px 25px;
+        }
+        
+        .step-title {
+            font-size: 20px;
+            min-height: 60px;
+        }
+    }
+    
+    @media (max-width: 992px) {
+        .steps-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+        
+        .step-card {
+            padding: 40px 20px 25px 20px;
+        }
+        
+        .step-title {
+            font-size: 19px;
+            min-height: 55px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .steps-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            padding: 0 10px;
+        }
+        
+        .step-card {
+            padding: 45px 25px 30px 25px;
+        }
+        
+        .step-number {
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            top: -22px;
+        }
+        
+        .step-title {
+            font-size: 20px;
+            min-height: auto;
+            margin: 20px 0 12px 0;
+        }
+        
+        .step-description {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .steps-grid {
+            grid-template-columns: 1fr;
+            gap: 40px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .step-card {
+            padding: 50px 30px 35px 30px;
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            font-size: 22px;
+            top: -25px;
+        }
+        
+        .step-title {
+            font-size: 22px;
+            margin: 25px 0 15px 0;
+        }
+        
+        .step-description {
+            font-size: 15px;
+            line-height: 1.6;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .steps-grid {
+            padding: 0 15px;
+        }
+        
+        .step-card {
+            padding: 45px 25px 30px 25px;
+        }
     }
     
     /* 6. FEATURES SECTION */
@@ -458,10 +603,22 @@ def inject_global_css():
     .pause-color { color: #e74c3c; }
     
     /* 9. INTERVIEW PAGE STYLING */
-
+    .question-container {
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 40px;
+        border-left: 6px solid #667eea;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
     
     /* 10. RESPONSIVE DESIGN */
     @media (max-width: 1200px) {
+        .main-content {
+            padding-left: 30px !important;
+            padding-right: 30px !important;
+        }
+        
         .metric-grid {
             grid-template-columns: repeat(2, 1fr);
         }
@@ -472,6 +629,12 @@ def inject_global_css():
     }
     
     @media (max-width: 768px) {
+        .main-content {
+            padding-top: 80px !important;
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+        }
+        
         .navbar-content {
             padding: 0 20px;
         }
@@ -486,6 +649,7 @@ def inject_global_css():
         
         .hero-subtitle {
             font-size: 28px;
+            padding: 0 20px;
         }
         
         .hero-section {
@@ -494,16 +658,6 @@ def inject_global_css():
         
         .section-title {
             font-size: 32px;
-        }
-        
-        .steps-container {
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .step-card {
-            width: 100%;
-            max-width: 320px;
         }
         
         .features-grid {
@@ -533,8 +687,21 @@ def inject_global_css():
     }
     
     @media (max-width: 480px) {
+        .main-content {
+            padding-left: 15px !important;
+            padding-right: 15px !important;
+        }
+        
         .logo-text {
             font-size: 20px;
+        }
+        
+        .hero-title {
+            font-size: 36px;
+        }
+        
+        .hero-subtitle {
+            font-size: 24px;
         }
         
         .nav-buttons-container {
@@ -673,7 +840,7 @@ def render_home_page():
     render_navbar('home')
     
     # HERO SECTION
-   
+    st.markdown('<section class="hero-section">', unsafe_allow_html=True)
     
     st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
     st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job with comprehensive evaluation and actionable insights.</p>', unsafe_allow_html=True)
@@ -691,7 +858,9 @@ def render_home_page():
     st.markdown('<h2 class="section-title">How To Use</h2>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    st.markdown('<div class="steps-container">', unsafe_allow_html=True)
+    # Container untuk step cards dengan grid layout
+    st.markdown('<div class="steps-grid-container">', unsafe_allow_html=True)
+    st.markdown('<div class="steps-grid">', unsafe_allow_html=True)
     
     steps = [
         ("1", "Upload Answer Video", "Upload your video answer for each interview question provided by the system."),
@@ -701,18 +870,18 @@ def render_home_page():
         ("5", "Improve Your Skills", "Use personalized recommendations to practice and enhance your interview performance.")
     ]
     
-    cols = st.columns(5)
-    for i, (num, title, desc) in enumerate(steps):
-        with cols[i]:
-            st.markdown(f"""
-            <div class="step-card">
-                <div class="step-number">{num}</div>
-                <h3 class="step-title">{title}</h3>
-                <p class="step-description">{desc}</p>
-            </div>
-            """, unsafe_allow_html=True)
+    # Menggunakan grid layout untuk step cards
+    for num, title, desc in steps:
+        st.markdown(f"""
+        <div class="step-card">
+            <div class="step-number">{num}</div>
+            <h3 class="step-title">{title}</h3>
+            <p class="step-description">{desc}</p>
+        </div>
+        """, unsafe_allow_html=True)
     
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)  # Close steps-grid
+    st.markdown('</div>', unsafe_allow_html=True)  # Close steps-grid-container
     
     # KEY FEATURES SECTION
     st.markdown('<h2 class="section-title">Key Features</h2>', unsafe_allow_html=True)
