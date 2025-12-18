@@ -631,9 +631,7 @@ def inject_global_css():
         transition: transform 0.3s ease;
     }
     
-    .feature-card:hover {
-        transform: translateY(-5px);
-    }
+    
     
     .feature-icon {
         font-size: 40px;
