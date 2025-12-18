@@ -297,7 +297,7 @@ def inject_global_css():
         box-shadow: 0 12px 35px rgba(0,0,0,0.15);
     }
     
-    /* 5. HOW IT WORKS SECTION */
+    /* 5. HOW IT WORKS SECTION - STEP CARDS */
     .section-title {
         font-size: 42px;
         font-weight: 800;
@@ -330,7 +330,7 @@ def inject_global_css():
         position: relative;
         transition: all 0.4s ease;
         border: 1px solid #f0f0f0;
-        flex: 0 1 auto;
+        flex: 0 0 auto;
     }
     
     .step-card:hover {
@@ -373,7 +373,7 @@ def inject_global_css():
     }
     
     /* Responsive design untuk step-card */
-    @media (max-width: 1200px) {
+    @media (max-width: 1400px) {
         .steps-container {
             gap: 35px;
             padding: 0 30px;
@@ -386,7 +386,7 @@ def inject_global_css():
         }
     }
     
-    @media (max-width: 992px) {
+    @media (max-width: 1200px) {
         .steps-container {
             gap: 30px;
         }
@@ -410,17 +410,29 @@ def inject_global_css():
         }
     }
     
+    @media (max-width: 992px) {
+        .steps-container {
+            gap: 25px;
+        }
+        
+        .step-card {
+            width: 220px;
+            min-height: 290px;
+            padding: 35px 20px 20px 20px;
+        }
+    }
+    
     @media (max-width: 768px) {
         .steps-container {
-            flex-direction: column;
-            align-items: center;
-            gap: 60px;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 40px;
             padding: 0 20px;
         }
         
         .step-card {
-            width: 100%;
-            max-width: 400px;
+            width: calc(50% - 20px);
+            max-width: none;
             min-height: auto;
             padding: 50px 30px 30px 30px;
         }
@@ -441,6 +453,21 @@ def inject_global_css():
             font-size: 16px;
             line-height: 1.7;
             padding: 0 10px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .steps-container {
+            flex-direction: column;
+            align-items: center;
+            gap: 60px;
+        }
+        
+        .step-card {
+            width: 100%;
+            max-width: 400px;
+            min-height: auto;
+            padding: 45px 25px 25px 25px;
         }
     }
     
@@ -837,15 +864,17 @@ def render_home_page():
         ("5", "Improve Your Skills", "Use personalized recommendations to practice and enhance your interview performance.")
     ]
     
-    # Menggunakan pendekatan flexbox yang lebih responsif
-    for num, title, desc in steps:
-        st.markdown(f"""
-        <div class="step-card">
-            <div class="step-number">{num}</div>
-            <h3 class="step-title">{title}</h3>
-            <p class="step-description">{desc}</p>
-        </div>
-        """, unsafe_allow_html=True)
+    # Membuat 5 kolom untuk 5 step card (layout horizontal)
+    cols = st.columns(5)
+    for i, (num, title, desc) in enumerate(steps):
+        with cols[i]:
+            st.markdown(f"""
+            <div class="step-card">
+                <div class="step-number">{num}</div>
+                <h3 class="step-title">{title}</h3>
+                <p class="step-description">{desc}</p>
+            </div>
+            """, unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
     
