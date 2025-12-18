@@ -1,3 +1,5 @@
+# app.py (versi dimodifikasi dengan form input kandidat)
+
 import streamlit as st
 import pandas as pd
 import json
@@ -6,6 +8,8 @@ import tempfile
 import sys
 import numpy as np
 import base64
+import uuid
+from datetime import datetime
 
 # Add current directory and 'models' to PATH
 sys.path.append(os.path.dirname(__file__))
@@ -49,6 +53,11 @@ if 'answers' not in st.session_state:
     st.session_state.answers = {}
 if 'results' not in st.session_state:
     st.session_state.results = None
+# Tambah session state untuk data kandidat
+if 'candidate_data' not in st.session_state:
+    st.session_state.candidate_data = None
+if 'interview_id' not in st.session_state:
+    st.session_state.interview_id = None
 
 # Constants
 TOTAL_QUESTIONS = 5
@@ -243,7 +252,6 @@ def inject_global_css():
     }
     
     /* 4. LANDING PAGE HERO SECTION */
- 
     
     .hero-section::before {
         content: '';
@@ -291,240 +299,156 @@ def inject_global_css():
         box-shadow: 0 12px 35px rgba(0,0,0,0.15);
     }
     
-    /* 5. HOW IT WORKS SECTION - STEP CARDS */
-.section-title {
-    font-size: 42px;
-    font-weight: 800;
-    text-align: center;
-    margin-bottom: 60px;
-    color: #000000;
-    letter-spacing: -0.5px;
-}
-
-.step-card-container {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-bottom: 80px;
-    padding: 0 20px;
-}
-
-.step-card-wrapper {
-    display: flex;
-    justify-content: space-between; /* Menggunakan space-between untuk distribusi merata */
-    width: 100%;
-    max-width: 1400px;
-    gap: 20px; /* Gap antar card */
-}
-
-.step-card {
-    background: white;
-    border-radius: 20px;
-    padding: 60px 25px 35px 25px; /* Atas lebih besar untuk number, bawah konsisten */
-    text-align: center;
-    width: 250px; /* Lebar tetap */
-    height: 320px; /* Tinggi tetap - SEMUA CARD SAMA TINGGI */
-    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-    position: relative;
-    transition: all 0.4s ease;
-    border: 1px solid #f0f0f0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start; /* Konten mulai dari atas */
-    flex: 0 0 auto; /* Tidak fleksibel, ukuran tetap */
-}
-
-.step-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.12);
-}
-
-.step-number {
-    position: absolute;
-    top: -25px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    font-weight: 700;
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-}
-
-.step-title {
-    font-size: 20px;
-    font-weight: 700;
-    margin: 0 0 15px 0; /* Margin atas dihapus karena sudah ada padding atas */
-    color: #000000;
-    line-height: 1.4;
-    text-align: center;
-    width: 100%;
-    min-height: 60px; /* Tinggi minimum untuk judul */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.step-description {
-    color: #666666;
-    font-size: 15px;
-    line-height: 1.6;
-    font-weight: 400;
-    text-align: center;
-    width: 100%;
-    flex-grow: 1; /* Deskripsi mengambil ruang yang tersisa */
-    display: flex;
-    align-items: center; /* Vertikal center untuk teks */
-    justify-content: center; /* Horizontal center untuk teks */
-    padding: 0 5px; /* Sedikit padding samping */
-}
-
-/* Responsive design untuk step-card */
-@media (max-width: 1400px) {
-    .step-card-wrapper {
-        gap: 15px;
+    /* 5. CANDIDATE FORM STYLING */
+    .candidate-form-container {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        margin: 40px auto;
+        max-width: 800px;
+        border: 1px solid #f0f0f0;
     }
     
-    .step-card {
-        width: 200px;
-        height: 300px;
-        padding: 55px 20px 30px 20px;
-    }
-}
-
-@media (max-width: 1200px) {
-    .step-card-wrapper {
-        flex-wrap: wrap; /* Allow wrapping jika tidak cukup space */
-        justify-content: center;
-        gap: 25px;
-        max-width: 1000px;
+    .candidate-form-title {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 30px;
+        color: #000000;
+        text-align: center;
     }
     
-    .step-card {
-        width: 180px;
-        height: 290px;
-        padding: 50px 15px 25px 15px;
+    .form-field {
+        margin-bottom: 25px;
     }
     
-    .step-title {
-        font-size: 18px;
-        min-height: 55px;
-    }
-    
-    .step-description {
-        font-size: 14px;
-    }
-}
-
-@media (max-width: 992px) {
-    .step-card-wrapper {
-        gap: 20px;
-    }
-    
-    .step-card {
-        width: 170px;
-        height: 280px;
-        padding: 45px 12px 20px 12px;
-    }
-    
-    .step-title {
-        font-size: 17px;
-        min-height: 50px;
-        margin: 0 0 12px 0;
-    }
-    
-    .step-description {
-        font-size: 13px;
-        line-height: 1.5;
-    }
-}
-
-@media (max-width: 768px) {
-    .step-card-container {
-        padding: 0 15px;
-    }
-    
-    .step-card-wrapper {
-        gap: 20px;
-        max-width: 600px;
-    }
-    
-    .step-card {
-        width: 160px;
-        height: 270px;
-        padding: 40px 10px 18px 10px;
-    }
-    
-    .step-number {
-        width: 45px;
-        height: 45px;
-        font-size: 20px;
-        top: -22px;
-    }
-    
-    .step-title {
+    .form-label {
         font-size: 16px;
-        min-height: 45px;
-        margin: 0 0 10px 0;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333333;
+        display: block;
     }
     
-    .step-description {
-        font-size: 13px;
-        line-height: 1.4;
+    .form-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: all 0.3s ease;
     }
-}
-
-@media (max-width: 640px) {
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #000000;
+        box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
+    }
+    
+    .info-card {
+        background: #f8f9ff;
+        border-left: 4px solid #667eea;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+    
+    /* 6. HOW IT WORKS SECTION - STEP CARDS */
+    .section-title {
+        font-size: 42px;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 60px;
+        color: #000000;
+        letter-spacing: -0.5px;
+    }
+    
+    .step-card-container {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 80px;
+        padding: 0 20px;
+    }
+    
     .step-card-wrapper {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 1400px;
+        gap: 20px;
+    }
+    
+    .step-card {
+        background: white;
+        border-radius: 20px;
+        padding: 60px 25px 35px 25px;
+        text-align: center;
+        width: 250px;
+        height: 320px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        position: relative;
+        transition: all 0.4s ease;
+        border: 1px solid #f0f0f0;
+        display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 50px; /* Gap lebih besar untuk mobile */
-        max-width: 400px;
+        justify-content: flex-start;
+        flex: 0 0 auto;
     }
     
-    .step-card {
-        width: 100%;
-        max-width: 300px;
-        height: auto; /* Biarkan tinggi otomatis di mobile */
-        min-height: 280px;
-        padding: 55px 25px 30px 25px;
+    .step-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.12);
     }
     
     .step-number {
+        position: absolute;
+        top: -25px;
+        left: 50%;
+        transform: translateX(-50%);
         width: 50px;
         height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-size: 22px;
-        top: -25px;
+        font-weight: 700;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
     }
     
     .step-title {
         font-size: 20px;
-        min-height: auto;
+        font-weight: 700;
         margin: 0 0 15px 0;
+        color: #000000;
+        line-height: 1.4;
+        text-align: center;
+        width: 100%;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
     .step-description {
+        color: #666666;
         font-size: 15px;
         line-height: 1.6;
+        font-weight: 400;
+        text-align: center;
+        width: 100%;
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 5px;
     }
-}
-
-@media (max-width: 480px) {
-    .step-card {
-        padding: 50px 20px 25px 20px;
-        max-width: 280px;
-        min-height: 260px;
-    }
-}
     
-    /* 6. FEATURES SECTION */
+    /* 7. FEATURES SECTION */
     .features-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -565,7 +489,7 @@ def inject_global_css():
         line-height: 1.5;
     }
     
-    /* 7. FOOTER */
+    /* 8. FOOTER */
     .custom-footer {
         background: #000000;
         color: white;
@@ -588,8 +512,7 @@ def inject_global_css():
         font-weight: 400;
     }
     
-    /* 8. METRIC CARDS FOR RESULTS - PERBAIKAN DI SINI */
-    /* Container untuk metric cards */
+    /* 9. METRIC CARDS FOR RESULTS */
     .metric-container {
         display: flex;
         justify-content: center;
@@ -603,7 +526,7 @@ def inject_global_css():
         width: 100%;
         max-width: 1400px;
         gap: 20px;
-        flex-wrap: nowrap; /* Tidak boleh wrap di desktop */
+        flex-wrap: nowrap;
     }
     
     .metric-card {
@@ -612,8 +535,8 @@ def inject_global_css():
         padding: 25px;
         box-shadow: 0 6px 25px rgba(0,0,0,0.06);
         border: 1px solid #f0f0f0;
-        flex: 1; /* Mengambil ruang yang sama */
-        min-width: 0; /* Agar tidak meledak */
+        flex: 1;
+        min-width: 0;
         min-height: 120px;
         display: flex;
         flex-direction: column;
@@ -640,7 +563,7 @@ def inject_global_css():
     .tempo-color { color: #f39c12; }
     .pause-color { color: #e74c3c; }
     
-    /* 9. INTERVIEW PAGE STYLING */
+    /* 10. INTERVIEW PAGE STYLING */
     .question-container {
         background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
         border-radius: 20px;
@@ -650,7 +573,29 @@ def inject_global_css():
         box-shadow: 0 10px 30px rgba(0,0,0,0.05);
     }
     
-    /* 10. RESPONSIVE DESIGN */
+    /* 11. CANDIDATE INFO BANNER */
+    .candidate-banner {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .candidate-name {
+        font-size: 24px;
+        font-weight: 700;
+    }
+    
+    .candidate-id {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+    
+    /* 12. RESPONSIVE DESIGN */
     @media (max-width: 1200px) {
         .main-content {
             padding-left: 30px !important;
@@ -658,11 +603,11 @@ def inject_global_css():
         }
         
         .metric-wrapper {
-            flex-wrap: wrap; /* Boleh wrap di tablet */
+            flex-wrap: wrap;
         }
         
         .metric-card {
-            flex: 0 0 calc(50% - 10px); /* 2 cards per row */
+            flex: 0 0 calc(50% - 10px);
             min-width: 250px;
         }
         
@@ -695,71 +640,25 @@ def inject_global_css():
             padding: 0 20px;
         }
         
-        .hero-section {
-            padding: 40px 0 60px 0;
+        .candidate-form-container {
+            padding: 25px;
+            margin: 20px auto;
         }
         
-        .section-title {
-            font-size: 32px;
+        .candidate-form-title {
+            font-size: 28px;
         }
         
-        .features-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .metric-wrapper {
-            flex-direction: column; /* Stack vertical di mobile */
-        }
-        
-        .metric-card {
-            width: 100%;
-            flex: 1 0 auto;
-        }
-        
-        .custom-footer {
+        .candidate-banner {
             flex-direction: column;
-            gap: 20px;
-            text-align: center;
-            padding: 30px 20px;
-        }
-        
-        .nav-buttons-container {
+            align-items: flex-start;
             gap: 10px;
-        }
-        
-        .navbar-btn {
-            min-width: 80px;
-            padding: 6px 16px;
-            font-size: 13px;
         }
     }
     
     @media (max-width: 480px) {
-        .main-content {
-            padding-left: 15px !important;
-            padding-right: 15px !important;
-        }
-        
-        .logo-text {
-            font-size: 20px;
-        }
-        
-        .hero-title {
-            font-size: 36px;
-        }
-        
-        .hero-subtitle {
-            font-size: 24px;
-        }
-        
-        .nav-buttons-container {
-            gap: 5px;
-        }
-        
-        .navbar-btn {
-            min-width: 70px;
-            padding: 5px 12px;
-            font-size: 12px;
+        .candidate-form-container {
+            padding: 20px;
         }
     }
     </style>
@@ -880,6 +779,90 @@ def close_navbar():
     """Close the navbar HTML structure."""
     st.markdown("</div>", unsafe_allow_html=True)
 
+def render_candidate_form():
+    """Render form untuk input data kandidat."""
+    inject_global_css()
+    render_navbar('home')
+    
+    st.markdown("""
+    <div class="candidate-form-container">
+        <h1 class="candidate-form-title">Candidate Information</h1>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Form untuk input data kandidat
+    with st.container():
+        col1, col2 = st.columns([3, 2])
+        
+        with col1:
+            st.markdown("### Personal Information")
+            st.markdown("Please fill in your details before starting the interview.")
+            
+            # Form input menggunakan Streamlit
+            with st.form("candidate_form"):
+                name = st.text_input("Full Name", placeholder="Enter your full name", help="Your name will appear on the interview report")
+                email = st.text_input("Email Address", placeholder="Enter your email address", help="We'll send the interview report to this email")
+                
+                submitted = st.form_submit_button("Start Interview", type="primary", use_container_width=True)
+                
+                if submitted:
+                    if not name.strip():
+                        st.error("Please enter your name")
+                        return
+                    if not email.strip() or "@" not in email:
+                        st.error("Please enter a valid email address")
+                        return
+                    
+                    # Generate interview ID
+                    interview_id = str(uuid.uuid4())[:8].upper()
+                    
+                    # Simpan data kandidat ke session state
+                    st.session_state.candidate_data = {
+                        'id': interview_id,
+                        'name': name.strip(),
+                        'email': email.strip(),
+                        'start_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    }
+                    st.session_state.interview_id = interview_id
+                    
+                    # Reset data interview
+                    st.session_state.answers = {}
+                    st.session_state.results = None
+                    st.session_state.current_q = 1
+                    
+                    # Redirect ke halaman interview
+                    next_page("interview")
+                    st.rerun()
+        
+        with col2:
+            st.markdown("### Information")
+            st.markdown("""
+            <div class="info-card">
+                <strong>Why we need your information:</strong>
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li>Personalize your interview experience</li>
+                    <li>Include your name in the final report</li>
+                    <li>Send the report to your email</li>
+                    <li>Track your interview sessions</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("""
+            <div class="info-card">
+                <strong>Privacy Assurance:</strong>
+                <p style="margin-top: 10px;">
+                    Your data is securely processed and will not be shared with third parties.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    # Tombol back
+    if st.button("Back to Home", use_container_width=True):
+        next_page('home')
+    
+    close_navbar()
+
 def render_home_page():
     """Render the fixed landing page."""
     inject_global_css()
@@ -888,16 +871,12 @@ def render_home_page():
     render_navbar('home')
     
     # HERO SECTION
-
-    
     st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
     st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job with comprehensive evaluation and actionable insights.</p>', unsafe_allow_html=True)
     
+    # Ganti tombol "Start Interview Now" untuk redirect ke form kandidat
     if st.button("Start Interview Now", key="hero_start", type="primary"):
-        st.session_state.answers = {}
-        st.session_state.results = None
-        st.session_state.current_q = 1
-        next_page("interview")
+        next_page("candidate_form")
     
     st.markdown('</section>', unsafe_allow_html=True)
     
@@ -906,19 +885,18 @@ def render_home_page():
     st.markdown('<h2 class="section-title">How To Use</h2>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Container untuk step cards dengan flex layout yang lebih baik
+    # Container untuk step cards
     st.markdown('<div class="step-card-container">', unsafe_allow_html=True)
     st.markdown('<div class="step-card-wrapper">', unsafe_allow_html=True)
     
     steps = [
-        ("1", "Upload Answer Video", "Upload your video answer for each interview question provided by the system."),
-        ("2", "AI Processing", "The AI processes video into transcript and analyzes non-verbal communication aspects."),
-        ("3", "Semantic Scoring", "Your answer is compared to ideal rubric criteria for content relevance scoring."),
-        ("4", "Get Instant Feedback", "Receive final score, detailed rationale, and communication analysis immediately."),
-        ("5", "Improve Your Skills", "Use personalized recommendations to practice and enhance your interview performance.")
+        ("1", "Candidate Registration", "Enter your personal information before starting the interview session."),
+        ("2", "Upload Answer Video", "Upload your video answer for each interview question provided by the system."),
+        ("3", "AI Processing", "The AI processes video into transcript and analyzes non-verbal communication aspects."),
+        ("4", "Semantic Scoring", "Your answer is compared to ideal rubric criteria for content relevance scoring."),
+        ("5", "Get Instant Feedback", "Receive final score, detailed rationale, and communication analysis immediately.")
     ]
     
-    # Menggunakan st.columns dengan 5 kolom untuk desktop
     cols = st.columns(5)
     for i, (num, title, desc) in enumerate(steps):
         with cols[i]:
@@ -930,8 +908,8 @@ def render_home_page():
             </div>
             """, unsafe_allow_html=True)
     
-    st.markdown('</div>', unsafe_allow_html=True)  # Close step-card-wrapper
-    st.markdown('</div>', unsafe_allow_html=True)  # Close step-card-container
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # KEY FEATURES SECTION
     st.markdown('<h2 class="section-title">Key Features</h2>', unsafe_allow_html=True)
@@ -977,7 +955,6 @@ def render_home_page():
 def render_info_page():
     """Render the information page."""
     inject_global_css()
-    # Gunakan render_navbar biasa untuk halaman info
     render_navbar('info')
     
     st.title("📚 Application Information")
@@ -1024,10 +1001,24 @@ def render_info_page():
     close_navbar()
 
 def render_interview_page():
-    """Render the interview page."""
+    """Render the interview page dengan banner kandidat."""
     inject_global_css()
-    # Gunakan render_navbar biasa untuk halaman interview
     render_navbar('interview')
+    
+    # Tampilkan informasi kandidat jika ada
+    if st.session_state.candidate_data:
+        st.markdown(f"""
+        <div class="candidate-banner">
+            <div>
+                <div class="candidate-name">Candidate: {st.session_state.candidate_data['name']}</div>
+                <div class="candidate-id">Interview ID: {st.session_state.candidate_data['id']}</div>
+            </div>
+            <div style="text-align: right;">
+                <div>Email: {st.session_state.candidate_data['email']}</div>
+                <div>Started: {st.session_state.candidate_data['start_time']}</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.title(f"🎯 Interview Question {st.session_state.current_q} of {TOTAL_QUESTIONS}")
     
@@ -1108,10 +1099,24 @@ def render_interview_page():
     close_navbar()
 
 def render_processing_page():
-    """Render the processing page."""
+    """Render the processing page dengan informasi kandidat."""
     inject_global_css()
-    # Gunakan render_navbar biasa untuk halaman processing
     render_navbar('processing')
+    
+    # Tampilkan informasi kandidat jika ada
+    if st.session_state.candidate_data:
+        st.markdown(f"""
+        <div style="background: #f0f2ff; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between;">
+                <div>
+                    <strong>Candidate:</strong> {st.session_state.candidate_data['name']}
+                </div>
+                <div>
+                    <strong>Interview ID:</strong> {st.session_state.candidate_data['id']}
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.title("⚙️ Analysis Process")
     st.info("Please wait, this process may take a few minutes depending on video duration.")
@@ -1206,12 +1211,30 @@ def render_processing_page():
     close_navbar()
 
 def render_final_summary_page():
-    """Render the final results page."""
+    """Render the final results page dengan data kandidat."""
     inject_global_css()
-    # Gunakan render_navbar biasa untuk halaman final summary
     render_navbar('final_summary')
     
-    st.title("🏆 Final Evaluation Report")
+    # Header dengan informasi kandidat
+    if st.session_state.candidate_data:
+        candidate = st.session_state.candidate_data
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                    color: white; padding: 25px; border-radius: 15px; margin-bottom: 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 style="margin: 0; font-size: 28px;">Interview Report</h2>
+                    <p style="margin: 5px 0 0 0; opacity: 0.9;">Final Evaluation Summary</p>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 18px; font-weight: bold;">{candidate['name']}</div>
+                    <div style="font-size: 14px; opacity: 0.9;">ID: {candidate['id']}</div>
+                    <div style="font-size: 14px; opacity: 0.9;">Date: {candidate['start_time']}</div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
     st.markdown("---")
     
     if not st.session_state.results:
@@ -1252,11 +1275,10 @@ def render_final_summary_page():
     # Display metrics
     st.subheader("📊 Performance Summary")
     
-    # PERBAIKAN DI SINI: Menggunakan st.columns untuk metric cards horizontal
+    # Tampilkan metric cards
     st.markdown('<div class="metric-container">', unsafe_allow_html=True)
     st.markdown('<div class="metric-wrapper">', unsafe_allow_html=True)
     
-    # Metric cards dalam satu baris horizontal
     cols = st.columns(4)
     
     with cols[0]:
@@ -1291,8 +1313,8 @@ def render_final_summary_page():
         </div>
         """, unsafe_allow_html=True)
     
-    st.markdown('</div>', unsafe_allow_html=True)  # Close metric-wrapper
-    st.markdown('</div>', unsafe_allow_html=True)  # Close metric-container
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # Evaluation and Recommendations
     st.markdown("---")
@@ -1356,7 +1378,7 @@ def render_final_summary_page():
             with col_a:
                 st.metric("Rubric Score", f"{res['final_score']}/4")
             with col_b:
-                st.metric("Confidents", f"{res['confidence_score']}%")
+                st.metric("Confidence", f"{res['confidence_score']}%")
             with col_c:
                 st.metric("Non-Verbal Analysis", res['non_verbal'].get('qualitative_summary', 'N/A'))
             
@@ -1374,15 +1396,41 @@ def render_final_summary_page():
     
     with col_btn1:
         if st.button("🔄 New Interview", use_container_width=True, type="primary"):
-            st.session_state.clear()
-            next_page('home')
+            # Reset data interview tapi pertahankan data kandidat jika mau
+            st.session_state.answers = {}
+            st.session_state.results = None
+            st.session_state.current_q = 1
+            next_page('candidate_form')
     
     with col_btn2:
         if st.button("📥 Download Report", use_container_width=True):
-            st.info("Download feature coming soon!")
+            # Tambahkan data kandidat ke report
+            if st.session_state.candidate_data:
+                report_data = {
+                    'candidate': st.session_state.candidate_data,
+                    'results': st.session_state.results,
+                    'metrics': {
+                        'avg_score': avg_score,
+                        'avg_confidence': avg_confidence,
+                        'avg_tempo': avg_tempo,
+                        'total_pause': total_pause
+                    }
+                }
+                # Konversi ke JSON untuk download
+                json_report = json.dumps(report_data, indent=2, ensure_ascii=False)
+                st.download_button(
+                    label="Download Report as JSON",
+                    data=json_report,
+                    file_name=f"interview_report_{st.session_state.candidate_data['id']}.json",
+                    mime="application/json",
+                    use_container_width=True
+                )
+            else:
+                st.info("Download feature requires candidate information.")
     
     with col_btn3:
         if st.button("🏠 Back to Home", use_container_width=True):
+            st.session_state.clear()
             next_page('home')
     
     close_navbar()
@@ -1392,6 +1440,8 @@ if st.session_state.page == 'home':
     render_home_page()
 elif st.session_state.page == 'info':
     render_info_page()
+elif st.session_state.page == 'candidate_form':
+    render_candidate_form()
 elif st.session_state.page == 'interview':
     render_interview_page()
 elif st.session_state.page == 'processing':
