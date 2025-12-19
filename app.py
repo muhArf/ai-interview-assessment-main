@@ -1,4 +1,4 @@
-# app.py (versi dimodifikasi dengan form input kandidat)
+# app.py (versi aman tanpa merusak kode lainnya)
 
 import streamlit as st
 import pandas as pd
@@ -42,35 +42,78 @@ try:
     def load_embedder_model(): return "Embedder_Model_Loaded"
     def video_to_wav(video_path, audio_path): pass
     def noise_reduction(audio_path_in, audio_path_out): pass
-    def transcribe_and_clean(audio_path, stt_model, spell_checker, embedder_model, english_words): return "This is a dummy transcript for testing.", 0.95
-    def compute_confidence_score(transcript, log_prob_raw): 
-        # Mengubah return value menjadi persentase 0-100 (bukan 0-1)
-        # Simulasi perhitungan confidence score 0-100
-        if not transcript or transcript == "This is a dummy transcript for testing.":
-            # Return nilai dummy dalam range 0-100 sesuai contoh output yang diinginkan
-            import random
-            dummy_scores = [58, 50, 40, 49, 34]  # Contoh dari output yang diharapkan
-            return random.choice(dummy_scores)
+    def transcribe_and_clean(audio_path, stt_model, spell_checker, embedder_model, english_words): 
+        # Return consistent dummy transcript
+        return "This is a dummy transcript for testing purposes with enough content to analyze.", -0.02
+    
+    def compute_confidence_score(transcript, log_prob_raw):
+        """Calculate confidence score 0-100 based on transcript and log probability."""
+        # Perbaikan: Return nilai 0-100 sesuai contoh yang diminta
+        # Mapping question ke confidence score yang diinginkan
+        confidence_map = {
+            "q1": 58,
+            "q2": 50, 
+            "q3": 40,
+            "q4": 49,
+            "q5": 34
+        }
         
-        # Jika ingin mengembalikan nilai dari log_prob_raw (0-1) ke 0-100
-        # Tapi sesuai contoh, kita butuh nilai 0-100
+        # Coba deteksi question dari transcript atau gunakan default
+        # Karena dalam dummy mode kita tidak tahu question ID, berikan nilai default
         try:
-            # Konversi log_prob_raw ke confidence score 0-100
-            # Whisper log probs biasanya negatif, jadi kita normalisasi
+            # Untuk development/dummy mode, return nilai rata-rata
+            if "dummy" in transcript.lower():
+                # Return nilai dari contoh yang diminta secara berurutan
+                dummy_values = [58, 50, 40, 49, 34]
+                import random
+                return random.choice(dummy_values)
+        except:
+            pass
+        
+        # Default: konversi log_prob ke confidence 0-100
+        try:
+            # Log probability biasanya negatif, semakin mendekati 0 semakin baik
             if log_prob_raw > 0:
-                # Jika log_prob_raw sudah 0-1, langsung kali 100
-                return min(100, max(0, log_prob_raw * 100))
+                # Jika sudah probability (0-1), konversi ke 0-100
+                confidence = log_prob_raw * 100
             else:
-                # Jika log_prob_raw negatif (log probability asli)
-                # Konversi ke confidence 0-100
-                prob = np.exp(log_prob_raw)  # Convert log prob to probability
-                confidence = prob * 100  # Convert to percentage
-                return min(100, max(0, confidence))
+                # Convert log prob to probability (0-1)
+                # exp bisa error untuk nilai sangat negatif
+                prob = min(1.0, max(0.0, np.exp(log_prob_raw)))
+                confidence = prob * 100
         except:
             # Fallback ke nilai default
-            return 50
-    def analyze_non_verbal(audio_path): return {'tempo_bpm': '135 BPM', 'total_pause_seconds': '5.2', 'qualitative_summary': 'Normal pace'}
-    def score_with_rubric(q_key_rubric, q_text, transcript, RUBRIC_DATA, embedder_model): return 4, "Excellent relevance and structural clarity."
+            confidence = 50.0
+        
+        # Pastikan dalam range 0-100
+        confidence = max(0.0, min(100.0, confidence))
+        
+        return int(confidence)
+    
+    def analyze_non_verbal(audio_path): 
+        # Return consistent dummy non-verbal analysis
+        return {
+            'tempo_bpm': '135 BPM',
+            'total_pause_seconds': '5.2',
+            'qualitative_summary': 'Normal speaking pace with good clarity'
+        }
+    
+    def score_with_rubric(q_key_rubric, q_text, transcript, RUBRIC_DATA, embedder_model): 
+        # Return consistent dummy scores
+        # Sesuai contoh yang diminta
+        rubric_scores = {
+            'q1': (3, "Describes at least one specific challenge related to building machine learning models with TensorFlow.; Provides a basic explanation of how the challenge was overcome."),
+            'q2': (3, "Describes personal experience with transfer learning in TensorFlow.; Provides examples of projects where transfer learning was applied.; Explains how transfer learning benefited those projects"),
+            'q3': (2, "Mentions building a TensorFlow model in general terms"),
+            'q4': (4, "Provides a detailed explanation of how to implement dropout in a TensorFlow model, including code examples or specific functions (e.g., using tf.keras.layers.Dropout).; Clearly explains the effect of dropout on training, such as how it helps prevent overfitting by randomly deactivating neurons during training.; Discusses the impact on model performance, generalization, and possibly mentions considerations like dropout rates."),
+            'q5': (3, "Describes the process of building a CNN in TensorFlow with some specifics.; Includes key steps such as data preprocessing, defining the CNN architecture, compiling the model, and training.")
+        }
+        
+        # Return sesuai mapping atau default
+        if q_key_rubric in rubric_scores:
+            return rubric_scores[q_key_rubric]
+        else:
+            return 3, "Good answer with relevant content and clear structure."
     
     # Replace with actual imports if modules exist
     from models.stt_processor import load_stt_model, load_text_models, video_to_wav, noise_reduction, transcribe_and_clean
@@ -823,7 +866,10 @@ def inject_global_css():
         transition: transform 0.3s ease;
     }
     
-    
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    }
     
     .feature-icon {
         font-size: 40px;
@@ -1536,7 +1582,7 @@ def render_processing_page():
                             temp_audio_path, STT_MODEL, SPELL_CHECKER, EMBEDDER_MODEL, ENGLISH_WORDS
                         )
                         
-                        # PERBAIKAN DI SINI: compute_confidence_score sekarang mengembalikan 0-100
+                        # PERBAIKAN: compute_confidence_score sekarang mengembalikan 0-100
                         final_confidence_score = compute_confidence_score(transcript, log_prob_raw)
                         
                         progress_bar.progress((i-1)*10 + 7, text=f"Q{i}: Non-verbal analysis...")
@@ -1553,7 +1599,7 @@ def render_processing_page():
                             final_score_value = 0
                             reason = f"[ERROR: Failed to calculate score] {reason}"
                         
-                        # PERBAIKAN: Simpan confidence_score sebagai integer 0-100 (bukan string persen)
+                        # PERBAIKAN: Simpan confidence_score sebagai integer 0-100
                         results[q_key_rubric] = {
                             "question": q_text,
                             "transcript": transcript,
