@@ -1552,7 +1552,7 @@ def render_processing_page():
 
 # --- Add function to generate PDF report ---
 def generate_pdf_report(candidate_data, results, metrics):
-    """Generate professional PDF report with layout like the image."""
+    """Generate professional PDF report dengan layout seperti gambar."""
     pdf = FPDF()
     pdf.add_page()
     
@@ -1565,45 +1565,45 @@ def generate_pdf_report(candidate_data, results, metrics):
     
     # Candidate Information
     pdf.set_font("Arial", 'B', 12)
-    pdf.cell(0, 10, "Candidate Information", 0, 1)
+    pdf.cell(0, 10, "Candidate Information", 0, 1, 'L')
     pdf.set_font("Arial", '', 10)
     
-    pdf.cell(60, 8, f"Name: {candidate_data.get('name', 'N/A')}", 0, 0)
-    pdf.cell(60, 8, f"ID: {candidate_data.get('id', 'N/A')}", 0, 1)
-    pdf.cell(60, 8, f"Email: {candidate_data.get('email', 'N/A')}", 0, 0)
-    pdf.cell(60, 8, f"Interview Date: {candidate_data.get('start_time', 'N/A')}", 0, 1)
+    pdf.cell(60, 8, f"Name: {candidate_data.get('name', 'N/A')}", 0, 0, 'L')
+    pdf.cell(60, 8, f"ID: {candidate_data.get('id', 'N/A')}", 0, 1, 'L')
+    pdf.cell(60, 8, f"Email: {candidate_data.get('email', 'N/A')}", 0, 0, 'L')
+    pdf.cell(60, 8, f"Interview Date: {candidate_data.get('start_time', 'N/A')}", 0, 1, 'L')
     
     pdf.ln(10)
     
     # Overall Metrics
     pdf.set_font("Arial", 'B', 12)
-    pdf.cell(0, 10, "Overall Performance Metrics", 0, 1)
+    pdf.cell(0, 10, "Overall Performance Metrics", 0, 1, 'L')
     pdf.set_font("Arial", '', 10)
     
-    pdf.cell(45, 8, f"Average Score: {metrics.get('avg_score', 0):.2f}/4", 0, 0)
-    pdf.cell(45, 8, f"Confidence: {metrics.get('avg_confidence', 0):.2f}%", 0, 1)
-    pdf.cell(45, 8, f"Tempo: {metrics.get('avg_tempo', 0):.1f} BPM", 0, 0)
-    pdf.cell(45, 8, f"Total Pause: {metrics.get('total_pause', 0):.1f}s", 0, 1)
+    pdf.cell(45, 8, f"Average Score: {metrics.get('avg_score', 0):.2f}/4", 0, 0, 'L')
+    pdf.cell(45, 8, f"Confidence: {metrics.get('avg_confidence', 0):.2f}%", 0, 1, 'L')
+    pdf.cell(45, 8, f"Tempo: {metrics.get('avg_tempo', 0):.1f} BPM", 0, 0, 'L')
+    pdf.cell(45, 8, f"Total Pause: {metrics.get('total_pause', 0):.1f}s", 0, 1, 'L')
     
     pdf.ln(15)
     
     # Detailed Results per Question
     pdf.set_font("Arial", 'B', 12)
-    pdf.cell(0, 10, "Detailed Question Analysis", 0, 1)
+    pdf.cell(0, 10, "Detailed Question Analysis", 0, 1, 'L')
     
     for q_key, result in results.items():
         q_num = q_key.replace('q', '')
         
         # Question header
         pdf.set_font("Arial", 'B', 11)
-        pdf.cell(0, 8, f"Question {q_num}", 0, 1)
+        pdf.cell(0, 8, f"Question {q_num}", 0, 1, 'L')
         
         # Question text
         pdf.set_font("Arial", 'I', 9)
         question_text = result.get('question', 'N/A')
         if len(question_text) > 80:
             question_text = question_text[:80] + "..."
-        pdf.multi_cell(0, 5, f"Q: {question_text}", 0, 1)
+        pdf.multi_cell(0, 5, f"Q: {question_text}", 0, 'L')
         
         # Metrics for this question
         pdf.set_font("Arial", '', 9)
@@ -1611,46 +1611,46 @@ def generate_pdf_report(candidate_data, results, metrics):
         # Score with visual indicator
         score = result.get('final_score', 0)
         score_text = f"Rubric: {score}/4"
-        pdf.cell(40, 6, score_text, 0, 0)
+        pdf.cell(40, 6, score_text, 0, 0, 'L')
         
         # Confidence
         confidence = result.get('confidence_score', '0%')
-        pdf.cell(40, 6, f"Confidence: {confidence}", 0, 1)
+        pdf.cell(40, 6, f"Confidence: {confidence}", 0, 1, 'L')
         
-        # Non-verbal metrics (IMPROVED PART)
+        # Non-verbal metrics
         non_verbal = result.get('non_verbal', {})
         
         # Extract tempo and pause from non_verbal
         tempo_str = non_verbal.get('tempo_bpm', '0')
         pause_str = non_verbal.get('total_pause_seconds', '0')
         
-        # If format "140 per minute", extract number only
+        # Jika format "140 per minute", ekstrak angka saja
         if 'per minute' in str(tempo_str):
             tempo_value = str(tempo_str).split(' ')[0]
         else:
             tempo_value = str(tempo_str).split(' ')[0] if str(tempo_str).split(' ') else '0'
         
-        # If format "50 seconds", extract number only
+        # Jika format "50 seconds", ekstrak angka saja
         if 'seconds' in str(pause_str):
             pause_value = str(pause_str).split(' ')[0]
         else:
             pause_value = str(pause_str).split(' ')[0] if str(pause_str).split(' ') else '0'
         
-        # Display in PDF
-        pdf.cell(40, 6, f"Tempo: {tempo_value} BPM", 0, 0)
-        pdf.cell(40, 6, f"Pause: {pause_value} seconds", 0, 1)
+        # Tampilkan di PDF
+        pdf.cell(40, 6, f"Tempo: {tempo_value} BPM", 0, 0, 'L')
+        pdf.cell(40, 6, f"Pause: {pause_value} seconds", 0, 1, 'L')
         
         # Reason/rationale
         pdf.set_font("Arial", '', 8)
         reason = result.get('rubric_reason', 'No rationale provided.')
-        pdf.multi_cell(0, 4, f"Reason: {reason}", 0, 1)
+        pdf.multi_cell(0, 4, f"Reason: {reason}", 0, 'L')
         
         # Transcript preview
         pdf.set_font("Arial", 'I', 8)
         transcript = result.get('transcript', 'No transcript available.')
         if len(transcript) > 100:
             transcript = transcript[:100] + "..."
-        pdf.multi_cell(0, 4, f"Transcript: {transcript}", 0, 1)
+        pdf.multi_cell(0, 4, f"Transcript: {transcript}", 0, 'L')
         
         pdf.ln(5)
         pdf.line(10, pdf.get_y(), 200, pdf.get_y())
