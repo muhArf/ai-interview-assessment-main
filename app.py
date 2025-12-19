@@ -1,4 +1,4 @@
-# app.py (versi dengan laporan invoice style + auto print)
+# app.py (versi dimodifikasi dengan form input kandidat)
 
 import streamlit as st
 import pandas as pd
@@ -14,8 +14,16 @@ from datetime import datetime
 def get_local_time_indonesia():
     """Get current time in Indonesia timezone."""
     try:
+        # Simple manual adjustment for Indonesia timezones
         from datetime import datetime, timedelta
         utc_now = datetime.utcnow()
+        
+        # Choose your timezone:
+        # WIB (UTC+7): Jakarta, Sumatra, Java, West Kalimantan
+        # WITA (UTC+8): Bali, Nusa Tenggara, South/East Kalimantan, Sulawesi
+        # WIT (UTC+9): Maluku, Papua
+        
+        # Default to WIB
         local_time = utc_now + timedelta(hours=7)
         return local_time
     except:
@@ -27,6 +35,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'models'))
 
 # Import logic from models folder
 try:
+    # IMPORTANT: Ensure files in models/ folder are correctly implemented
+    # Dummy imports if modules in models/ folder are not fully implemented
     def load_stt_model(): return "STT_Model_Loaded"
     def load_text_models(): return None, None, None
     def load_embedder_model(): return "Embedder_Model_Loaded"
@@ -34,9 +44,10 @@ try:
     def noise_reduction(audio_path_in, audio_path_out): pass
     def transcribe_and_clean(audio_path, stt_model, spell_checker, embedder_model, english_words): return "This is a dummy transcript for testing.", 0.95
     def compute_confidence_score(transcript, log_prob_raw): return 0.95
-    def analyze_non_verbal(audio_path): return {'tempo_bpm': '140 per minute', 'total_pause_seconds': '50 seconds', 'qualitative_summary': 'Normal pace'}
-    def score_with_rubric(q_key_rubric, q_text, transcript, RUBRIC_DATA, embedder_model): return 4, "Candidate meets rubric 4 because dfg, candidate appears confident, but candidate has"
+    def analyze_non_verbal(audio_path): return {'tempo_bpm': '135 BPM', 'total_pause_seconds': '5.2', 'qualitative_summary': 'Normal pace'}
+    def score_with_rubric(q_key_rubric, q_text, transcript, RUBRIC_DATA, embedder_model): return 4, "Excellent relevance and structural clarity."
     
+    # Replace with actual imports if modules exist
     from models.stt_processor import load_stt_model, load_text_models, video_to_wav, noise_reduction, transcribe_and_clean
     from models.scoring_logic import load_embedder_model, compute_confidence_score, score_with_rubric
     from models.nonverbal_analysis import analyze_non_verbal
@@ -60,6 +71,7 @@ if 'answers' not in st.session_state:
     st.session_state.answers = {}
 if 'results' not in st.session_state:
     st.session_state.results = None
+# Tambah session state untuk data kandidat
 if 'candidate_data' not in st.session_state:
     st.session_state.candidate_data = None
 if 'interview_id' not in st.session_state:
@@ -78,6 +90,7 @@ def next_page(page_name):
 def get_models():
     """Load all heavy models (only once)."""
     try:
+        # IMPORTANT: Replace model paths according to your actual implementation
         stt_model = load_stt_model()
         embedder_model = load_embedder_model()
         
@@ -99,6 +112,7 @@ STT_MODEL, EMBEDDER_MODEL, SPELL_CHECKER, ENGLISH_WORDS = get_models()
 def load_questions():
     """Load questions from questions.json."""
     try:
+        # Dummy data if questions.json doesn't exist
         if not os.path.exists('questions.json'):
              return {
                  "1": {"question": "Tell me about a time you handled a conflict in a team."},
@@ -118,6 +132,7 @@ def load_questions():
 def load_rubric_data():
     """Load rubric data from rubric_data.json."""
     try:
+        # Dummy data if rubric_data.json doesn't exist
         if not os.path.exists('rubric_data.json'):
              return {
                  "q1": {"rubric": "STAR method used, clear resolution.", "keywords": ["conflict", "resolution", "STAR"]},
@@ -141,6 +156,7 @@ def inject_global_css():
     """Inject custom CSS for all pages."""
     st.markdown("""
     <style>
+    /* 1. GLOBAL STREAMLIT RESET */
     .stApp {
         padding-top: 0 !important;
         padding-bottom: 0 !important;
@@ -151,12 +167,13 @@ def inject_global_css():
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
     
+    /* Hide default Streamlit elements */
     #MainMenu {visibility: hidden !important;}
     footer {visibility: hidden !important;}
     header {visibility: hidden !important;}
     .stDeployButton {display: none !important;}
     
-    /* NAVBAR */
+    /* 2. FIXED NAVBAR CONTAINER - FULLY IN HTML */
     .navbar-container {
         position: fixed;
         top: 0;
@@ -180,6 +197,7 @@ def inject_global_css():
         align-items: center;
     }
     
+    /* Brand/Logo - Pure HTML */
     .navbar-brand {
         display: flex;
         align-items: center;
@@ -200,12 +218,14 @@ def inject_global_css():
         text-decoration: none;
     }
     
+    /* Navigation buttons container - Pure HTML */
     .nav-buttons-container {
         display: flex;
         gap: 15px;
         align-items: center;
     }
     
+    /* Custom navbar button styling - Pure HTML */
     .navbar-btn {
         border-radius: 25px;
         border: 2px solid #000000;
@@ -234,11 +254,13 @@ def inject_global_css():
         border-color: #000000;
     }
     
+    /* Active button state */
     .navbar-btn.active {
         background: #000000;
         color: white;
     }
     
+    /* 3. MAIN CONTENT PADDING (to account for fixed navbar) */
     .main-content {
         padding-top: 50px !important;
         padding-left: 40px !important;
@@ -247,7 +269,18 @@ def inject_global_css():
         margin: 0 auto !important;
     }
     
-    /* HERO SECTION */
+    /* 4. LANDING PAGE HERO SECTION */
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+    
     .hero-title {
         font-size: 56px;
         font-weight: 800;
@@ -284,7 +317,531 @@ def inject_global_css():
         box-shadow: 0 12px 35px rgba(0,0,0,0.15);
     }
     
-    /* METRIC CARDS */
+    /* 5. CANDIDATE FORM STYLING */
+    .candidate-form-container {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        margin: 40px auto;
+        max-width: 800px;
+        border: 1px solid #f0f0f0;
+    }
+    
+    .candidate-form-title {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 30px;
+        color: #000000;
+        text-align: center;
+    }
+    
+    .form-field {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333333;
+        display: block;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #000000;
+        box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
+    }
+    
+    .info-card {
+        background: #f8f9ff;
+        border-left: 4px solid #667eea;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+    
+    /* 6. HOW IT WORKS SECTION - STEP CARDS - FIX TEXT SIZE */
+    
+    .section-title {
+        font-size: 42px;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 60px;
+        color: #000000;
+        letter-spacing: -0.5px;
+    }
+
+    .step-card-container {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 80px;
+        padding: 0 20px;
+    }
+
+    .step-card-wrapper {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        width: 100%;
+        max-width: 1400px;
+        gap: 20px;
+        justify-items: center;
+    }
+
+    /* STEP CARD - FIXED HEIGHT WITH BETTER TEXT CONTROL */
+    .step-card {
+        background: white;
+        border-radius: 20px;
+        padding: 60px 20px 30px 20px; /* Kurangi padding horizontal */
+        text-align: center;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        position: relative;
+        transition: all 0.4s ease;
+        border: 1px solid #f0f0f0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between; /* Gunakan space-between */
+        height: 320px;
+        width: 100%;
+        max-width: 240px; /* Lebih kecil dari sebelumnya */
+        box-sizing: border-box;
+    }
+    
+    .step-number {
+        position: absolute;
+        top: -25px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        font-weight: 700;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        flex-shrink: 0;
+    }
+    
+    .step-title {
+        font-size: 18px; /* Lebih kecil dari awal */
+        font-weight: 700;
+        margin: 0 0 15px 0;
+        color: #000000;
+        line-height: 1.3; /* Line height lebih ketat */
+        text-align: center;
+        width: 100%;
+        height: 50px; /* Fixed height */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        padding: 0 5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2; /* Maksimal 2 baris */
+        -webkit-box-orient: vertical;
+        flex-shrink: 0;
+    }
+    
+    .step-description {
+        color: #666666;
+        font-size: 14px; /* Lebih kecil dari awal */
+        line-height: 1.5;
+        font-weight: 400;
+        text-align: center;
+        width: 100%;
+        flex-grow: 1;
+        display: flex;
+        align-items: flex-start; /* Start dari atas */
+        justify-content: flex-start;
+        padding: 0 5px;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 4; /* Maksimal 4 baris */
+        -webkit-box-orient: vertical;
+    }
+    
+         /* 12. RESPONSIVE DESIGN - BETTER TEXT SIZING */
+    @media (max-width: 1200px) {
+        .main-content {
+            padding-left: 30px !important;
+            padding-right: 30px !important;
+        }
+        
+        .metric-wrapper {
+            flex-wrap: wrap;
+        }
+        
+        .metric-card {
+            flex: 0 0 calc(50% - 10px);
+            min-width: 250px;
+        }
+        
+        .features-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        /* STEP CARDS - 4 cards per row */
+        .step-card-wrapper {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        
+        .step-card {
+            max-width: 220px;
+            height: 300px;
+            padding: 50px 15px 25px 15px;
+        }
+        
+        .step-title {
+            font-size: 17px;
+            height: 45px;
+            -webkit-line-clamp: 2;
+        }
+        
+        .step-description {
+            font-size: 13px;
+            -webkit-line-clamp: 4;
+        }
+    }
+    
+    @media (max-width: 992px) {
+        /* STEP CARDS - 3 cards per row */
+        .step-card-wrapper {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        .step-card {
+            max-width: 200px;
+            height: 280px;
+            padding: 45px 12px 20px 12px;
+        }
+        
+        .step-number {
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            top: -20px;
+        }
+        
+        .step-title {
+            font-size: 16px;
+            height: 40px;
+            -webkit-line-clamp: 2;
+            margin-bottom: 10px;
+        }
+        
+        .step-description {
+            font-size: 12.5px;
+            line-height: 1.4;
+            -webkit-line-clamp: 4;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .main-content {
+            padding-top: 30px !important;
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+        }
+        
+        .navbar-content {
+            padding: 0 20px;
+        }
+        
+        .logo-text {
+            font-size: 24px;
+        }
+        
+        .hero-title {
+            font-size: 42px;
+        }
+        
+        .hero-subtitle {
+            font-size: 28px;
+            padding: 0 20px;
+        }
+        
+        .candidate-form-container {
+            padding: 25px;
+            margin: 20px auto;
+        }
+        
+        .candidate-form-title {
+            font-size: 28px;
+        }
+        
+        .candidate-banner {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        /* STEP CARDS - 2 cards per row */
+        .step-card-wrapper {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .step-card {
+            max-width: 180px;
+            height: 260px;
+            padding: 40px 10px 20px 10px;
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+            top: -18px;
+        }
+        
+        .step-title {
+            font-size: 15px;
+            height: 35px;
+            -webkit-line-clamp: 2;
+            margin-bottom: 8px;
+        }
+        
+        .step-description {
+            font-size: 12px;
+            line-height: 1.4;
+            -webkit-line-clamp: 4;
+        }
+        
+        .section-title {
+            font-size: 36px;
+            margin-bottom: 40px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .candidate-form-container {
+            padding: 20px;
+        }
+        
+        /* STEP CARDS - 2 cards per row dengan lebih compact */
+        .step-card-container {
+            padding: 0 10px;
+        }
+        
+        .step-card-wrapper {
+            gap: 12px;
+        }
+        
+        .step-card {
+            max-width: 160px;
+            height: 240px;
+            padding: 35px 8px 15px 8px;
+        }
+        
+        .step-title {
+            font-size: 14px;
+            height: 32px;
+            -webkit-line-clamp: 2;
+            margin-bottom: 6px;
+            padding: 0 3px;
+        }
+        
+        .step-description {
+            font-size: 11.5px;
+            line-height: 1.3;
+            -webkit-line-clamp: 4;
+            padding: 0 3px;
+        }
+        
+        .section-title {
+            font-size: 32px;
+            margin-bottom: 40px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        /* STEP CARDS - 1 card per row di sangat kecil */
+        .step-card-wrapper {
+            grid-template-columns: 1fr;
+            max-width: 260px;
+            margin: 0 auto;
+            gap: 30px;
+        }
+        
+        .step-card {
+            max-width: 240px;
+            height: 250px;
+            padding: 40px 15px 25px 15px;
+        }
+        
+        .step-number {
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            top: -20px;
+        }
+        
+        .step-title {
+            font-size: 16px;
+            height: 40px;
+            -webkit-line-clamp: 2;
+            margin-bottom: 10px;
+            padding: 0 10px;
+        }
+        
+        .step-description {
+            font-size: 13px;
+            line-height: 1.4;
+            -webkit-line-clamp: 4;
+            padding: 0 10px;
+        }
+        
+        .hero-title {
+            font-size: 36px;
+        }
+        
+        .hero-subtitle {
+            font-size: 24px;
+        }
+    }
+    
+    /* FIX UNTUK ZOOM - TEXT SIZE CONTROL */
+    @media (max-width: 400px) {
+        .step-card-wrapper {
+            grid-template-columns: 1fr !important;
+            max-width: 240px !important;
+        }
+        
+        .step-card {
+            max-width: 220px !important;
+            height: 230px !important;
+            padding: 35px 12px 20px 12px !important;
+        }
+        
+        .step-title {
+            font-size: 15px !important;
+            height: 35px !important;
+        }
+        
+        .step-description {
+            font-size: 12px !important;
+        }
+    }
+    
+    /* Untuk layar sangat kecil */
+    @media (max-width: 360px) {
+        .step-card {
+            max-width: 200px !important;
+            height: 220px !important;
+            padding: 30px 10px 15px 10px !important;
+        }
+        
+        .step-number {
+            width: 40px !important;
+            height: 40px !important;
+            font-size: 18px !important;
+            top: -18px !important;
+        }
+        
+        .step-title {
+            font-size: 14px !important;
+            height: 32px !important;
+            padding: 0 5px !important;
+        }
+        
+        .step-description {
+            font-size: 11.5px !important;
+            padding: 0 5px !important;
+        }
+    }
+    
+    /* Fix untuk line clamping */
+    .step-title, .step-description {
+        display: -webkit-box;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    /* 7. FEATURES SECTION */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+        margin: 60px 0;
+        padding: 0 20px;
+    }
+    
+    .feature-card {
+        background: white;
+        border-radius: 16px;
+        padding: 35px 25px;
+        text-align: center;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+        border: 1px solid #f0f0f0;
+        transition: transform 0.3s ease;
+    }
+    
+    
+    
+    .feature-icon {
+        font-size: 40px;
+        margin-bottom: 20px;
+    }
+    
+    .feature-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: #000000;
+    }
+    
+    .feature-desc {
+        color: #666666;
+        font-size: 15px;
+        line-height: 1.5;
+    }
+    
+    /* 8. FOOTER */
+    .custom-footer {
+        background: #000000;
+        color: white;
+        padding: 40px 50px;
+        margin-top: 100px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .footer-brand {
+        font-size: 24px;
+        font-weight: 700;
+        color: white;
+    }
+    
+    .footer-copyright {
+        font-size: 14px;
+        opacity: 0.7;
+        font-weight: 400;
+    }
+    
+    /* 9. METRIC CARDS FOR RESULTS */
     .metric-container {
         display: flex;
         justify-content: center;
@@ -335,7 +892,17 @@ def inject_global_css():
     .tempo-color { color: #f39c12; }
     .pause-color { color: #e74c3c; }
     
-    /* CANDIDATE BANNER */
+    /* 10. INTERVIEW PAGE STYLING */
+    .question-container {
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 40px;
+        border-left: 6px solid #667eea;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+    
+    /* 11. CANDIDATE INFO BANNER */
     .candidate-banner {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
@@ -356,17 +923,90 @@ def inject_global_css():
         font-size: 14px;
         opacity: 0.9;
     }
+    
+    /* 12. RESPONSIVE DESIGN */
+    @media (max-width: 1200px) {
+        .main-content {
+            padding-left: 30px !important;
+            padding-right: 30px !important;
+        }
+        
+        .metric-wrapper {
+            flex-wrap: wrap;
+        }
+        
+        .metric-card {
+            flex: 0 0 calc(50% - 10px);
+            min-width: 250px;
+        }
+        
+        .features-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .main-content {
+            padding-top: 30px !important;
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+        }
+        
+        .navbar-content {
+            padding: 0 20px;
+        }
+        
+        .logo-text {
+            font-size: 24px;
+        }
+        
+        .hero-title {
+            font-size: 42px;
+        }
+        
+        .hero-subtitle {
+            font-size: 28px;
+            padding: 0 20px;
+        }
+        
+        .candidate-form-container {
+            padding: 25px;
+            margin: 20px auto;
+        }
+        
+        .candidate-form-title {
+            font-size: 28px;
+        }
+        
+        .candidate-banner {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .candidate-form-container {
+            padding: 20px;
+        }
+    }
     </style>
     """, unsafe_allow_html=True)
 
 def create_navbar_html(current_page='home'):
     """Create navbar HTML dengan logo dan tombol."""
     
+    # Cek apakah logo file ada
     logo_exists = os.path.exists("assets/seiai.png")
     
+    # Generate HTML untuk navbar
     html_parts = []
+    
+    # Navbar container
     html_parts.append('<div class="navbar-container">')
     html_parts.append('  <div class="navbar-content">')
+    
+    # Logo section
     html_parts.append('    <div class="navbar-brand">')
     if logo_exists:
         try:
@@ -379,11 +1019,17 @@ def create_navbar_html(current_page='home'):
         html_parts.append('      <div class="logo-text">SEI-AI</div>')
     html_parts.append('    </div>')
     
+    # Navigation buttons
     html_parts.append('    <div class="nav-buttons-container">')
+    
+    # Home button
     home_active = "active" if current_page == 'home' else ""
-    info_active = "active" if current_page == 'info' else ""
     html_parts.append(f'      <a href="#" class="navbar-btn {home_active}" id="nav-home"> Home</a>')
+    
+    # Info button
+    info_active = "active" if current_page == 'info' else ""
     html_parts.append(f'      <a href="#" class="navbar-btn {info_active}" id="nav-info"> Info</a>')
+    
     html_parts.append('    </div>')
     html_parts.append('  </div>')
     html_parts.append('</div>')
@@ -394,27 +1040,37 @@ def inject_navbar_js():
     """Inject JavaScript untuk navbar secara terpisah."""
     st.markdown("""
     <script>
+    // Setup navbar buttons
     function setupNavbar() {
+        // Home button
         const homeBtn = document.getElementById('nav-home');
         if (homeBtn) {
             homeBtn.onclick = function(e) {
                 e.preventDefault();
+                // Simpan ke session storage untuk Streamlit
                 sessionStorage.setItem('nav_to', 'home');
+                // Trigger page reload
                 window.location.reload();
             };
         }
         
+        // Info button
         const infoBtn = document.getElementById('nav-info');
         if (infoBtn) {
             infoBtn.onclick = function(e) {
                 e.preventDefault();
+                // Simpan ke session storage untuk Streamlit
                 sessionStorage.setItem('nav_to', 'info');
+                // Trigger page reload
                 window.location.reload();
             };
         }
     }
     
+    // Jalankan setup saat DOM siap
     document.addEventListener('DOMContentLoaded', setupNavbar);
+    
+    // Juga jalankan setelah timeout untuk memastikan
     setTimeout(setupNavbar, 100);
     </script>
     """, unsafe_allow_html=True)
@@ -424,16 +1080,26 @@ def inject_navbar_js():
 def render_navbar(current_page='home'):
     """Render fixed navbar dengan logo dan tombol sepenuhnya dalam HTML."""
     
+    # Buat HTML navbar
     navbar_html = create_navbar_html(current_page)
+    
+    # Render navbar HTML
     st.markdown(navbar_html, unsafe_allow_html=True)
+    
+    # Inject JavaScript secara terpisah
     inject_navbar_js()
+    
+    # Buka main content
     st.markdown('<div class="main-content">', unsafe_allow_html=True)
     
+    # Cek session storage untuk navigasi
     try:
+        # Gunakan JavaScript untuk membaca session storage
         if 'nav_to' in st.session_state:
             nav_to = st.session_state.nav_to
             if nav_to and nav_to in ['home', 'info']:
                 next_page(nav_to)
+                # Clear setelah digunakan
                 del st.session_state.nav_to
     except:
         pass
@@ -448,11 +1114,12 @@ def render_candidate_form():
     render_navbar('home')
     
     st.markdown("""
-    <div style="background: white; border-radius: 20px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); margin: 40px auto; max-width: 800px; border: 1px solid #f0f0f0;">
-        <h1 style="font-size: 32px; font-weight: 700; margin-bottom: 30px; color: #000000; text-align: center;">Candidate Information</h1>
+    <div class="candidate-form-container">
+        <h1 class="candidate-form-title">Candidate Information</h1>
     </div>
     """, unsafe_allow_html=True)
     
+    # Form untuk input data kandidat
     with st.container():
         col1, col2 = st.columns([3, 2])
         
@@ -460,6 +1127,7 @@ def render_candidate_form():
             st.markdown("### Personal Information")
             st.markdown("Please fill in your details before starting the interview.")
             
+            # Form input menggunakan Streamlit
             with st.form("candidate_form"):
                 name = st.text_input("Full Name", placeholder="Enter your full name", help="Your name will appear on the interview report")
                 email = st.text_input("Email Address", placeholder="Enter your email address", help="We'll send the interview report to this email")
@@ -474,34 +1142,48 @@ def render_candidate_form():
                         st.error("Please enter a valid email address")
                         return
                     
+                    # Generate interview ID
                     interview_id = str(uuid.uuid4())[:8].upper()
                     
+                    # FIX: Get local time for Indonesia (WIB/WITA/WIT)
                     try:
+                        # Method 1: Try to get system time (works if server is in Indonesia)
                         now_local = get_local_time_indonesia()
+                        
+                        # Method 2: If system time is UTC, adjust manually
+                        # Add 7 hours for WIB (UTC+7), 8 for WITA (UTC+8), 9 for WIT (UTC+9)
+                        # Uncomment line below if you need to adjust manually:
+                        # from datetime import timedelta
+                        # now_local = datetime.now() + timedelta(hours=7)  # WIB (UTC+7)
+                        
                     except Exception as e:
                         now_local = get_local_time_indonesia()
                     
+                    # Format the date
                     start_time = now_local.strftime("%Y-%m-%d %H:%M:%S")
                     
+                    # Simpan data kandidat ke session state
                     st.session_state.candidate_data = {
                         'id': interview_id,
                         'name': name.strip(),
                         'email': email.strip(),
-                        'start_time': start_time
+                        'start_time': start_time  # Use the corrected local time
                     }
                     st.session_state.interview_id = interview_id
                     
+                    # Reset data interview
                     st.session_state.answers = {}
                     st.session_state.results = None
                     st.session_state.current_q = 1
                     
+                    # Redirect ke halaman interview
                     next_page("interview")
                     st.rerun()
         
         with col2:
             st.markdown("### Information")
             st.markdown("""
-            <div style="background: #f8f9ff; border-left: 4px solid #667eea; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <div class="info-card">
                 <strong>Why we need your information:</strong>
                 <ul style="margin-top: 10px; padding-left: 20px;">
                     <li>Personalize your interview experience</li>
@@ -511,7 +1193,17 @@ def render_candidate_form():
                 </ul>
             </div>
             """, unsafe_allow_html=True)
+            
+            st.markdown("""
+            <div class="info-card">
+                <strong>Privacy Assurance:</strong>
+                <p style="margin-top: 10px;">
+                    Your data is securely processed and will not be shared with third parties.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
     
+    # Tombol back
     if st.button("Back to Home", use_container_width=True):
         next_page('home')
     
@@ -520,13 +1212,89 @@ def render_candidate_form():
 def render_home_page():
     """Render the fixed landing page."""
     inject_global_css()
+    
+    # Render navbar dengan semua elemen dalam HTML
     render_navbar('home')
     
+    # HERO SECTION
     st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
     st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job with comprehensive evaluation and actionable insights.</p>', unsafe_allow_html=True)
     
+    # Ganti tombol "Start Interview Now" untuk redirect ke form kandidat
     if st.button("Start Interview Now", key="hero_start", type="primary"):
         next_page("candidate_form")
+    
+    st.markdown('</section>', unsafe_allow_html=True)
+    
+    # HOW IT WORKS SECTION
+    st.markdown('<div class="text-center" style="margin-bottom: 40px;">', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-title">How To Use</h2>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Container untuk step cards
+    st.markdown('<div class="step-card-container">', unsafe_allow_html=True)
+    st.markdown('<div class="step-card-wrapper">', unsafe_allow_html=True)
+    
+    steps = [
+        ("1", "Candidate Registration", "Enter your personal information before starting the interview session."),
+        ("2", "Upload Answer Video", "Upload your video answer for each interview question provided by the system."),
+        ("3", "AI Processing", "The AI processes video into transcript and analyzes non-verbal communication aspects."),
+        ("4", "Semantic Scoring", "Your answer is compared to ideal rubric criteria for content relevance scoring."),
+        ("5", "Get Instant Feedback", "Receive final score, detailed rationale, and communication analysis immediately.")
+    ]
+    
+    cols = st.columns(5)
+    for i, (num, title, desc) in enumerate(steps):
+        with cols[i]:
+            st.markdown(f"""
+            <div class="step-card">
+                <div class="step-number">{num}</div>
+                <h3 class="step-title">{title}</h3>
+                <p class="step-description">{desc}</p>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # KEY FEATURES SECTION
+    st.markdown('<h2 class="section-title">Key Features</h2>', unsafe_allow_html=True)
+    
+    st.markdown('<div class="features-grid">', unsafe_allow_html=True)
+    
+    features = [
+        ("🎤", "Advanced Speech-to-Text", "High-accuracy audio transcription using Whisper AI model"),
+        ("📊", "Comprehensive Analysis", "Evaluate content, structure, and non-verbal aspects simultaneously"),
+        ("⚡", "Real-time Feedback", "Instant evaluation results and personalized recommendations"),
+        ("🎯", "Rubric-based Scoring", "Objective assessment against industry-standard interview rubrics"),
+        ("📈", "Progress Tracking", "Monitor improvement across multiple practice sessions"),
+        ("🔒", "Privacy Focused", "Your data is processed securely and not stored permanently")
+    ]
+    
+    # Create two rows of features
+    for i in range(0, len(features), 3):
+        cols = st.columns(3)
+        for j in range(3):
+            if i + j < len(features):
+                icon, title, desc = features[i + j]
+                with cols[j]:
+                    st.markdown(f"""
+                    <div class="feature-card">
+                        <div class="feature-icon">{icon}</div>
+                        <h3 class="feature-title">{title}</h3>
+                        <p class="feature-desc">{desc}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # FOOTER
+    st.markdown("""
+    <div class="custom-footer">
+        <div class="footer-brand">SEI-AI Interviewer</div>
+        <div class="footer-copyright">Copyright © 2025 SEI-AI Interviewer. All Rights Reserved.</div>
+    </div>
+    """, unsafe_allow_html=True)
     
     close_navbar()
 
@@ -554,8 +1322,25 @@ def render_info_page():
     * **Format**: MP4, MOV, or WebM
     * **Maximum Size**: 50MB
     * **Audio Quality**: Ensure clear speech with minimal background noise
+    
+    #### Compatibility
+    * **Browser**: Latest versions of Chrome, Firefox, Safari
+    * **Device**: Desktop, Tablet, Smartphone
+    * **Operating Systems**: Windows, macOS, Linux, Android, iOS
+    
+    ### Data Security
+    * All videos are processed in real-time
+    * No permanent data storage
+    * Local processing where possible
+    
+    ### Support
+    For technical assistance or questions:
+    * Email: support@sei-ai.com
+    * Phone: +1 (555) 123-4567
+    * Hours: Monday-Friday, 9:00 AM - 5:00 PM EST
     """)
     
+    # Tombol Back to Home menggunakan Streamlit
     if st.button("🏠 Back to Home", type="primary"):
         next_page('home')
     
@@ -566,6 +1351,7 @@ def render_interview_page():
     inject_global_css()
     render_navbar('interview')
     
+    # Tampilkan informasi kandidat jika ada
     if st.session_state.candidate_data:
         st.markdown(f"""
         <div class="candidate-banner">
@@ -597,6 +1383,7 @@ def render_interview_page():
 
     st.markdown("### 📝 Question:")
     st.info(f"**{question_text}**")
+    st.markdown('</div>', unsafe_allow_html=True)
     
     st.markdown("---")
     
@@ -604,6 +1391,7 @@ def render_interview_page():
     
     current_uploaded_file_data = st.session_state.answers.get(q_id_str)
     
+    # --- File Upload Logic ---
     with col_upload:
         uploaded_file = None
         
@@ -637,6 +1425,7 @@ def render_interview_page():
         else:
             st.warning("Please upload your answer video to continue.")
     
+    # --- Navigation Controls ---
     with col_control:
         is_ready = st.session_state.answers.get(q_id_str) is not None
         
@@ -660,6 +1449,7 @@ def render_processing_page():
     inject_global_css()
     render_navbar('processing')
     
+    # Tampilkan informasi kandidat jika ada
     if st.session_state.candidate_data:
         st.markdown(f"""
         <div style="background: #f0f2ff; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
@@ -742,7 +1532,7 @@ def render_processing_page():
                             "transcript": transcript,
                             "final_score": final_score_value,
                             "rubric_reason": reason,
-                            "confidence_score": f"{final_confidence_score*100:.2f}%",
+                            "confidence_score": f"{final_confidence_score*100:.2f}",
                             "non_verbal": non_verbal_res
                         }
                         
@@ -765,573 +1555,6 @@ def render_processing_page():
             return
     
     close_navbar()
-
-# --- Fungsi untuk generate Print-Ready HTML Report ---
-def generate_invoice_report(candidate_data, results, metrics):
-    """Generate professional invoice-style report with auto-print."""
-    from datetime import datetime
-    
-    # Format tanggal yang lebih baik
-    interview_date = candidate_data.get('start_time', 'N/A')
-    report_date = datetime.now().strftime("%B %d, %Y")
-    
-    # Hitung total score
-    total_score = sum(int(res['final_score']) for res in results.values())
-    max_score = len(results) * 4
-    
-    html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Interview Assessment Report - {candidate_data.get('name', 'Candidate')}</title>
-        <style>
-            @media print {{
-                @page {{
-                    size: A4;
-                    margin: 20mm;
-                }}
-                body {{
-                    margin: 0;
-                    padding: 0;
-                    background: white !important;
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                }}
-                .no-print {{
-                    display: none !important;
-                }}
-                .page-break {{
-                    page-break-before: always;
-                }}
-            }}
-            
-            @media screen {{
-                body {{
-                    background: #f5f5f5;
-                    padding: 20px;
-                }}
-                .report-container {{
-                    max-width: 210mm;
-                    margin: 0 auto;
-                    box-shadow: 0 0 30px rgba(0,0,0,0.1);
-                }}
-            }}
-            
-            body {{
-                font-family: 'Georgia', 'Times New Roman', serif;
-                line-height: 1.6;
-                color: #333;
-                margin: 0;
-                padding: 0;
-            }}
-            
-            .report-container {{
-                background: white;
-                min-height: 297mm;
-                position: relative;
-            }}
-            
-            /* HEADER STYLE */
-            .header {{
-                padding: 40px 50px 30px 50px;
-                border-bottom: 3px double #2c3e50;
-                position: relative;
-            }}
-            
-            .company-info {{
-                float: left;
-                width: 60%;
-            }}
-            
-            .company-name {{
-                font-size: 32px;
-                font-weight: bold;
-                color: #2c3e50;
-                margin: 0 0 5px 0;
-                letter-spacing: 1px;
-            }}
-            
-            .company-tagline {{
-                font-size: 14px;
-                color: #7f8c8d;
-                font-style: italic;
-                margin: 0;
-            }}
-            
-            .report-info {{
-                float: right;
-                text-align: right;
-                width: 35%;
-            }}
-            
-            .report-title {{
-                font-size: 24px;
-                font-weight: bold;
-                color: #2c3e50;
-                margin: 0 0 15px 0;
-                text-transform: uppercase;
-                letter-spacing: 2px;
-            }}
-            
-            .report-id {{
-                font-size: 14px;
-                color: #7f8c8d;
-                margin: 5px 0;
-            }}
-            
-            .report-date {{
-                font-size: 14px;
-                color: #7f8c8d;
-                margin: 5px 0;
-            }}
-            
-            /* CANDIDATE INFO STYLE */
-            .candidate-section {{
-                padding: 30px 50px;
-                background: #f8f9fa;
-                margin: 20px 50px;
-                border-radius: 8px;
-                border-left: 5px solid #2c3e50;
-            }}
-            
-            .section-title {{
-                font-size: 18px;
-                font-weight: bold;
-                color: #2c3e50;
-                margin-bottom: 15px;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-                border-bottom: 2px solid #eee;
-                padding-bottom: 8px;
-            }}
-            
-            .info-grid {{
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
-            }}
-            
-            .info-item {{
-                margin-bottom: 10px;
-            }}
-            
-            .info-label {{
-                font-weight: bold;
-                color: #7f8c8d;
-                font-size: 13px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                margin-bottom: 3px;
-            }}
-            
-            .info-value {{
-                font-size: 16px;
-                color: #2c3e50;
-            }}
-            
-            /* SUMMARY METRICS */
-            .summary-section {{
-                padding: 0 50px 30px 50px;
-            }}
-            
-            .metrics-grid {{
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 20px;
-                margin-top: 20px;
-            }}
-            
-            .metric-box {{
-                text-align: center;
-                padding: 25px 15px;
-                border-radius: 8px;
-                border: 2px solid #eee;
-                background: white;
-                position: relative;
-                box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-            }}
-            
-            .metric-value {{
-                font-size: 32px;
-                font-weight: bold;
-                color: #2c3e50;
-                margin-bottom: 5px;
-                font-family: 'Arial', sans-serif;
-            }}
-            
-            .metric-label {{
-                font-size: 12px;
-                color: #7f8c8d;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-                margin-bottom: 8px;
-            }}
-            
-            .metric-note {{
-                font-size: 11px;
-                color: #95a5a6;
-                font-style: italic;
-                margin-top: 5px;
-            }}
-            
-            /* QUESTION DETAILS */
-            .questions-section {{
-                padding: 30px 50px;
-            }}
-            
-            .question-card {{
-                border: 1px solid #eee;
-                border-radius: 8px;
-                margin-bottom: 25px;
-                overflow: hidden;
-                background: white;
-                box-shadow: 0 3px 15px rgba(0,0,0,0.05);
-            }}
-            
-            .question-header {{
-                background: linear-gradient(to right, #f8f9fa, #e9ecef);
-                padding: 20px;
-                border-bottom: 2px solid #dee2e6;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }}
-            
-            .question-title {{
-                font-size: 18px;
-                font-weight: bold;
-                color: #2c3e50;
-                margin: 0;
-            }}
-            
-            .question-score {{
-                background: #2c3e50;
-                color: white;
-                padding: 8px 20px;
-                border-radius: 20px;
-                font-weight: bold;
-                font-size: 16px;
-            }}
-            
-            .question-body {{
-                padding: 25px;
-            }}
-            
-            .question-text {{
-                font-size: 16px;
-                color: #34495e;
-                margin-bottom: 20px;
-                padding: 15px;
-                background: #f8f9fa;
-                border-radius: 5px;
-                border-left: 4px solid #3498db;
-                font-style: italic;
-            }}
-            
-            .metrics-row {{
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 15px;
-                margin-bottom: 25px;
-            }}
-            
-            .metric-small {{
-                text-align: center;
-                padding: 15px 10px;
-                background: #f8f9fa;
-                border-radius: 6px;
-                border: 1px solid #e9ecef;
-            }}
-            
-            .metric-small-title {{
-                font-weight: bold;
-                color: #7f8c8d;
-                font-size: 12px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                margin-bottom: 5px;
-            }}
-            
-            .metric-small-value {{
-                font-size: 18px;
-                font-weight: bold;
-                color: #2c3e50;
-                font-family: 'Arial', sans-serif;
-            }}
-            
-            .evaluation-box {{
-                background: #e8f4fc;
-                padding: 20px;
-                border-radius: 6px;
-                margin-bottom: 20px;
-                border-left: 4px solid #3498db;
-            }}
-            
-            .evaluation-title {{
-                font-weight: bold;
-                color: #2c3e50;
-                margin-bottom: 10px;
-                font-size: 14px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }}
-            
-            .transcript-box {{
-                background: #f8f9fa;
-                padding: 20px;
-                border-radius: 6px;
-                border: 1px solid #e9ecef;
-                font-family: 'Courier New', monospace;
-                font-size: 13px;
-                line-height: 1.5;
-                max-height: 150px;
-                overflow-y: auto;
-                white-space: pre-wrap;
-                word-wrap: break-word;
-            }}
-            
-            /* FOOTER */
-            .footer {{
-                padding: 30px 50px;
-                border-top: 3px double #2c3e50;
-                margin-top: 40px;
-                text-align: center;
-                color: #7f8c8d;
-                font-size: 12px;
-            }}
-            
-            .footer-note {{
-                font-style: italic;
-                margin-top: 10px;
-                font-size: 11px;
-            }}
-            
-            .signature-section {{
-                margin-top: 40px;
-                padding-top: 20px;
-                border-top: 1px solid #eee;
-            }}
-            
-            .signature-line {{
-                width: 200px;
-                border-top: 1px solid #7f8c8d;
-                margin: 30px auto 10px auto;
-            }}
-            
-            .signature-label {{
-                text-align: center;
-                font-size: 12px;
-                color: #7f8c8d;
-            }}
-            
-            /* PRINT BUTTON */
-            .print-button {{
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                background: #2c3e50;
-                color: white;
-                padding: 12px 24px;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                font-weight: bold;
-                z-index: 1000;
-                box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-            }}
-            
-            .print-button:hover {{
-                background: #34495e;
-            }}
-            
-            .clearfix::after {{
-                content: "";
-                clear: both;
-                display: table;
-            }}
-        </style>
-        <script>
-            function autoPrint() {{
-                window.print();
-                setTimeout(function() {{
-                    window.close();
-                }}, 1000);
-            }}
-            
-            window.onload = function() {{
-                setTimeout(autoPrint, 500);
-            }};
-        </script>
-    </head>
-    <body>
-        <button class="print-button no-print" onclick="window.print()">🖨️ Print Report</button>
-        
-        <div class="report-container">
-            <!-- HEADER -->
-            <div class="header clearfix">
-                <div class="company-info">
-                    <h1 class="company-name">SEI-AI INTERVIEW SYSTEM</h1>
-                    <p class="company-tagline">Artificial Intelligence Powered Interview Assessment</p>
-                </div>
-                <div class="report-info">
-                    <h2 class="report-title">ASSESSMENT REPORT</h2>
-                    <p class="report-id"><strong>Report ID:</strong> {candidate_data.get('id', 'N/A')}</p>
-                    <p class="report-date"><strong>Date:</strong> {report_date}</p>
-                </div>
-            </div>
-            
-            <!-- CANDIDATE INFORMATION -->
-            <div class="candidate-section">
-                <div class="section-title">Candidate Information</div>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-label">Full Name</div>
-                        <div class="info-value">{candidate_data.get('name', 'N/A')}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Interview ID</div>
-                        <div class="info-value">{candidate_data.get('id', 'N/A')}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Email Address</div>
-                        <div class="info-value">{candidate_data.get('email', 'N/A')}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Interview Date</div>
-                        <div class="info-value">{interview_date}</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- PERFORMANCE SUMMARY -->
-            <div class="summary-section">
-                <div class="section-title">Performance Summary</div>
-                <div class="metrics-grid">
-                    <div class="metric-box">
-                        <div class="metric-value">{metrics.get('avg_score', 0):.2f}<span style="font-size: 16px; color: #95a5a6;">/4.0</span></div>
-                        <div class="metric-label">Average Score</div>
-                        <div class="metric-note">Content Quality</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-value">{metrics.get('avg_confidence', 0):.1f}<span style="font-size: 16px; color: #95a5a6;">%</span></div>
-                        <div class="metric-label">Confidence Level</div>
-                        <div class="metric-note">Transcript Accuracy</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-value">{metrics.get('avg_tempo', 0):.0f}</div>
-                        <div class="metric-label">Speaking Tempo</div>
-                        <div class="metric-note">Words per minute</div>
-                    </div>
-                    <div class="metric-box">
-                        <div class="metric-value">{metrics.get('total_pause', 0):.1f}<span style="font-size: 16px; color: #95a5a6;">s</span></div>
-                        <div class="metric-label">Total Pauses</div>
-                        <div class="metric-note">Speaking rhythm</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- QUESTION DETAILS -->
-            <div class="questions-section">
-                <div class="section-title">Detailed Question Analysis</div>
-    """
-    
-    for q_key, result in results.items():
-        q_num = q_key.replace('q', '')
-        
-        # Extract tempo and pause
-        non_verbal = result.get('non_verbal', {})
-        tempo_str = non_verbal.get('tempo_bpm', '0')
-        pause_str = non_verbal.get('total_pause_seconds', '0')
-        
-        # Clean tempo
-        if 'per minute' in str(tempo_str):
-            tempo_value = str(tempo_str).split(' ')[0]
-        else:
-            tempo_value = str(tempo_str).split(' ')[0] if str(tempo_str).split(' ') else '0'
-        
-        # Clean pause
-        if 'seconds' in str(pause_str):
-            pause_value = str(pause_str).split(' ')[0]
-        else:
-            pause_value = str(pause_str).split(' ')[0] if str(pause_str).split(' ') else '0'
-        
-        html += f"""
-                <div class="question-card">
-                    <div class="question-header">
-                        <div class="question-title">Question {q_num}</div>
-                        <div class="question-score">{result.get('final_score', 0)}/4</div>
-                    </div>
-                    <div class="question-body">
-                        <div class="question-text">"{result.get('question', 'N/A')}"</div>
-                        
-                        <div class="metrics-row">
-                            <div class="metric-small">
-                                <div class="metric-small-title">Confidence</div>
-                                <div class="metric-small-value">{result.get('confidence_score', '0%')}</div>
-                            </div>
-                            <div class="metric-small">
-                                <div class="metric-small-title">Tempo</div>
-                                <div class="metric-small-value">{tempo_value} BPM</div>
-                            </div>
-                            <div class="metric-small">
-                                <div class="metric-small-title">Pause</div>
-                                <div class="metric-small-value">{pause_value}s</div>
-                            </div>
-                            <div class="metric-small">
-                                <div class="metric-small-title">Delivery</div>
-                                <div class="metric-small-value">{non_verbal.get('qualitative_summary', 'N/A')[:15]}...</div>
-                            </div>
-                        </div>
-                        
-                        <div class="evaluation-box">
-                            <div class="evaluation-title">Evaluation</div>
-                            <div>{result.get('rubric_reason', 'No rationale provided.')}</div>
-                        </div>
-                        
-                        <div style="margin-top: 20px;">
-                            <div class="evaluation-title">Transcript</div>
-                            <div class="transcript-box">{result.get('transcript', 'No transcript available.')}</div>
-                        </div>
-                    </div>
-                </div>
-        """
-    
-    html += f"""
-            </div>
-            
-            <!-- FOOTER -->
-            <div class="footer">
-                <div style="margin-bottom: 20px;">
-                    <p><strong>Overall Assessment:</strong> {total_score}/{max_score} total points achieved</p>
-                </div>
-                
-                <div class="signature-section">
-                    <div class="signature-line"></div>
-                    <div class="signature-label">SEI-AI Interview System</div>
-                </div>
-                
-                <div class="footer-note">
-                    <p>This report was automatically generated by the SEI-AI Interview Assessment System.</p>
-                    <p>Generated on: {datetime.now().strftime("%B %d, %Y at %H:%M:%S")}</p>
-                    <p>Confidential Document - For authorized use only</p>
-                </div>
-            </div>
-        </div>
-        
-        <script>
-            // Auto-print after page loads
-            window.addEventListener('load', function() {{
-                setTimeout(function() {{
-                    window.print();
-                }}, 1000);
-            }});
-        </script>
-    </body>
-    </html>
-    """
-    
-    return html.encode('utf-8')
 
 def render_final_summary_page():
     """Render the final results page dengan data kandidat."""
@@ -1369,36 +1592,20 @@ def render_final_summary_page():
     # Calculate metrics
     try:
         all_scores = [int(res['final_score']) for res in st.session_state.results.values()]
-        all_confidence = [float(res['confidence_score'].replace('%', '')) 
+        all_confidence = [float(res['confidence_score'].split(' ')[0].replace('%', '')) 
                          for res in st.session_state.results.values()]
         
-        # Extract tempo and pause
         all_tempo = []
         all_pause = []
         for res in st.session_state.results.values():
-            non_verbal = res['non_verbal']
-            
-            # Extract tempo
-            tempo_str = non_verbal.get('tempo_bpm', '0')
-            if 'per minute' in str(tempo_str):
-                tempo_value = str(tempo_str).split(' ')[0]
-            else:
-                tempo_value = str(tempo_str).split(' ')[0] if str(tempo_str).split(' ') else '0'
-            
-            # Extract pause
-            pause_str = non_verbal.get('total_pause_seconds', '0')
-            if 'seconds' in str(pause_str):
-                pause_value = str(pause_str).split(' ')[0]
-            else:
-                pause_value = str(pause_str).split(' ')[0] if str(pause_str).split(' ') else '0'
-            
+            tempo_str = res['non_verbal'].get('tempo_bpm', '0').split(' ')[0]
+            pause_str = res['non_verbal'].get('total_pause_seconds', '0').split(' ')[0]
             try:
-                all_tempo.append(float(tempo_value))
+                all_tempo.append(float(tempo_str))
             except ValueError:
                 all_tempo.append(0)
-            
             try:
-                all_pause.append(float(pause_value))
+                all_pause.append(float(pause_str))
             except ValueError:
                 all_pause.append(0)
         
@@ -1439,8 +1646,8 @@ def render_final_summary_page():
     with cols[2]:
         st.markdown(f"""
         <div class="metric-card">
-            <div class="metric-value tempo-color">{avg_tempo:.1f} BPM</div>
-            <div class="metric-label">Average Tempo</div>
+            <div class="metric-value tempo-color">{avg_tempo:.1f}</div>
+            <div class="metric-label">Average Tempo (BPM)</div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -1455,65 +1662,95 @@ def render_final_summary_page():
     st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
+    # Evaluation and Recommendations
+    st.markdown("---")
+    st.subheader("💡 Objective Evaluation & Action Plan")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("### Performance Conclusion")
+        if avg_score >= 3.5:
+            st.success("**Excellent Performance!** Content and relevance of answers were strong and well-structured.")
+        elif avg_score >= 2.5:
+            st.warning("**Good Performance.** Answer content was adequate but could be improved for deeper understanding.")
+        else:
+            st.error("**Needs Improvement.** Focus is needed on aligning answers with rubric criteria.")
+        
+        if 125 <= avg_tempo <= 150:
+            st.success("**Optimal speaking tempo** for effective communication.")
+        elif avg_tempo > 150:
+            st.warning("**Speaking tempo too fast.** Practice slowing down for clarity.")
+        else:
+            st.warning("**Speaking tempo too slow.** Increase pace to maintain engagement.")
+    
+    with col2:
+        st.markdown("### Key Development Areas")
+        
+        if avg_score < 3.0:
+            st.info(
+                "🎯 **Content Development:**\n"
+                "- Utilize STAR method (Situation, Task, Action, Result)\n"
+                "- Include specific examples and supporting data\n"
+                "- Align responses with scoring rubrics"
+            )
+        
+        if total_pause > 120:
+            st.info(
+                "⏸️ **Pause Management:**\n"
+                "- Reduce excessively long pauses\n"
+                "- Use 2-3 second pauses for emphasis only\n"
+                "- Practice consistent speaking rhythm"
+            )
+        
+        if avg_confidence < 90:
+            st.info(
+                "🎤 **Vocal Clarity:**\n"
+                "- Increase volume and articulation\n"
+                "- Choose quiet recording environments\n"
+                "- Consider using external microphone"
+            )
+    
     # Detailed question breakdown
     st.markdown("---")
-    st.subheader("📋 Detailed Breakdown by Question")
+    with st.expander("📋 View Detailed Breakdown by Question"):
+        for q_key, res in st.session_state.results.items():
+            q_num = q_key.replace('q', '')
+            
+            st.markdown(f"### Question {q_num}")
+            st.write(f"**Question:** {res['question']}")
+            
+            col_a, col_b, col_c = st.columns(3)
+            with col_a:
+                st.metric("Rubric Score", f"{res['final_score']}/4")
+            with col_b:
+                st.metric("Confidence", f"{res['confidence_score']}%")
+            with col_c:
+                st.metric("Non-Verbal Analysis", res['non_verbal'].get('qualitative_summary', 'N/A'))
+            
+            st.markdown("**Evaluation:**")
+            st.info(res['rubric_reason'])
+            
+            with st.expander("View Transcript"):
+                st.code(res['transcript'], language='text')
+            
+            st.markdown("---")
     
-    for q_key, res in st.session_state.results.items():
-        q_num = q_key.replace('q', '')
-        
-        st.markdown(f"### Question {q_num}")
-        
-        col_a, col_b, col_c, col_d = st.columns(4)
-        
-        with col_a:
-            st.metric("Rubric Score", f"{res['final_score']}/4")
-        
-        with col_b:
-            st.metric("Confidence", f"{res['confidence_score']}")
-        
-        with col_c:
-            non_verbal = res['non_verbal']
-            tempo_str = non_verbal.get('tempo_bpm', '0')
-            if 'per minute' in str(tempo_str):
-                tempo_display = str(tempo_str).split(' ')[0] + " BPM"
-            else:
-                tempo_display = str(tempo_str).split(' ')[0] + " BPM" if str(tempo_str).split(' ') else "0 BPM"
-            st.metric("Tempo", tempo_display)
-        
-        with col_d:
-            pause_str = non_verbal.get('total_pause_seconds', '0')
-            if 'seconds' in str(pause_str):
-                pause_display = str(pause_str).split(' ')[0] + " seconds"
-            else:
-                pause_display = str(pause_str).split(' ')[0] + " seconds" if str(pause_str).split(' ') else "0 seconds"
-            st.metric("Pause", pause_display)
-        
-        st.markdown(f"**Question:** {res['question']}")
-        
-        st.markdown("**Evaluation:**")
-        st.info(res['rubric_reason'])
-        
-        with st.expander("View Transcript"):
-            st.code(res['transcript'], language='text')
-        
-        st.markdown("---")
-    
-    # Action buttons - TOMBOL UTAMA UNTUK PRINT
+    # Action buttons
     st.markdown("---")
-    st.subheader("📄 Download Report")
-    
     col_btn1, col_btn2, col_btn3 = st.columns(3)
     
     with col_btn1:
         if st.button("🔄 New Interview", use_container_width=True, type="primary"):
+            # Reset data interview tapi pertahankan data kandidat jika mau
             st.session_state.answers = {}
             st.session_state.results = None
             st.session_state.current_q = 1
             next_page('candidate_form')
     
     with col_btn2:
-        if st.button("📥 JSON Data", use_container_width=True):
+        if st.button("📥 Download Report", use_container_width=True):
+            # Tambahkan data kandidat ke report
             if st.session_state.candidate_data:
                 report_data = {
                     'candidate': st.session_state.candidate_data,
@@ -1525,9 +1762,10 @@ def render_final_summary_page():
                         'total_pause': total_pause
                     }
                 }
+                # Konversi ke JSON untuk download
                 json_report = json.dumps(report_data, indent=2, ensure_ascii=False)
                 st.download_button(
-                    label="Download JSON",
+                    label="Download Report as JSON",
                     data=json_report,
                     file_name=f"interview_report_{st.session_state.candidate_data['id']}.json",
                     mime="application/json",
@@ -1537,56 +1775,9 @@ def render_final_summary_page():
                 st.info("Download feature requires candidate information.")
     
     with col_btn3:
-        # TOMBOL UTAMA UNTUK PRINT LAPORAN
-        if st.button("🖨️ Print Report", use_container_width=True, type="primary"):
-            if st.session_state.candidate_data:
-                metrics = {
-                    'avg_score': avg_score,
-                    'avg_confidence': avg_confidence,
-                    'avg_tempo': avg_tempo,
-                    'total_pause': total_pause
-                }
-                
-                html_bytes = generate_invoice_report(
-                    st.session_state.candidate_data,
-                    st.session_state.results,
-                    metrics
-                )
-                
-                # Buat popup window untuk print
-                html_content = html_bytes.decode('utf-8')
-                
-                # Inject JavaScript untuk membuka popup dan auto-print
-                js_code = f"""
-                <script>
-                function openPrintWindow() {{
-                    var printWindow = window.open('', '_blank');
-                    printWindow.document.write(`{html_content}`);
-                    printWindow.document.close();
-                    
-                    // Auto print setelah window terbuka
-                    printWindow.onload = function() {{
-                        printWindow.print();
-                        // Tutup window setelah print (opsional)
-                        // setTimeout(function() {{ printWindow.close(); }}, 1000);
-                    }};
-                }}
-                
-                openPrintWindow();
-                </script>
-                """
-                
-                st.components.v1.html(js_code, height=0)
-                
-                st.success("Report opened in new window for printing. If popup blocked, please allow popups for this site.")
-            else:
-                st.info("Report generation requires candidate information.")
-    
-    # Tombol back to home
-    st.markdown("---")
-    if st.button("🏠 Back to Home", use_container_width=True):
-        st.session_state.clear()
-        next_page('home')
+        if st.button("🏠 Back to Home", use_container_width=True):
+            st.session_state.clear()
+            next_page('home')
     
     close_navbar()
 
