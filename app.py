@@ -1,4 +1,4 @@
-# app.py (complete version with report improvements)
+# app.py (versi dimodifikasi dengan form input kandidat)
 
 import streamlit as st
 import pandas as pd
@@ -10,8 +10,6 @@ import numpy as np
 import base64
 import uuid
 from datetime import datetime
-from fpdf import FPDF
-import io
 
 def get_local_time_indonesia():
     """Get current time in Indonesia timezone."""
@@ -46,8 +44,8 @@ try:
     def noise_reduction(audio_path_in, audio_path_out): pass
     def transcribe_and_clean(audio_path, stt_model, spell_checker, embedder_model, english_words): return "This is a dummy transcript for testing.", 0.95
     def compute_confidence_score(transcript, log_prob_raw): return 0.95
-    def analyze_non_verbal(audio_path): return {'tempo_bpm': '140 per minute', 'total_pause_seconds': '50 seconds', 'qualitative_summary': 'Normal pace'}
-    def score_with_rubric(q_key_rubric, q_text, transcript, RUBRIC_DATA, embedder_model): return 4, "Candidate meets rubric 4 because dfg, candidate appears confident, but candidate has"
+    def analyze_non_verbal(audio_path): return {'tempo_bpm': '135 BPM', 'total_pause_seconds': '5.2', 'qualitative_summary': 'Normal pace'}
+    def score_with_rubric(q_key_rubric, q_text, transcript, RUBRIC_DATA, embedder_model): return 4, "Excellent relevance and structural clarity."
     
     # Replace with actual imports if modules exist
     from models.stt_processor import load_stt_model, load_text_models, video_to_wav, noise_reduction, transcribe_and_clean
@@ -73,7 +71,7 @@ if 'answers' not in st.session_state:
     st.session_state.answers = {}
 if 'results' not in st.session_state:
     st.session_state.results = None
-# Add session state for candidate data
+# Tambah session state untuk data kandidat
 if 'candidate_data' not in st.session_state:
     st.session_state.candidate_data = None
 if 'interview_id' not in st.session_state:
@@ -405,7 +403,7 @@ def inject_global_css():
     .step-card {
         background: white;
         border-radius: 20px;
-        padding: 60px 20px 30px 20px; /* Reduce horizontal padding */
+        padding: 60px 20px 30px 20px; /* Kurangi padding horizontal */
         text-align: center;
         box-shadow: 0 10px 40px rgba(0,0,0,0.08);
         position: relative;
@@ -414,10 +412,10 @@ def inject_global_css():
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: space-between; /* Use space-between */
+        justify-content: space-between; /* Gunakan space-between */
         height: 320px;
         width: 100%;
-        max-width: 240px; /* Smaller than before */
+        max-width: 240px; /* Lebih kecil dari sebelumnya */
         box-sizing: border-box;
     }
     
@@ -441,11 +439,11 @@ def inject_global_css():
     }
     
     .step-title {
-        font-size: 18px; /* Smaller than initial */
+        font-size: 18px; /* Lebih kecil dari awal */
         font-weight: 700;
         margin: 0 0 15px 0;
         color: #000000;
-        line-height: 1.3; /* Tighter line height */
+        line-height: 1.3; /* Line height lebih ketat */
         text-align: center;
         width: 100%;
         height: 50px; /* Fixed height */
@@ -458,21 +456,21 @@ def inject_global_css():
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;
-        -webkit-line-clamp: 2; /* Max 2 lines */
+        -webkit-line-clamp: 2; /* Maksimal 2 baris */
         -webkit-box-orient: vertical;
         flex-shrink: 0;
     }
     
     .step-description {
         color: #666666;
-        font-size: 14px; /* Smaller than initial */
+        font-size: 14px; /* Lebih kecil dari awal */
         line-height: 1.5;
         font-weight: 400;
         text-align: center;
         width: 100%;
         flex-grow: 1;
         display: flex;
-        align-items: flex-start; /* Start from top */
+        align-items: flex-start; /* Start dari atas */
         justify-content: flex-start;
         padding: 0 5px;
         word-break: break-word;
@@ -480,7 +478,7 @@ def inject_global_css():
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;
-        -webkit-line-clamp: 4; /* Max 4 lines */
+        -webkit-line-clamp: 4; /* Maksimal 4 baris */
         -webkit-box-orient: vertical;
     }
     
@@ -642,7 +640,7 @@ def inject_global_css():
             padding: 20px;
         }
         
-        /* STEP CARDS - 2 cards per row with more compact */
+        /* STEP CARDS - 2 cards per row dengan lebih compact */
         .step-card-container {
             padding: 0 10px;
         }
@@ -679,7 +677,7 @@ def inject_global_css():
     }
     
     @media (max-width: 480px) {
-        /* STEP CARDS - 1 card per row on very small screens */
+        /* STEP CARDS - 1 card per row di sangat kecil */
         .step-card-wrapper {
             grid-template-columns: 1fr;
             max-width: 260px;
@@ -724,7 +722,7 @@ def inject_global_css():
         }
     }
     
-    /* FIX FOR ZOOM - TEXT SIZE CONTROL */
+    /* FIX UNTUK ZOOM - TEXT SIZE CONTROL */
     @media (max-width: 400px) {
         .step-card-wrapper {
             grid-template-columns: 1fr !important;
@@ -747,7 +745,7 @@ def inject_global_css():
         }
     }
     
-    /* For very small screens */
+    /* Untuk layar sangat kecil */
     @media (max-width: 360px) {
         .step-card {
             max-width: 200px !important;
@@ -774,7 +772,7 @@ def inject_global_css():
         }
     }
     
-    /* Fix for line clamping */
+    /* Fix untuk line clamping */
     .step-title, .step-description {
         display: -webkit-box;
         overflow: hidden;
@@ -996,12 +994,12 @@ def inject_global_css():
     """, unsafe_allow_html=True)
 
 def create_navbar_html(current_page='home'):
-    """Create navbar HTML with logo and buttons."""
+    """Create navbar HTML dengan logo dan tombol."""
     
-    # Check if logo file exists
+    # Cek apakah logo file ada
     logo_exists = os.path.exists("assets/seiai.png")
     
-    # Generate HTML for navbar
+    # Generate HTML untuk navbar
     html_parts = []
     
     # Navbar container
@@ -1039,7 +1037,7 @@ def create_navbar_html(current_page='home'):
     return '\n'.join(html_parts)
 
 def inject_navbar_js():
-    """Inject JavaScript for navbar separately."""
+    """Inject JavaScript untuk navbar secara terpisah."""
     st.markdown("""
     <script>
     // Setup navbar buttons
@@ -1049,7 +1047,7 @@ def inject_navbar_js():
         if (homeBtn) {
             homeBtn.onclick = function(e) {
                 e.preventDefault();
-                // Save to session storage for Streamlit
+                // Simpan ke session storage untuk Streamlit
                 sessionStorage.setItem('nav_to', 'home');
                 // Trigger page reload
                 window.location.reload();
@@ -1061,7 +1059,7 @@ def inject_navbar_js():
         if (infoBtn) {
             infoBtn.onclick = function(e) {
                 e.preventDefault();
-                // Save to session storage for Streamlit
+                // Simpan ke session storage untuk Streamlit
                 sessionStorage.setItem('nav_to', 'info');
                 // Trigger page reload
                 window.location.reload();
@@ -1069,10 +1067,10 @@ def inject_navbar_js():
         }
     }
     
-    // Run setup when DOM is ready
+    // Jalankan setup saat DOM siap
     document.addEventListener('DOMContentLoaded', setupNavbar);
     
-    // Also run after timeout to ensure
+    // Juga jalankan setelah timeout untuk memastikan
     setTimeout(setupNavbar, 100);
     </script>
     """, unsafe_allow_html=True)
@@ -1080,28 +1078,28 @@ def inject_navbar_js():
 # --- Page Render Functions ---
 
 def render_navbar(current_page='home'):
-    """Render fixed navbar with logo and buttons entirely in HTML."""
+    """Render fixed navbar dengan logo dan tombol sepenuhnya dalam HTML."""
     
-    # Create navbar HTML
+    # Buat HTML navbar
     navbar_html = create_navbar_html(current_page)
     
     # Render navbar HTML
     st.markdown(navbar_html, unsafe_allow_html=True)
     
-    # Inject JavaScript separately
+    # Inject JavaScript secara terpisah
     inject_navbar_js()
     
-    # Open main content
+    # Buka main content
     st.markdown('<div class="main-content">', unsafe_allow_html=True)
     
-    # Check session storage for navigation
+    # Cek session storage untuk navigasi
     try:
-        # Use JavaScript to read session storage
+        # Gunakan JavaScript untuk membaca session storage
         if 'nav_to' in st.session_state:
             nav_to = st.session_state.nav_to
             if nav_to and nav_to in ['home', 'info']:
                 next_page(nav_to)
-                # Clear after use
+                # Clear setelah digunakan
                 del st.session_state.nav_to
     except:
         pass
@@ -1111,7 +1109,7 @@ def close_navbar():
     st.markdown("</div>", unsafe_allow_html=True)
 
 def render_candidate_form():
-    """Render form for candidate data input."""
+    """Render form untuk input data kandidat."""
     inject_global_css()
     render_navbar('home')
     
@@ -1121,7 +1119,7 @@ def render_candidate_form():
     </div>
     """, unsafe_allow_html=True)
     
-    # Form for candidate data input
+    # Form untuk input data kandidat
     with st.container():
         col1, col2 = st.columns([3, 2])
         
@@ -1129,7 +1127,7 @@ def render_candidate_form():
             st.markdown("### Personal Information")
             st.markdown("Please fill in your details before starting the interview.")
             
-            # Form input using Streamlit
+            # Form input menggunakan Streamlit
             with st.form("candidate_form"):
                 name = st.text_input("Full Name", placeholder="Enter your full name", help="Your name will appear on the interview report")
                 email = st.text_input("Email Address", placeholder="Enter your email address", help="We'll send the interview report to this email")
@@ -1147,30 +1145,38 @@ def render_candidate_form():
                     # Generate interview ID
                     interview_id = str(uuid.uuid4())[:8].upper()
                     
-                    # Get local time for Indonesia
+                    # FIX: Get local time for Indonesia (WIB/WITA/WIT)
                     try:
+                        # Method 1: Try to get system time (works if server is in Indonesia)
                         now_local = get_local_time_indonesia()
+                        
+                        # Method 2: If system time is UTC, adjust manually
+                        # Add 7 hours for WIB (UTC+7), 8 for WITA (UTC+8), 9 for WIT (UTC+9)
+                        # Uncomment line below if you need to adjust manually:
+                        # from datetime import timedelta
+                        # now_local = datetime.now() + timedelta(hours=7)  # WIB (UTC+7)
+                        
                     except Exception as e:
                         now_local = get_local_time_indonesia()
                     
                     # Format the date
                     start_time = now_local.strftime("%Y-%m-%d %H:%M:%S")
                     
-                    # Save candidate data to session state
+                    # Simpan data kandidat ke session state
                     st.session_state.candidate_data = {
                         'id': interview_id,
                         'name': name.strip(),
                         'email': email.strip(),
-                        'start_time': start_time
+                        'start_time': start_time  # Use the corrected local time
                     }
                     st.session_state.interview_id = interview_id
                     
-                    # Reset interview data
+                    # Reset data interview
                     st.session_state.answers = {}
                     st.session_state.results = None
                     st.session_state.current_q = 1
                     
-                    # Redirect to interview page
+                    # Redirect ke halaman interview
                     next_page("interview")
                     st.rerun()
         
@@ -1197,7 +1203,7 @@ def render_candidate_form():
             </div>
             """, unsafe_allow_html=True)
     
-    # Back button
+    # Tombol back
     if st.button("Back to Home", use_container_width=True):
         next_page('home')
     
@@ -1207,14 +1213,14 @@ def render_home_page():
     """Render the fixed landing page."""
     inject_global_css()
     
-    # Render navbar with all elements in HTML
+    # Render navbar dengan semua elemen dalam HTML
     render_navbar('home')
     
     # HERO SECTION
     st.markdown('<h1 class="hero-title">Welcome to SEI-AI Interviewer</h1>', unsafe_allow_html=True)
     st.markdown('<p class="hero-subtitle">Hone your interview skills with AI-powered feedback and prepare for your dream job with comprehensive evaluation and actionable insights.</p>', unsafe_allow_html=True)
     
-    # Change "Start Interview Now" button to redirect to candidate form
+    # Ganti tombol "Start Interview Now" untuk redirect ke form kandidat
     if st.button("Start Interview Now", key="hero_start", type="primary"):
         next_page("candidate_form")
     
@@ -1225,7 +1231,7 @@ def render_home_page():
     st.markdown('<h2 class="section-title">How To Use</h2>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Container for step cards
+    # Container untuk step cards
     st.markdown('<div class="step-card-container">', unsafe_allow_html=True)
     st.markdown('<div class="step-card-wrapper">', unsafe_allow_html=True)
     
@@ -1334,18 +1340,18 @@ def render_info_page():
     * Hours: Monday-Friday, 9:00 AM - 5:00 PM EST
     """)
     
-    # Back to Home button using Streamlit
+    # Tombol Back to Home menggunakan Streamlit
     if st.button("🏠 Back to Home", type="primary"):
         next_page('home')
     
     close_navbar()
 
 def render_interview_page():
-    """Render the interview page with candidate banner."""
+    """Render the interview page dengan banner kandidat."""
     inject_global_css()
     render_navbar('interview')
     
-    # Display candidate information if available
+    # Tampilkan informasi kandidat jika ada
     if st.session_state.candidate_data:
         st.markdown(f"""
         <div class="candidate-banner">
@@ -1439,11 +1445,11 @@ def render_interview_page():
     close_navbar()
 
 def render_processing_page():
-    """Render the processing page with candidate information."""
+    """Render the processing page dengan informasi kandidat."""
     inject_global_css()
     render_navbar('processing')
     
-    # Display candidate information if available
+    # Tampilkan informasi kandidat jika ada
     if st.session_state.candidate_data:
         st.markdown(f"""
         <div style="background: #f0f2ff; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
@@ -1526,7 +1532,7 @@ def render_processing_page():
                             "transcript": transcript,
                             "final_score": final_score_value,
                             "rubric_reason": reason,
-                            "confidence_score": f"{final_confidence_score*100:.2f}%",
+                            "confidence_score": f"{final_confidence_score*100:.2f}",
                             "non_verbal": non_verbal_res
                         }
                         
@@ -1550,127 +1556,12 @@ def render_processing_page():
     
     close_navbar()
 
-# --- Add function to generate PDF report ---
-def generate_pdf_report(candidate_data, results, metrics):
-    """Generate professional PDF report dengan layout seperti gambar."""
-    pdf = FPDF()
-    pdf.add_page()
-    
-    # Set font
-    pdf.set_font("Arial", 'B', 16)
-    
-    # Header
-    pdf.cell(0, 10, "INTERVIEW EVALUATION REPORT", 0, 1, 'C')
-    pdf.ln(5)
-    
-    # Candidate Information
-    pdf.set_font("Arial", 'B', 12)
-    pdf.cell(0, 10, "Candidate Information", 0, 1, 'L')
-    pdf.set_font("Arial", '', 10)
-    
-    pdf.cell(60, 8, f"Name: {candidate_data.get('name', 'N/A')}", 0, 0, 'L')
-    pdf.cell(60, 8, f"ID: {candidate_data.get('id', 'N/A')}", 0, 1, 'L')
-    pdf.cell(60, 8, f"Email: {candidate_data.get('email', 'N/A')}", 0, 0, 'L')
-    pdf.cell(60, 8, f"Interview Date: {candidate_data.get('start_time', 'N/A')}", 0, 1, 'L')
-    
-    pdf.ln(10)
-    
-    # Overall Metrics
-    pdf.set_font("Arial", 'B', 12)
-    pdf.cell(0, 10, "Overall Performance Metrics", 0, 1, 'L')
-    pdf.set_font("Arial", '', 10)
-    
-    pdf.cell(45, 8, f"Average Score: {metrics.get('avg_score', 0):.2f}/4", 0, 0, 'L')
-    pdf.cell(45, 8, f"Confidence: {metrics.get('avg_confidence', 0):.2f}%", 0, 1, 'L')
-    pdf.cell(45, 8, f"Tempo: {metrics.get('avg_tempo', 0):.1f} BPM", 0, 0, 'L')
-    pdf.cell(45, 8, f"Total Pause: {metrics.get('total_pause', 0):.1f}s", 0, 1, 'L')
-    
-    pdf.ln(15)
-    
-    # Detailed Results per Question
-    pdf.set_font("Arial", 'B', 12)
-    pdf.cell(0, 10, "Detailed Question Analysis", 0, 1, 'L')
-    
-    for q_key, result in results.items():
-        q_num = q_key.replace('q', '')
-        
-        # Question header
-        pdf.set_font("Arial", 'B', 11)
-        pdf.cell(0, 8, f"Question {q_num}", 0, 1, 'L')
-        
-        # Question text
-        pdf.set_font("Arial", 'I', 9)
-        question_text = result.get('question', 'N/A')
-        if len(question_text) > 80:
-            question_text = question_text[:80] + "..."
-        pdf.multi_cell(0, 5, f"Q: {question_text}", 0, 'L')
-        
-        # Metrics for this question
-        pdf.set_font("Arial", '', 9)
-        
-        # Score with visual indicator
-        score = result.get('final_score', 0)
-        score_text = f"Rubric: {score}/4"
-        pdf.cell(40, 6, score_text, 0, 0, 'L')
-        
-        # Confidence
-        confidence = result.get('confidence_score', '0%')
-        pdf.cell(40, 6, f"Confidence: {confidence}", 0, 1, 'L')
-        
-        # Non-verbal metrics
-        non_verbal = result.get('non_verbal', {})
-        
-        # Extract tempo and pause from non_verbal
-        tempo_str = non_verbal.get('tempo_bpm', '0')
-        pause_str = non_verbal.get('total_pause_seconds', '0')
-        
-        # Jika format "140 per minute", ekstrak angka saja
-        if 'per minute' in str(tempo_str):
-            tempo_value = str(tempo_str).split(' ')[0]
-        else:
-            tempo_value = str(tempo_str).split(' ')[0] if str(tempo_str).split(' ') else '0'
-        
-        # Jika format "50 seconds", ekstrak angka saja
-        if 'seconds' in str(pause_str):
-            pause_value = str(pause_str).split(' ')[0]
-        else:
-            pause_value = str(pause_str).split(' ')[0] if str(pause_str).split(' ') else '0'
-        
-        # Tampilkan di PDF
-        pdf.cell(40, 6, f"Tempo: {tempo_value} BPM", 0, 0, 'L')
-        pdf.cell(40, 6, f"Pause: {pause_value} seconds", 0, 1, 'L')
-        
-        # Reason/rationale
-        pdf.set_font("Arial", '', 8)
-        reason = result.get('rubric_reason', 'No rationale provided.')
-        pdf.multi_cell(0, 4, f"Reason: {reason}", 0, 'L')
-        
-        # Transcript preview
-        pdf.set_font("Arial", 'I', 8)
-        transcript = result.get('transcript', 'No transcript available.')
-        if len(transcript) > 100:
-            transcript = transcript[:100] + "..."
-        pdf.multi_cell(0, 4, f"Transcript: {transcript}", 0, 'L')
-        
-        pdf.ln(5)
-        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-        pdf.ln(5)
-    
-    # Footer
-    pdf.set_y(-30)
-    pdf.set_font("Arial", 'I', 8)
-    pdf.cell(0, 10, "Generated by SEI-AI Interview System", 0, 0, 'C')
-    pdf.ln(5)
-    pdf.cell(0, 10, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 0, 0, 'C')
-    
-    return pdf.output(dest='S').encode('latin1')
-
 def render_final_summary_page():
-    """Render the final results page with candidate data."""
+    """Render the final results page dengan data kandidat."""
     inject_global_css()
     render_navbar('final_summary')
     
-    # Header with candidate information
+    # Header dengan informasi kandidat
     if st.session_state.candidate_data:
         candidate = st.session_state.candidate_data
         st.markdown(f"""
@@ -1701,36 +1592,20 @@ def render_final_summary_page():
     # Calculate metrics
     try:
         all_scores = [int(res['final_score']) for res in st.session_state.results.values()]
-        all_confidence = [float(res['confidence_score'].replace('%', '')) 
+        all_confidence = [float(res['confidence_score'].split(' ')[0].replace('%', '')) 
                          for res in st.session_state.results.values()]
         
-        # IMPROVEMENT: Extract tempo and pause from non_verbal
         all_tempo = []
         all_pause = []
         for res in st.session_state.results.values():
-            non_verbal = res['non_verbal']
-            
-            # Extract tempo
-            tempo_str = non_verbal.get('tempo_bpm', '0')
-            if 'per minute' in str(tempo_str):
-                tempo_value = str(tempo_str).split(' ')[0]
-            else:
-                tempo_value = str(tempo_str).split(' ')[0] if str(tempo_str).split(' ') else '0'
-            
-            # Extract pause
-            pause_str = non_verbal.get('total_pause_seconds', '0')
-            if 'seconds' in str(pause_str):
-                pause_value = str(pause_str).split(' ')[0]
-            else:
-                pause_value = str(pause_str).split(' ')[0] if str(pause_str).split(' ') else '0'
-            
+            tempo_str = res['non_verbal'].get('tempo_bpm', '0').split(' ')[0]
+            pause_str = res['non_verbal'].get('total_pause_seconds', '0').split(' ')[0]
             try:
-                all_tempo.append(float(tempo_value))
+                all_tempo.append(float(tempo_str))
             except ValueError:
                 all_tempo.append(0)
-            
             try:
-                all_pause.append(float(pause_value))
+                all_pause.append(float(pause_str))
             except ValueError:
                 all_pause.append(0)
         
@@ -1743,10 +1618,10 @@ def render_final_summary_page():
         st.error(f"Failed to calculate metrics: {e}")
         return
     
-    # Display metrics - IMPROVEMENT: Add tempo and pause
+    # Display metrics
     st.subheader("📊 Performance Summary")
     
-    # Display metric cards
+    # Tampilkan metric cards
     st.markdown('<div class="metric-container">', unsafe_allow_html=True)
     st.markdown('<div class="metric-wrapper">', unsafe_allow_html=True)
     
@@ -1771,8 +1646,8 @@ def render_final_summary_page():
     with cols[2]:
         st.markdown(f"""
         <div class="metric-card">
-            <div class="metric-value tempo-color">{avg_tempo:.1f} BPM</div>
-            <div class="metric-label">Average Tempo</div>
+            <div class="metric-value tempo-color">{avg_tempo:.1f}</div>
+            <div class="metric-label">Average Tempo (BPM)</div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -1836,66 +1711,46 @@ def render_final_summary_page():
                 "- Consider using external microphone"
             )
     
-    # Detailed question breakdown - IMPROVEMENT: Display tempo and pause per question
+    # Detailed question breakdown
     st.markdown("---")
-    st.subheader("📋 Detailed Breakdown by Question")
+    with st.expander("📋 View Detailed Breakdown by Question"):
+        for q_key, res in st.session_state.results.items():
+            q_num = q_key.replace('q', '')
+            
+            st.markdown(f"### Question {q_num}")
+            st.write(f"**Question:** {res['question']}")
+            
+            col_a, col_b, col_c = st.columns(3)
+            with col_a:
+                st.metric("Rubric Score", f"{res['final_score']}/4")
+            with col_b:
+                st.metric("Confidence", f"{res['confidence_score']}%")
+            with col_c:
+                st.metric("Non-Verbal Analysis", res['non_verbal'].get('qualitative_summary', 'N/A'))
+            
+            st.markdown("**Evaluation:**")
+            st.info(res['rubric_reason'])
+            
+            with st.expander("View Transcript"):
+                st.code(res['transcript'], language='text')
+            
+            st.markdown("---")
     
-    for q_key, res in st.session_state.results.items():
-        q_num = q_key.replace('q', '')
-        
-        st.markdown(f"### Question {q_num}")
-        
-        col_a, col_b, col_c, col_d = st.columns(4)
-        
-        with col_a:
-            st.metric("Rubric Score", f"{res['final_score']}/4")
-        
-        with col_b:
-            st.metric("Confidence", f"{res['confidence_score']}")
-        
-        # IMPROVEMENT: Display tempo and pause in report
-        with col_c:
-            non_verbal = res['non_verbal']
-            tempo_str = non_verbal.get('tempo_bpm', '0')
-            if 'per minute' in str(tempo_str):
-                tempo_display = str(tempo_str).split(' ')[0] + " BPM"
-            else:
-                tempo_display = str(tempo_str).split(' ')[0] + " BPM" if str(tempo_str).split(' ') else "0 BPM"
-            st.metric("Tempo", tempo_display)
-        
-        with col_d:
-            pause_str = non_verbal.get('total_pause_seconds', '0')
-            if 'seconds' in str(pause_str):
-                pause_display = str(pause_str).split(' ')[0] + " seconds"
-            else:
-                pause_display = str(pause_str).split(' ')[0] + " seconds" if str(pause_str).split(' ') else "0 seconds"
-            st.metric("Pause", pause_display)
-        
-        st.markdown(f"**Question:** {res['question']}")
-        
-        st.markdown("**Evaluation:**")
-        st.info(res['rubric_reason'])
-        
-        with st.expander("View Transcript"):
-            st.code(res['transcript'], language='text')
-        
-        st.markdown("---")
-    
-    # Action buttons - IMPROVEMENT: Add PDF download button
+    # Action buttons
     st.markdown("---")
-    col_btn1, col_btn2, col_btn3, col_btn4 = st.columns(4)
+    col_btn1, col_btn2, col_btn3 = st.columns(3)
     
     with col_btn1:
         if st.button("🔄 New Interview", use_container_width=True, type="primary"):
-            # Reset interview data but keep candidate data if desired
+            # Reset data interview tapi pertahankan data kandidat jika mau
             st.session_state.answers = {}
             st.session_state.results = None
             st.session_state.current_q = 1
             next_page('candidate_form')
     
     with col_btn2:
-        if st.button("📥 JSON Report", use_container_width=True):
-            # Add candidate data to report
+        if st.button("📥 Download Report", use_container_width=True):
+            # Tambahkan data kandidat ke report
             if st.session_state.candidate_data:
                 report_data = {
                     'candidate': st.session_state.candidate_data,
@@ -1907,10 +1762,10 @@ def render_final_summary_page():
                         'total_pause': total_pause
                     }
                 }
-                # Convert to JSON for download
+                # Konversi ke JSON untuk download
                 json_report = json.dumps(report_data, indent=2, ensure_ascii=False)
                 st.download_button(
-                    label="Download JSON Report",
+                    label="Download Report as JSON",
                     data=json_report,
                     file_name=f"interview_report_{st.session_state.candidate_data['id']}.json",
                     mime="application/json",
@@ -1920,33 +1775,6 @@ def render_final_summary_page():
                 st.info("Download feature requires candidate information.")
     
     with col_btn3:
-        if st.button("📄 PDF Report", use_container_width=True):
-            # Generate and download PDF report
-            if st.session_state.candidate_data:
-                metrics = {
-                    'avg_score': avg_score,
-                    'avg_confidence': avg_confidence,
-                    'avg_tempo': avg_tempo,
-                    'total_pause': total_pause
-                }
-                
-                pdf_bytes = generate_pdf_report(
-                    st.session_state.candidate_data,
-                    st.session_state.results,
-                    metrics
-                )
-                
-                st.download_button(
-                    label="Download Professional PDF",
-                    data=pdf_bytes,
-                    file_name=f"Interview_Report_{st.session_state.candidate_data['name'].replace(' ', '_')}_{st.session_state.candidate_data['id']}.pdf",
-                    mime="application/pdf",
-                    use_container_width=True
-                )
-            else:
-                st.info("PDF generation requires candidate information.")
-    
-    with col_btn4:
         if st.button("🏠 Back to Home", use_container_width=True):
             st.session_state.clear()
             next_page('home')
