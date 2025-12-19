@@ -1,4 +1,4 @@
-# app.py (versi dimodifikasi dengan form input kandidat)
+# app.py (versi dengan HTML report)
 
 import streamlit as st
 import pandas as pd
@@ -44,8 +44,8 @@ try:
     def noise_reduction(audio_path_in, audio_path_out): pass
     def transcribe_and_clean(audio_path, stt_model, spell_checker, embedder_model, english_words): return "This is a dummy transcript for testing.", 0.95
     def compute_confidence_score(transcript, log_prob_raw): return 0.95
-    def analyze_non_verbal(audio_path): return {'tempo_bpm': '135 BPM', 'total_pause_seconds': '5.2', 'qualitative_summary': 'Normal pace'}
-    def score_with_rubric(q_key_rubric, q_text, transcript, RUBRIC_DATA, embedder_model): return 4, "Excellent relevance and structural clarity."
+    def analyze_non_verbal(audio_path): return {'tempo_bpm': '140 per minute', 'total_pause_seconds': '50 seconds', 'qualitative_summary': 'Normal pace'}
+    def score_with_rubric(q_key_rubric, q_text, transcript, RUBRIC_DATA, embedder_model): return 4, "Candidate meets rubric 4 because dfg, candidate appears confident, but candidate has"
     
     # Replace with actual imports if modules exist
     from models.stt_processor import load_stt_model, load_text_models, video_to_wav, noise_reduction, transcribe_and_clean
@@ -1532,7 +1532,7 @@ def render_processing_page():
                             "transcript": transcript,
                             "final_score": final_score_value,
                             "rubric_reason": reason,
-                            "confidence_score": f"{final_confidence_score*100:.2f}",
+                            "confidence_score": f"{final_confidence_score*100:.2f}%",
                             "non_verbal": non_verbal_res
                         }
                         
@@ -1555,6 +1555,358 @@ def render_processing_page():
             return
     
     close_navbar()
+
+# --- Fungsi untuk generate HTML Report ---
+def generate_html_report(candidate_data, results, metrics):
+    """Generate professional HTML report."""
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Interview Report - {candidate_data.get('name', 'Candidate')}</title>
+        <style>
+            body {{
+                font-family: 'Segoe UI', Arial, sans-serif;
+                margin: 0;
+                padding: 30px;
+                background-color: #f8f9fa;
+                color: #333;
+                line-height: 1.6;
+            }}
+            .container {{
+                max-width: 1200px;
+                margin: 0 auto;
+                background: white;
+                padding: 40px;
+                box-shadow: 0 0 30px rgba(0,0,0,0.1);
+                border-radius: 15px;
+            }}
+            .header {{
+                text-align: center;
+                margin-bottom: 40px;
+                padding-bottom: 25px;
+                border-bottom: 3px solid #667eea;
+            }}
+            .header h1 {{
+                color: #2c3e50;
+                margin: 0 0 10px 0;
+                font-size: 36px;
+            }}
+            .header p {{
+                color: #7f8c8d;
+                font-size: 18px;
+                margin: 0;
+            }}
+            .section {{
+                margin-bottom: 35px;
+            }}
+            .section-title {{
+                color: #2c3e50;
+                font-size: 22px;
+                font-weight: 600;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #ecf0f1;
+                display: flex;
+                align-items: center;
+            }}
+            .section-title::before {{
+                content: "📋";
+                margin-right: 10px;
+                font-size: 24px;
+            }}
+            .info-grid {{
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+                margin-bottom: 25px;
+            }}
+            .info-item {{
+                background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+                padding: 20px;
+                border-radius: 10px;
+                border-left: 5px solid #667eea;
+            }}
+            .info-item strong {{
+                color: #2c3e50;
+                display: block;
+                margin-bottom: 8px;
+                font-size: 14px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }}
+            .info-item span {{
+                font-size: 16px;
+                color: #34495e;
+            }}
+            .metrics-grid {{
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 20px;
+                margin-bottom: 30px;
+            }}
+            .metric-card {{
+                text-align: center;
+                padding: 25px 15px;
+                border-radius: 12px;
+                color: white;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            }}
+            .metric-card.score {{ background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); }}
+            .metric-card.confidence {{ background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }}
+            .metric-card.tempo {{ background: linear-gradient(135deg, #f39c12 0%, #d35400 100%); }}
+            .metric-card.pause {{ background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); }}
+            .metric-value {{
+                font-size: 32px;
+                font-weight: 700;
+                margin-bottom: 8px;
+            }}
+            .metric-label {{
+                font-size: 14px;
+                opacity: 0.9;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }}
+            .question-container {{
+                margin-bottom: 30px;
+                border: 2px solid #ecf0f1;
+                border-radius: 12px;
+                overflow: hidden;
+            }}
+            .question-header {{
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }}
+            .question-number {{
+                font-size: 22px;
+                font-weight: 700;
+            }}
+            .question-score {{
+                background: white;
+                color: #2c3e50;
+                padding: 8px 20px;
+                border-radius: 50px;
+                font-weight: 700;
+                font-size: 18px;
+            }}
+            .question-body {{
+                padding: 25px;
+            }}
+            .question-text {{
+                font-size: 18px;
+                color: #2c3e50;
+                margin-bottom: 25px;
+                font-style: italic;
+                padding: 15px;
+                background: #f8f9fa;
+                border-radius: 8px;
+                border-left: 4px solid #667eea;
+            }}
+            .metrics-row {{
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 15px;
+                margin-bottom: 25px;
+            }}
+            .metric-small {{
+                text-align: center;
+                padding: 15px;
+                background: #f8f9fa;
+                border-radius: 8px;
+                border: 1px solid #e0e0e0;
+            }}
+            .metric-small-title {{
+                font-weight: 600;
+                color: #7f8c8d;
+                margin-bottom: 5px;
+                font-size: 14px;
+            }}
+            .metric-small-value {{
+                font-size: 18px;
+                font-weight: 700;
+                color: #2c3e50;
+            }}
+            .evaluation-box {{
+                background: #e8f4fc;
+                padding: 20px;
+                border-radius: 8px;
+                margin-bottom: 25px;
+                border-left: 5px solid #3498db;
+            }}
+            .evaluation-title {{
+                font-weight: 600;
+                color: #2c3e50;
+                margin-bottom: 10px;
+                font-size: 16px;
+            }}
+            .transcript-box {{
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 8px;
+                border: 1px solid #e0e0e0;
+                max-height: 200px;
+                overflow-y: auto;
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+                line-height: 1.5;
+            }}
+            .footer {{
+                text-align: center;
+                margin-top: 50px;
+                padding-top: 25px;
+                border-top: 1px solid #ecf0f1;
+                color: #7f8c8d;
+                font-size: 14px;
+            }}
+            @media print {{
+                body {{
+                    background: white !important;
+                    padding: 0 !important;
+                }}
+                .container {{
+                    box-shadow: none !important;
+                    padding: 20px !important;
+                }}
+                .metric-card {{
+                    break-inside: avoid;
+                }}
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>📊 Interview Evaluation Report</h1>
+                <p>SEI-AI Interview Assessment System</p>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Candidate Information</div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>Name</strong>
+                        <span>{candidate_data.get('name', 'N/A')}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Interview ID</strong>
+                        <span>{candidate_data.get('id', 'N/A')}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Email</strong>
+                        <span>{candidate_data.get('email', 'N/A')}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Interview Date</strong>
+                        <span>{candidate_data.get('start_time', 'N/A')}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Overall Performance</div>
+                <div class="metrics-grid">
+                    <div class="metric-card score">
+                        <div class="metric-value">{metrics.get('avg_score', 0):.2f}/4</div>
+                        <div class="metric-label">Average Score</div>
+                    </div>
+                    <div class="metric-card confidence">
+                        <div class="metric-value">{metrics.get('avg_confidence', 0):.2f}%</div>
+                        <div class="metric-label">Confidence</div>
+                    </div>
+                    <div class="metric-card tempo">
+                        <div class="metric-value">{metrics.get('avg_tempo', 0):.1f}</div>
+                        <div class="metric-label">Tempo (BPM)</div>
+                    </div>
+                    <div class="metric-card pause">
+                        <div class="metric-value">{metrics.get('total_pause', 0):.1f}s</div>
+                        <div class="metric-label">Total Pause</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Detailed Question Analysis</div>
+    """
+    
+    for q_key, result in results.items():
+        q_num = q_key.replace('q', '')
+        
+        # Extract tempo and pause
+        non_verbal = result.get('non_verbal', {})
+        tempo_str = non_verbal.get('tempo_bpm', '0')
+        pause_str = non_verbal.get('total_pause_seconds', '0')
+        
+        # Clean tempo
+        if 'per minute' in str(tempo_str):
+            tempo_value = str(tempo_str).split(' ')[0]
+        else:
+            tempo_value = str(tempo_str).split(' ')[0] if str(tempo_str).split(' ') else '0'
+        
+        # Clean pause
+        if 'seconds' in str(pause_str):
+            pause_value = str(pause_str).split(' ')[0]
+        else:
+            pause_value = str(pause_str).split(' ')[0] if str(pause_str).split(' ') else '0'
+        
+        html += f"""
+                <div class="question-container">
+                    <div class="question-header">
+                        <div class="question-number">Question {q_num}</div>
+                        <div class="question-score">{result.get('final_score', 0)}/4</div>
+                    </div>
+                    <div class="question-body">
+                        <div class="question-text">{result.get('question', 'N/A')}</div>
+                        
+                        <div class="metrics-row">
+                            <div class="metric-small">
+                                <div class="metric-small-title">Confidence</div>
+                                <div class="metric-small-value">{result.get('confidence_score', '0%')}</div>
+                            </div>
+                            <div class="metric-small">
+                                <div class="metric-small-title">Tempo</div>
+                                <div class="metric-small-value">{tempo_value} BPM</div>
+                            </div>
+                            <div class="metric-small">
+                                <div class="metric-small-title">Pause</div>
+                                <div class="metric-small-value">{pause_value}s</div>
+                            </div>
+                            <div class="metric-small">
+                                <div class="metric-small-title">Non-Verbal</div>
+                                <div class="metric-small-value">{non_verbal.get('qualitative_summary', 'N/A')}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="evaluation-box">
+                            <div class="evaluation-title">Evaluation</div>
+                            <div>{result.get('rubric_reason', 'No rationale provided.')}</div>
+                        </div>
+                        
+                        <div class="evaluation-box">
+                            <div class="evaluation-title">Transcript</div>
+                            <div class="transcript-box">{result.get('transcript', 'No transcript available.')}</div>
+                        </div>
+                    </div>
+                </div>
+        """
+    
+    html += f"""
+            </div>
+            
+            <div class="footer">
+                <p>Generated by SEI-AI Interview System • {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
+                <p><em>To save as PDF: Open in browser, press Ctrl+P (Cmd+P on Mac), select "Save as PDF"</em></p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    return html.encode('utf-8')
 
 def render_final_summary_page():
     """Render the final results page dengan data kandidat."""
@@ -1592,20 +1944,36 @@ def render_final_summary_page():
     # Calculate metrics
     try:
         all_scores = [int(res['final_score']) for res in st.session_state.results.values()]
-        all_confidence = [float(res['confidence_score'].split(' ')[0].replace('%', '')) 
+        all_confidence = [float(res['confidence_score'].replace('%', '')) 
                          for res in st.session_state.results.values()]
         
+        # PERBAIKAN: Ekstrak tempo dan jeda dari non_verbal
         all_tempo = []
         all_pause = []
         for res in st.session_state.results.values():
-            tempo_str = res['non_verbal'].get('tempo_bpm', '0').split(' ')[0]
-            pause_str = res['non_verbal'].get('total_pause_seconds', '0').split(' ')[0]
+            non_verbal = res['non_verbal']
+            
+            # Extract tempo
+            tempo_str = non_verbal.get('tempo_bpm', '0')
+            if 'per minute' in str(tempo_str):
+                tempo_value = str(tempo_str).split(' ')[0]
+            else:
+                tempo_value = str(tempo_str).split(' ')[0] if str(tempo_str).split(' ') else '0'
+            
+            # Extract pause
+            pause_str = non_verbal.get('total_pause_seconds', '0')
+            if 'seconds' in str(pause_str):
+                pause_value = str(pause_str).split(' ')[0]
+            else:
+                pause_value = str(pause_str).split(' ')[0] if str(pause_str).split(' ') else '0'
+            
             try:
-                all_tempo.append(float(tempo_str))
+                all_tempo.append(float(tempo_value))
             except ValueError:
                 all_tempo.append(0)
+            
             try:
-                all_pause.append(float(pause_str))
+                all_pause.append(float(pause_value))
             except ValueError:
                 all_pause.append(0)
         
@@ -1618,7 +1986,7 @@ def render_final_summary_page():
         st.error(f"Failed to calculate metrics: {e}")
         return
     
-    # Display metrics
+    # Display metrics - PERBAIKAN: Tambah tempo dan jeda
     st.subheader("📊 Performance Summary")
     
     # Tampilkan metric cards
@@ -1646,8 +2014,8 @@ def render_final_summary_page():
     with cols[2]:
         st.markdown(f"""
         <div class="metric-card">
-            <div class="metric-value tempo-color">{avg_tempo:.1f}</div>
-            <div class="metric-label">Average Tempo (BPM)</div>
+            <div class="metric-value tempo-color">{avg_tempo:.1f} BPM</div>
+            <div class="metric-label">Average Tempo</div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -1711,34 +2079,54 @@ def render_final_summary_page():
                 "- Consider using external microphone"
             )
     
-    # Detailed question breakdown
+    # Detailed question breakdown - PERBAIKAN: Tampilkan tempo dan jeda per pertanyaan
     st.markdown("---")
-    with st.expander("📋 View Detailed Breakdown by Question"):
-        for q_key, res in st.session_state.results.items():
-            q_num = q_key.replace('q', '')
-            
-            st.markdown(f"### Question {q_num}")
-            st.write(f"**Question:** {res['question']}")
-            
-            col_a, col_b, col_c = st.columns(3)
-            with col_a:
-                st.metric("Rubric Score", f"{res['final_score']}/4")
-            with col_b:
-                st.metric("Confidence", f"{res['confidence_score']}%")
-            with col_c:
-                st.metric("Non-Verbal Analysis", res['non_verbal'].get('qualitative_summary', 'N/A'))
-            
-            st.markdown("**Evaluation:**")
-            st.info(res['rubric_reason'])
-            
-            with st.expander("View Transcript"):
-                st.code(res['transcript'], language='text')
-            
-            st.markdown("---")
+    st.subheader("📋 Detailed Breakdown by Question")
     
-    # Action buttons
+    for q_key, res in st.session_state.results.items():
+        q_num = q_key.replace('q', '')
+        
+        st.markdown(f"### Question {q_num}")
+        
+        col_a, col_b, col_c, col_d = st.columns(4)
+        
+        with col_a:
+            st.metric("Rubric Score", f"{res['final_score']}/4")
+        
+        with col_b:
+            st.metric("Confidence", f"{res['confidence_score']}")
+        
+        # PERBAIKAN: Tampilkan tempo dan jeda di laporan
+        with col_c:
+            non_verbal = res['non_verbal']
+            tempo_str = non_verbal.get('tempo_bpm', '0')
+            if 'per minute' in str(tempo_str):
+                tempo_display = str(tempo_str).split(' ')[0] + " BPM"
+            else:
+                tempo_display = str(tempo_str).split(' ')[0] + " BPM" if str(tempo_str).split(' ') else "0 BPM"
+            st.metric("Tempo", tempo_display)
+        
+        with col_d:
+            pause_str = non_verbal.get('total_pause_seconds', '0')
+            if 'seconds' in str(pause_str):
+                pause_display = str(pause_str).split(' ')[0] + " seconds"
+            else:
+                pause_display = str(pause_str).split(' ')[0] + " seconds" if str(pause_str).split(' ') else "0 seconds"
+            st.metric("Pause", pause_display)
+        
+        st.markdown(f"**Question:** {res['question']}")
+        
+        st.markdown("**Evaluation:**")
+        st.info(res['rubric_reason'])
+        
+        with st.expander("View Transcript"):
+            st.code(res['transcript'], language='text')
+        
+        st.markdown("---")
+    
+    # Action buttons - PERBAIKAN: Tambah tombol download HTML Report
     st.markdown("---")
-    col_btn1, col_btn2, col_btn3 = st.columns(3)
+    col_btn1, col_btn2, col_btn3, col_btn4 = st.columns(4)
     
     with col_btn1:
         if st.button("🔄 New Interview", use_container_width=True, type="primary"):
@@ -1749,7 +2137,7 @@ def render_final_summary_page():
             next_page('candidate_form')
     
     with col_btn2:
-        if st.button("📥 Download Report", use_container_width=True):
+        if st.button("📥 JSON Report", use_container_width=True):
             # Tambahkan data kandidat ke report
             if st.session_state.candidate_data:
                 report_data = {
@@ -1765,7 +2153,7 @@ def render_final_summary_page():
                 # Konversi ke JSON untuk download
                 json_report = json.dumps(report_data, indent=2, ensure_ascii=False)
                 st.download_button(
-                    label="Download Report as JSON",
+                    label="Download JSON Report",
                     data=json_report,
                     file_name=f"interview_report_{st.session_state.candidate_data['id']}.json",
                     mime="application/json",
@@ -1775,6 +2163,34 @@ def render_final_summary_page():
                 st.info("Download feature requires candidate information.")
     
     with col_btn3:
+        if st.button("📄 HTML Report", use_container_width=True):
+            # Generate dan download HTML report
+            if st.session_state.candidate_data:
+                metrics = {
+                    'avg_score': avg_score,
+                    'avg_confidence': avg_confidence,
+                    'avg_tempo': avg_tempo,
+                    'total_pause': total_pause
+                }
+                
+                html_bytes = generate_html_report(
+                    st.session_state.candidate_data,
+                    st.session_state.results,
+                    metrics
+                )
+                
+                st.download_button(
+                    label="📥 Download Professional Report",
+                    data=html_bytes,
+                    file_name=f"Interview_Report_{st.session_state.candidate_data['name'].replace(' ', '_')}_{st.session_state.candidate_data['id']}.html",
+                    mime="text/html",
+                    use_container_width=True,
+                    help="Open in browser and print as PDF (Ctrl+P → Save as PDF)"
+                )
+            else:
+                st.info("Report generation requires candidate information.")
+    
+    with col_btn4:
         if st.button("🏠 Back to Home", use_container_width=True):
             st.session_state.clear()
             next_page('home')
