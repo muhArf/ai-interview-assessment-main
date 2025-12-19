@@ -1784,7 +1784,7 @@ def render_final_summary_page():
                 "- Practice speaking more confidently"
             )
     
-    # Detailed question breakdown
+    # Detailed question breakdown - HANYA DI SINI DITAMBAHKAN TEMPO DAN JEDA
     st.markdown("---")
     with st.expander("📋 View Detailed Breakdown by Question"):
         for q_key, res in st.session_state.results.items():
@@ -1793,14 +1793,20 @@ def render_final_summary_page():
             st.markdown(f"### Question {q_num}")
             st.write(f"**Question:** {res['question']}")
             
-            col_a, col_b, col_c = st.columns(3)
+            col_a, col_b, col_c, col_d = st.columns(4)  # Ditambah 1 kolom
             with col_a:
                 st.metric("Rubric Score", f"{res['final_score']}/4")
             with col_b:
                 # Tampilkan confidence score sebagai integer
                 st.metric("Confidence", f"{res['confidence_score']}")
             with col_c:
-                st.metric("Non-Verbal Analysis", res['non_verbal'].get('qualitative_summary', 'N/A'))
+                # TAMBAHAN: Tempo BPM
+                tempo = res['non_verbal'].get('tempo_bpm', 'N/A')
+                st.metric("Speaking Tempo", tempo)
+            with col_d:
+                # TAMBAHAN: Total Pause
+                pause = res['non_verbal'].get('total_pause_seconds', 'N/A')
+                st.metric("Total Pause", f"{pause}s")
             
             st.markdown("**Evaluation:**")
             st.info(res['rubric_reason'])
