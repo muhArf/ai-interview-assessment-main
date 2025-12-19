@@ -15,4 +15,4 @@ openai-whisper
 faster-whisper
 torch
 tf-keras
-fpdf2==1.7.2
+fpdf2==2.7.7
