@@ -91,14 +91,11 @@ try:
         return int(confidence)
     
     def analyze_non_verbal(audio_path): 
-        # Return consistent dummy non-verbal analysis with tempo and pause
+        # Return consistent dummy non-verbal analysis
         return {
             'tempo_bpm': '135 BPM',
             'total_pause_seconds': '5.2',
-            'avg_pause_duration': '1.3s',
-            'speech_rate': '150 WPM',
-            'pause_frequency': '4 pauses/min',
-            'qualitative_summary': 'Normal speaking pace with good clarity, moderate pausing for emphasis'
+            'qualitative_summary': 'Normal speaking pace with good clarity'
         }
     
     def score_with_rubric(q_key_rubric, q_text, transcript, RUBRIC_DATA, embedder_model): 
@@ -1673,19 +1670,9 @@ def render_final_summary_page():
         
         all_tempo = []
         all_pause = []
-        all_avg_pause = []
-        all_speech_rate = []
-        
         for res in st.session_state.results.values():
-            # Extract tempo
             tempo_str = res['non_verbal'].get('tempo_bpm', '0').split(' ')[0]
-            # Extract total pause
             pause_str = res['non_verbal'].get('total_pause_seconds', '0').split(' ')[0]
-            # Extract avg pause duration
-            avg_pause_str = res['non_verbal'].get('avg_pause_duration', '0s').replace('s', '')
-            # Extract speech rate
-            speech_rate_str = res['non_verbal'].get('speech_rate', '0 WPM').split(' ')[0]
-            
             try:
                 all_tempo.append(float(tempo_str))
             except ValueError:
@@ -1694,21 +1681,11 @@ def render_final_summary_page():
                 all_pause.append(float(pause_str))
             except ValueError:
                 all_pause.append(0)
-            try:
-                all_avg_pause.append(float(avg_pause_str))
-            except ValueError:
-                all_avg_pause.append(0)
-            try:
-                all_speech_rate.append(float(speech_rate_str))
-            except ValueError:
-                all_speech_rate.append(0)
         
         avg_score = np.mean(all_scores) if all_scores else 0
         avg_confidence = np.mean(all_confidence) if all_confidence else 0
         avg_tempo = np.mean(all_tempo) if all_tempo else 0
-        total_pause = np.sum(all_pause) if all_pause else 0
-        avg_pause_duration = np.mean(all_avg_pause) if all_avg_pause else 0
-        avg_speech_rate = np.mean(all_speech_rate) if all_speech_rate else 0
+        total_pause = np.sum(all_pause)
     
     except Exception as e:
         st.error(f"Failed to calculate metrics: {e}")
@@ -1758,87 +1735,6 @@ def render_final_summary_page():
     st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # ================================
-    # TAMBAHAN BARU: NON-VERBAL ANALYSIS SECTION
-    # ================================
-    st.markdown("---")
-    st.subheader("🎭 Non-Verbal Communication Analysis")
-    
-    # Summary metrics untuk nonverbal
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        tempo_status = "✅ Optimal" if 125 <= avg_tempo <= 150 else "⚠️ Review"
-        st.metric("Avg Speaking Tempo", f"{avg_tempo:.1f} BPM", 
-                  delta=tempo_status, delta_color="normal")
-    with col2:
-        pause_status = "✅ Optimal" if total_pause < 60 else "⚠️ High"
-        st.metric("Total Pauses", f"{total_pause:.1f}s", 
-                  delta=pause_status, delta_color="normal")
-    with col3:
-        st.metric("Avg Pause Duration", f"{avg_pause_duration:.1f}s")
-    with col4:
-        speech_rate_status = "✅ Good" if 120 <= avg_speech_rate <= 180 else "⚠️ Review"
-        st.metric("Speech Rate", f"{avg_speech_rate:.0f} WPM",
-                  delta=speech_rate_status, delta_color="normal")
-    
-    # Expanded view per question untuk nonverbal analysis
-    with st.expander("🔍 View Detailed Non-Verbal Analysis per Question", expanded=False):
-        for q_key, res in st.session_state.results.items():
-            q_num = q_key.replace('q', '')
-            non_verbal = res['non_verbal']
-            
-            st.markdown(f"**Question {q_num}**")
-            
-            # Create columns for metrics
-            cols = st.columns(6)
-            with cols[0]:
-                tempo_value = non_verbal.get('tempo_bpm', 'N/A')
-                st.metric("Tempo", tempo_value, 
-                          delta="✅" if "135" in tempo_value else "ℹ️", 
-                          delta_color="normal")
-            with cols[1]:
-                total_pause_value = non_verbal.get('total_pause_seconds', 'N/A')
-                st.metric("Total Pause", f"{total_pause_value}s" if total_pause_value != 'N/A' else "N/A")
-            with cols[2]:
-                avg_pause_value = non_verbal.get('avg_pause_duration', 'N/A')
-                st.metric("Avg Pause", avg_pause_value)
-            with cols[3]:
-                speech_rate_value = non_verbal.get('speech_rate', 'N/A')
-                st.metric("Speech Rate", speech_rate_value)
-            with cols[4]:
-                pause_freq_value = non_verbal.get('pause_frequency', 'N/A')
-                st.metric("Pause Freq", pause_freq_value)
-            with cols[5]:
-                score_value = res['final_score']
-                st.metric("Content Score", f"{score_value}/4")
-            
-            # Qualitative summary
-            st.info(f"**Summary:** {non_verbal.get('qualitative_summary', 'No analysis available')}")
-            st.markdown("---")
-    
-    # Interpretation guide for nonverbal metrics
-    with st.expander("📋 How to interpret non-verbal metrics", expanded=False):
-        st.markdown("""
-        ### **Non-Verbal Metrics Guide**
-        
-        | Metric | Optimal Range | What It Means |
-        |--------|--------------|---------------|
-        | **Speaking Tempo** | 125-150 BPM | Pace of speech. Too fast (>160 BPM) can seem anxious; too slow (<100 BPM) can seem unprepared |
-        | **Total Pause Time** | < 60 seconds | Total time spent pausing. Long pauses may indicate hesitation or lack of confidence |
-        | **Average Pause Duration** | 0.5-2.0 seconds | Average length of individual pauses. Brief pauses are good for emphasis |
-        | **Speech Rate** | 120-180 WPM | Words per minute. Adjust based on complexity of content |
-        | **Pause Frequency** | 3-6 pauses/min | Frequency of pauses. Natural pauses help with comprehension |
-        
-        ### **Tips for Improvement:**
-        - **Tempo too fast?** Practice pausing between sentences, breathe deeply
-        - **Too many pauses?** Prepare key points in advance, use structured responses
-        - **Pauses too long?** Use filler phrases like "Let me think about that..." instead of silent pauses
-        """)
-    
-    # ================================
-    # END OF TAMBAHAN BARU
-    # ================================
-    
     # Evaluation and Recommendations
     st.markdown("---")
     st.subheader("💡 Objective Evaluation & Action Plan")
@@ -1854,21 +1750,12 @@ def render_final_summary_page():
         else:
             st.error("**Needs Improvement.** Focus is needed on aligning answers with rubric criteria.")
         
-        # Updated tempo analysis with more detailed feedback
         if 125 <= avg_tempo <= 150:
             st.success("**Optimal speaking tempo** for effective communication.")
         elif avg_tempo > 150:
-            st.warning(f"**Speaking tempo too fast ({avg_tempo:.0f} BPM).** Consider slowing down by 10-15% for better clarity and impact.")
+            st.warning("**Speaking tempo too fast.** Practice slowing down for clarity.")
         else:
-            st.warning(f"**Speaking tempo too slow ({avg_tempo:.0f} BPM).** Increase pace by 10-15% to maintain audience engagement.")
-        
-        # Pause analysis feedback
-        if total_pause > 120:
-            st.error("**Excessive pausing detected.** Total pause time exceeds 2 minutes. Consider reducing filler pauses.")
-        elif total_pause > 60:
-            st.warning("**Moderate pausing.** Some pauses could be shortened for more fluid delivery.")
-        else:
-            st.success("**Good pause management.** Pauses are used effectively for emphasis.")
+            st.warning("**Speaking tempo too slow.** Increase pace to maintain engagement.")
     
     with col2:
         st.markdown("### Key Development Areas")
@@ -1881,37 +1768,25 @@ def render_final_summary_page():
                 "- Align responses with scoring rubrics"
             )
         
-        if total_pause > 120 or avg_pause_duration > 2.5:
+        if total_pause > 120:
             st.info(
                 "⏸️ **Pause Management:**\n"
-                "- Reduce excessively long pauses (>2 seconds)\n"
-                "- Use 1-2 second pauses for emphasis only\n"
-                "- Practice speaking with consistent rhythm\n"
-                "- Prepare key talking points to reduce hesitation"
+                "- Reduce excessively long pauses\n"
+                "- Use 2-3 second pauses for emphasis only\n"
+                "- Practice consistent speaking rhythm"
             )
         
         if avg_confidence < 60:
             st.info(
-                "🎤 **Speech Clarity & Confidence:**\n"
+                "🎤 **Speech Clarity:**\n"
                 "- Improve articulation and pronunciation\n"
                 "- Reduce filler words (um, uh, like)\n"
-                "- Practice speaking more confidently\n"
-                "- Record and listen to your own speaking patterns"
-            )
-        
-        # Additional nonverbal feedback
-        if avg_tempo < 100 or avg_tempo > 160:
-            st.info(
-                "⚡ **Pace Adjustment:**\n"
-                f"- Current tempo: {avg_tempo:.0f} BPM\n"
-                "- Target range: 125-150 BPM\n"
-                "- Practice with a metronome app\n"
-                "- Record and adjust speaking speed"
+                "- Practice speaking more confidently"
             )
     
     # Detailed question breakdown
     st.markdown("---")
-    with st.expander("📋 View Detailed Breakdown by Question", expanded=False):
+    with st.expander("📋 View Detailed Breakdown by Question"):
         for q_key, res in st.session_state.results.items():
             q_num = q_key.replace('q', '')
             
@@ -1933,20 +1808,6 @@ def render_final_summary_page():
             with st.expander("View Transcript"):
                 st.code(res['transcript'], language='text')
             
-            # Show nonverbal details for this question
-            with st.expander("View Non-Verbal Details"):
-                non_verbal = res['non_verbal']
-                cols = st.columns(3)
-                with cols[0]:
-                    st.write(f"**Tempo:** {non_verbal.get('tempo_bpm', 'N/A')}")
-                    st.write(f"**Total Pause:** {non_verbal.get('total_pause_seconds', 'N/A')}s")
-                with cols[1]:
-                    st.write(f"**Avg Pause:** {non_verbal.get('avg_pause_duration', 'N/A')}")
-                    st.write(f"**Speech Rate:** {non_verbal.get('speech_rate', 'N/A')}")
-                with cols[2]:
-                    st.write(f"**Pause Frequency:** {non_verbal.get('pause_frequency', 'N/A')}")
-                    st.write(f"**Qualitative:** {non_verbal.get('qualitative_summary', 'N/A')}")
-            
             st.markdown("---")
     
     # Action buttons
@@ -1965,33 +1826,15 @@ def render_final_summary_page():
         if st.button("📥 Download Report", use_container_width=True):
             # Tambahkan data kandidat ke report
             if st.session_state.candidate_data:
-                # Include detailed nonverbal analysis in report
-                enhanced_results = {}
-                for q_key, res in st.session_state.results.items():
-                    enhanced_results[q_key] = {
-                        **res,
-                        "non_verbal_details": {
-                            "tempo_bpm": res['non_verbal'].get('tempo_bpm', 'N/A'),
-                            "total_pause_seconds": res['non_verbal'].get('total_pause_seconds', 'N/A'),
-                            "avg_pause_duration": res['non_verbal'].get('avg_pause_duration', 'N/A'),
-                            "speech_rate": res['non_verbal'].get('speech_rate', 'N/A'),
-                            "pause_frequency": res['non_verbal'].get('pause_frequency', 'N/A'),
-                            "qualitative_summary": res['non_verbal'].get('qualitative_summary', 'N/A')
-                        }
-                    }
-                
                 report_data = {
                     'candidate': st.session_state.candidate_data,
-                    'results': enhanced_results,
-                    'summary_metrics': {
+                    'results': st.session_state.results,
+                    'metrics': {
                         'avg_score': avg_score,
                         'avg_confidence': avg_confidence,
                         'avg_tempo': avg_tempo,
-                        'total_pause': total_pause,
-                        'avg_pause_duration': avg_pause_duration,
-                        'avg_speech_rate': avg_speech_rate
-                    },
-                    'generated_at': get_local_time_indonesia().strftime("%Y-%m-%d %H:%M:%S")
+                        'total_pause': total_pause
+                    }
                 }
                 # Konversi ke JSON untuk download
                 json_report = json.dumps(report_data, indent=2, ensure_ascii=False)
